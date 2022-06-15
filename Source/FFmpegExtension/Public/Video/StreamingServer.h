@@ -22,20 +22,20 @@ extern "C"
 
 struct FServer_FFmpegParam
 {
-	//ÊäÈë½â·â×°ÉÏÏÂÎÄ
+	//è¾“å…¥è§£å°è£…ä¸Šä¸‹æ–‡
 	AVFormatContext* Local_InAVFormatContext = NULL;
-	//Êä³ö½â·â×°ÉÏÏÂÎÄ
+	//è¾“å‡ºè§£å°è£…ä¸Šä¸‹æ–‡
 	AVFormatContext* Local_OutAVFormatContext = NULL;
 
-	//ÊäÈëÒôÊÓÆµÁ÷
+	//è¾“å…¥éŸ³è§†é¢‘æµ
 	AVStream* Local_InStream = NULL;
-	//ÎªÊä³ö½â·â×°ÉÏÏÂÎÄÌí¼ÓÒôÊÓÆµÁ÷
+	//ä¸ºè¾“å‡ºè§£å°è£…ä¸Šä¸‹æ–‡æ·»åŠ éŸ³è§†é¢‘æµ
 	AVStream* Local_OutStream = NULL;
 
 	const AVCodec* Local_AVCodec = NULL;
 	AVCodecContext* Local_AVCodecContext = NULL;
 
-	//±£´æÊä³ö¸ñÊ½ĞÅÏ¢ºÍ³£¹æÉèÖÃ
+	//ä¿å­˜è¾“å‡ºæ ¼å¼ä¿¡æ¯å’Œå¸¸è§„è®¾ç½®
 	const AVOutputFormat* Local_AVOutputFormat = NULL;
 
 	AVPacket* Local_AVPacket = NULL;
@@ -66,25 +66,27 @@ struct FStreamingInfo
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, Category = "FFmpegExtension|Video|StreamingServer")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Video|StreamingServer")
 	bool bAutoStreaming = true;
 
-	UPROPERTY(EditAnywhere, Category = "FFmpegExtension|Video|StreamingServer")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Video|StreamingServer")
 	FString InURL;
 
-	UPROPERTY(EditAnywhere, Category = "FFmpegExtension|Video|StreamingServer")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Video|StreamingServer")
 	FString OutURL;
 
-	UPROPERTY(EditAnywhere, Category = "FFmpegExtension|Video|StreamingServer")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Video|StreamingServer")
 	bool bOutLog = false;
 
-	//Ê×¸ö¿ÉÓÃµÄÊÓÆµÁ÷
+	//é¦–ä¸ªå¯ç”¨çš„è§†é¢‘æµ
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	int32 FirstValidVideoIndex = -1;
-	//Ê×¸ö¿ÉÓÃµÄÒôÆµÁ÷
+	//é¦–ä¸ªå¯ç”¨çš„éŸ³é¢‘æµ
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	int32 FirstValidAudioIndex = -1;
 };
 
-UCLASS()
+UCLASS(Blueprintable)
 class FFMPEGEXTENSION_API UStreamingServer : public UObject
 {
 	GENERATED_BODY()
@@ -93,7 +95,7 @@ private:
 
 	FORCEINLINE void OutLog(const FString OutMessage) const
 	{
-		if (StreamingInfo.bOutLog && this != nullptr)
+		if (StreamingInfo.bOutLog)
 		{
 			AsyncTask(ENamedThreads::GameThread, [=]()
 				{
@@ -111,7 +113,7 @@ public:
 	bool bRun = true;
 
 	//~ Begin UObject Interface.
-	/** ´ó²¿·Ö±äÁ¿¶¼³õÊ¼»¯ºóµ÷ÓÃ */
+	/** å¤§éƒ¨åˆ†å˜é‡éƒ½åˆå§‹åŒ–åè°ƒç”¨ */
 	virtual void PostInitProperties() override;
 	//~ End UObject Interface.
 

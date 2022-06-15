@@ -34,7 +34,7 @@ void UStreamingServer::StreamingFunction()
 	const char* LocalInURL = TCHAR_TO_UTF8(*StreamingInfo.InURL);
 	const char* LocalOutURL = TCHAR_TO_UTF8(*StreamingInfo.OutURL);
 
-	//´ò¿ªÊÓÆµ
+	//æ‰“å¼€è§†é¢‘
 	ret = avformat_open_input(&FFmpegParam->Local_InAVFormatContext, LocalInURL, NULL, NULL);
 	if (ret != 0)
 	{
@@ -42,7 +42,7 @@ void UStreamingServer::StreamingFunction()
 		goto _Error;
 	}
 
-	//Ì½²âÎÄ¼şĞÅÏ¢
+	//æ¢æµ‹æ–‡ä»¶ä¿¡æ¯
 	ret = avformat_find_stream_info(FFmpegParam->Local_InAVFormatContext, 0);
 	if (ret < 0)
 	{
@@ -50,7 +50,7 @@ void UStreamingServer::StreamingFunction()
 		goto _Error;
 	}
 
-	//³õÊ¼»¯Êä³ö·â×°ÉÏÏÂÎÄ
+	//åˆå§‹åŒ–è¾“å‡ºå°è£…ä¸Šä¸‹æ–‡
 	ret = avformat_alloc_output_context2(&FFmpegParam->Local_OutAVFormatContext, NULL, "flv", LocalOutURL);
 	if (ret < 0)
 	{
@@ -59,7 +59,7 @@ void UStreamingServer::StreamingFunction()
 	}
 	FFmpegParam->Local_AVOutputFormat = FFmpegParam->Local_OutAVFormatContext->oformat;
 
-	//Ìí¼ÓÒôÊÓÆµÁ÷
+	//æ·»åŠ éŸ³è§†é¢‘æµ
 	for (uint32 i = 0; i < FFmpegParam->Local_InAVFormatContext->nb_streams; i++)
 	{
 		FFmpegParam->Local_InStream = FFmpegParam->Local_InAVFormatContext->streams[i];
@@ -69,7 +69,7 @@ void UStreamingServer::StreamingFunction()
 			OutLog("Error at avcodec_find_decoder");
 			goto _Error;
 		}
-		//ÎªÊä³ö½â·â×°ÉÏÏÂÎÄÌí¼ÓÒôÊÓÆµÁ÷
+		//ä¸ºè¾“å‡ºè§£å°è£…ä¸Šä¸‹æ–‡æ·»åŠ éŸ³è§†é¢‘æµ
 		FFmpegParam->Local_OutStream = avformat_new_stream(FFmpegParam->Local_OutAVFormatContext, FFmpegParam->Local_AVCodec);
 		if (!FFmpegParam->Local_OutStream)
 		{
@@ -77,7 +77,7 @@ void UStreamingServer::StreamingFunction()
 			goto _Error;
 		}
 
-		//½«ÊäÈëÁ÷µÄ±à½âÂëÆ÷ÉÏÏÂÎÄĞÅÏ¢ copy ¸øÊä³öÁ÷µÄ±à½âÂëÆ÷ÉÏÏÂÎÄ
+		//å°†è¾“å…¥æµçš„ç¼–è§£ç å™¨ä¸Šä¸‹æ–‡ä¿¡æ¯ copy ç»™è¾“å‡ºæµçš„ç¼–è§£ç å™¨ä¸Šä¸‹æ–‡
 		ret = avcodec_parameters_copy(FFmpegParam->Local_OutStream->codecpar, FFmpegParam->Local_InStream->codecpar);
 		if (ret < 0)
 		{
@@ -114,7 +114,7 @@ void UStreamingServer::StreamingFunction()
 		}
 	}
 
-	//ÕÒµ½µÚÒ»¸ö¿ÉÓÃµÄÊÓÆµÁ÷
+	//æ‰¾åˆ°ç¬¬ä¸€ä¸ªå¯ç”¨çš„è§†é¢‘æµ
 	for (uint32 i = 0; i < FFmpegParam->Local_InAVFormatContext->nb_streams; i++)
 	{
 		if (FFmpegParam->Local_InAVFormatContext->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
@@ -124,7 +124,7 @@ void UStreamingServer::StreamingFunction()
 		}
 	}
 
-	//ÕÒµ½µÚÒ»¸ö¿ÉÓÃµÄÒôÆµÁ÷
+	//æ‰¾åˆ°ç¬¬ä¸€ä¸ªå¯ç”¨çš„éŸ³é¢‘æµ
 	for (uint32 i = 0; i < FFmpegParam->Local_InAVFormatContext->nb_streams; i++)
 	{
 		if (FFmpegParam->Local_InAVFormatContext->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO)
@@ -134,15 +134,16 @@ void UStreamingServer::StreamingFunction()
 		}
 	}
 
-	//´ò¿ªIO
+	//æ‰“å¼€IO
 	ret = avio_open(&FFmpegParam->Local_OutAVFormatContext->pb, LocalOutURL, AVIO_FLAG_WRITE);
+	//ret = avio_open(&FFmpegParam->Local_OutAVFormatContext->pb, "rtmp://127.0.0.1:8854/live", AVIO_FLAG_WRITE);
 	if (ret < 0)
 	{
 		OutLog("Error at avio_open()");
 		goto _Error;
 	}
 
-	//Ğ´ÈëÍ·²¿ĞÅÏ¢
+	//å†™å…¥å¤´éƒ¨ä¿¡æ¯
 	ret = avformat_write_header(FFmpegParam->Local_OutAVFormatContext, 0);
 	if (ret < 0)
 	{
@@ -150,8 +151,8 @@ void UStreamingServer::StreamingFunction()
 		goto _Error;
 	}
 
-	//¿ªÊ¼ÍÆÁ÷
-	//ÒÔÎ¢ÃëÎªµ¥Î»»ñÈ¡µ±Ç°µÄÊ±¼ä´Á
+	//å¼€å§‹æ¨æµ
+	//ä»¥å¾®ç§’ä¸ºå•ä½è·å–å½“å‰çš„æ—¶é—´æˆ³
 	long long StartTime = av_gettime();
 	long long FrameIndex = 0;
 	FFmpegParam->Local_Filter = av_bsf_get_by_name("aac_adtstoasc");
@@ -164,27 +165,29 @@ void UStreamingServer::StreamingFunction()
 
 	while (bRun)
 	{
-		ret = av_read_frame(FFmpegParam->Local_InAVFormatContext, FFmpegParam->Local_AVPacket);
-		if (ret < 0)
+		OutLog(FString::FromInt(FrameIndex));
+
+		int32 Tempret = av_read_frame(FFmpegParam->Local_InAVFormatContext, FFmpegParam->Local_AVPacket);
+		if (Tempret < 0)
 		{
 			OutLog("Error at av_read_frame()");
 			goto _Error;
 		}
 
 		/*
-		PTS£¨Presentation Time Stamp£©ÏÔÊ¾Ê±¼ä´Á
-		DTS£¨Decoding Time Stamp£©½âÂëÊ±¼ä´Á
+		PTSï¼ˆPresentation Time Stampï¼‰æ˜¾ç¤ºæ—¶é—´æˆ³
+		DTSï¼ˆDecoding Time Stampï¼‰è§£ç æ—¶é—´æˆ³
 		*/
 
-		//ÈçÃ»ÓĞÏÔÊ¾Ê±¼ä£¨±ÈÈçÎ´½âÂëµÄ H.264 £©
+		//å¦‚æ²¡æœ‰æ˜¾ç¤ºæ—¶é—´ï¼ˆæ¯”å¦‚æœªè§£ç çš„ H.264 ï¼‰
 		if (FFmpegParam->Local_AVPacket->pts == AV_NOPTS_VALUE)
 		{
-			//AVRational time_base£ºÊ±»ù¡£Í¨¹ı¸ÃÖµ¿ÉÒÔ°ÑPTS£¬DTS×ª»¯ÎªÕæÕıµÄÊ±¼ä¡£
+			//AVRational time_baseï¼šæ—¶åŸºã€‚é€šè¿‡è¯¥å€¼å¯ä»¥æŠŠPTSï¼ŒDTSè½¬åŒ–ä¸ºçœŸæ­£çš„æ—¶é—´ã€‚
 			AVRational TimeBase = FFmpegParam->Local_InAVFormatContext->streams[StreamingInfo.FirstValidVideoIndex]->time_base;
 
 			int64_t calc_duration = (double)AV_TIME_BASE / av_q2d(FFmpegParam->Local_InAVFormatContext->streams[StreamingInfo.FirstValidVideoIndex]->r_frame_rate);
 
-			//ÅäÖÃ²ÎÊı
+			//é…ç½®å‚æ•°
 			FFmpegParam->Local_AVPacket->pts = (double)(FrameIndex * calc_duration) / (double)(av_q2d(TimeBase) * AV_TIME_BASE);
 			FFmpegParam->Local_AVPacket->dts = FFmpegParam->Local_AVPacket->pts;
 			FFmpegParam->Local_AVPacket->duration = (double)calc_duration / (double)(av_q2d(TimeBase) * AV_TIME_BASE);
@@ -259,15 +262,17 @@ void UStreamingServer::StreamingFunction()
 			goto _Error;
 		}
 
-		av_packet_free(&FFmpegParam->Local_AVPacket);
+		//av_packet_free(&FFmpegParam->Local_AVPacket);
+		ret = 0;
 	}
 
 _Error:
-	if (FFmpegParam != nullptr)
+	OutLog("Streaming Close!");
+	if (FFmpegParam != nullptr && IsValid(this))
 	{
-		FFmpegParam->ReleaseFFmpegParam();
+		//FFmpegParam->ReleaseFFmpegParam();
 
-		delete FFmpegParam;
-		FFmpegParam = nullptr;
+		//delete FFmpegParam;
+		//FFmpegParam = nullptr;
 	}
 }
