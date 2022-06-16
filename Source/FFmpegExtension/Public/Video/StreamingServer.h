@@ -42,22 +42,40 @@ struct FServer_FFmpegParam
 
 	const AVBitStreamFilter* Local_Filter = NULL;
 
-	void ReleaseFFmpegParam()
+	//void ReleaseFFmpegParam()
+	~FServer_FFmpegParam()
 	{
-		avformat_free_context(Local_InAVFormatContext);
-		avformat_free_context(Local_OutAVFormatContext);
+		if (Local_InAVFormatContext)
+		{
+			avformat_free_context(Local_InAVFormatContext);
 
-		av_free(Local_InStream);
-		av_free(Local_OutStream);
+		}
 
-		av_free(&Local_AVCodec);
-		avcodec_free_context(&Local_AVCodecContext);
+		if (Local_OutAVFormatContext)
+		{
+			avio_close(Local_OutAVFormatContext->pb);
+			avformat_free_context(Local_OutAVFormatContext);
+		}
 
-		av_free(&Local_AVOutputFormat);
+		if (Local_AVCodecContext)
+		{
+			avcodec_free_context(&Local_AVCodecContext);
+		}
 
-		av_packet_free(&Local_AVPacket);
+		if (Local_AVOutputFormat)
+		{
+			av_free(&Local_AVOutputFormat);
+		}
 
-		av_free(&Local_Filter);
+		if (Local_AVPacket)
+		{
+			av_packet_free(&Local_AVPacket);
+		}
+
+		if (Local_Filter)
+		{
+			av_free(&Local_Filter);
+		}
 	}
 };
 

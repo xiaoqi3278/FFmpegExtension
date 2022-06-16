@@ -133,7 +133,7 @@ void UStreamingServer::StreamingFunction()
 			break;
 		}
 	}
-
+	
 	//打开IO
 	//ret = avio_open(&FFmpegParam->Local_OutAVFormatContext->pb, LocalOutURL, AVIO_FLAG_WRITE);
 	//ret = avio_open(&FFmpegParam->Local_OutAVFormatContext->pb, "rtsp://192.168.3.5:554/10001", AVIO_FLAG_WRITE);
@@ -172,7 +172,7 @@ void UStreamingServer::StreamingFunction()
 		OutLog(FString::FromInt(FrameIndex));
 
 		int32 Tempret = av_read_frame(FFmpegParam->Local_InAVFormatContext, FFmpegParam->Local_AVPacket);
-		if (Tempret < 0)
+		if (Tempret < 0 || !bRun)
 		{
 			OutLog("Error at av_read_frame()");
 			goto _Error;
@@ -266,7 +266,7 @@ void UStreamingServer::StreamingFunction()
 			goto _Error;
 		}
 
-		//av_packet_unref(FFmpegParam->Local_AVPacket);
+		av_packet_unref(FFmpegParam->Local_AVPacket);
 		//av_packet_free(&FFmpegParam->Local_AVPacket);
 		ret = 0;
 	}
@@ -276,9 +276,8 @@ _Error:
 	if (FFmpegParam != nullptr && IsValid(this))
 	{
 		//FFmpegParam->ReleaseFFmpegParam();
-
-		//delete FFmpegParam;
-		//FFmpegParam = nullptr;
+		delete FFmpegParam;
+		FFmpegParam = nullptr;
 	}
 }
 
@@ -299,8 +298,5 @@ void UStreamingServer::BeginDestroy()
 
 UStreamingServer::~UStreamingServer()
 {
-	if (bRun && !HasAnyFlags(RF_ClassDefaultObject) && this->GetWorld())
-	{
-		closeStreaming();
-	}
+	closeStreaming();
 }
