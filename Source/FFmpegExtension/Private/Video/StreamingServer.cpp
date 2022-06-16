@@ -51,7 +51,7 @@ void UStreamingServer::StreamingFunction()
 	}
 
 	//初始化输出封装上下文
-	ret = avformat_alloc_output_context2(&FFmpegParam->Local_OutAVFormatContext, NULL, "flv", LocalOutURL);
+	ret = avformat_alloc_output_context2(&FFmpegParam->Local_OutAVFormatContext, NULL, "rtsp", LocalOutURL);
 	if (ret < 0)
 	{
 		OutLog("Error at avformat_alloc_output_context2()");
@@ -135,13 +135,17 @@ void UStreamingServer::StreamingFunction()
 	}
 
 	//打开IO
-	ret = avio_open(&FFmpegParam->Local_OutAVFormatContext->pb, LocalOutURL, AVIO_FLAG_WRITE);
-	//ret = avio_open(&FFmpegParam->Local_OutAVFormatContext->pb, "rtmp://127.0.0.1:8854/live", AVIO_FLAG_WRITE);
+	//ret = avio_open(&FFmpegParam->Local_OutAVFormatContext->pb, LocalOutURL, AVIO_FLAG_WRITE);
+	//ret = avio_open(&FFmpegParam->Local_OutAVFormatContext->pb, "rtsp://192.168.3.5:554/10001", AVIO_FLAG_WRITE);
+	/*AVDictionary* Local_AVDictionary = NULL;
+	av_dict_set(&Local_AVDictionary, "rtsp_transport", "tcp", 0);
+	ret = avio_open2(&FFmpegParam->Local_OutAVFormatContext->pb, LocalOutURL, AVIO_FLAG_WRITE, NULL, &Local_AVDictionary);
+	av_dict_free(&Local_AVDictionary);
 	if (ret < 0)
 	{
 		OutLog("Error at avio_open()");
 		goto _Error;
-	}
+	}*/
 
 	//写入头部信息
 	ret = avformat_write_header(FFmpegParam->Local_OutAVFormatContext, 0);
@@ -262,6 +266,7 @@ void UStreamingServer::StreamingFunction()
 			goto _Error;
 		}
 
+		//av_packet_unref(FFmpegParam->Local_AVPacket);
 		//av_packet_free(&FFmpegParam->Local_AVPacket);
 		ret = 0;
 	}
@@ -274,5 +279,28 @@ _Error:
 
 		//delete FFmpegParam;
 		//FFmpegParam = nullptr;
+	}
+}
+
+void UStreamingServer::closeStreaming()
+{
+	bRun = false;
+}
+
+void UStreamingServer::BeginDestroy()
+{
+	UObject::BeginDestroy();
+
+	if (bRun && !HasAnyFlags(RF_ClassDefaultObject) && this->GetWorld())
+	{
+		closeStreaming();
+	}
+}
+
+UStreamingServer::~UStreamingServer()
+{
+	if (bRun && !HasAnyFlags(RF_ClassDefaultObject) && this->GetWorld())
+	{
+		closeStreaming();
 	}
 }

@@ -118,4 +118,9 @@ public:
 	//~ End UObject Interface.
 
 	void StreamingFunction();
+
+	void closeStreaming();
+
+	virtual void BeginDestroy() override;
+	~UStreamingServer();
 };
