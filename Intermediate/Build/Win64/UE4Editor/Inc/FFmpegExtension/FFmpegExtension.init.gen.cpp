@@ -21,8 +21,8 @@ void EmptyLinkFunctionForGeneratedCodeFFmpegExtension_init() {}
 				nullptr,
 				0,
 				PKG_CompiledIn | 0x00000000,
-				0xCE641ED8,
-				0x54759D17,
+				0x6D482DC4,
+				0x93D928F3,
 				METADATA_PARAMS(nullptr, 0)
 			};
 			UE4CodeGen_Private::ConstructUPackage(ReturnPackage, PackageParams);

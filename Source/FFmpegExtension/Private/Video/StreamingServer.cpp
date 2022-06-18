@@ -28,6 +28,7 @@ void UStreamingServer::StreamingFunction()
 	FFmpegParam = new FServer_FFmpegParam();
 
 	int32 ret;
+	bool bServrIsRunning = false;
 
 	avformat_network_init();
 
@@ -147,8 +148,11 @@ void UStreamingServer::StreamingFunction()
 		goto _Error;
 	}*/
 
+	AVDictionary* Local_AVDictionary = NULL;
+	av_dict_set(&Local_AVDictionary, "rtsp_transport", "tcp", 0);
+
 	//写入头部信息
-	ret = avformat_write_header(FFmpegParam->Local_OutAVFormatContext, 0);
+	ret = avformat_write_header(FFmpegParam->Local_OutAVFormatContext, &Local_AVDictionary);
 	if (ret < 0)
 	{
 		OutLog("Error at avformat_write_header()");
@@ -166,6 +170,8 @@ void UStreamingServer::StreamingFunction()
 		OutLog("Error at av_packet_alloc()");
 		goto _Error;
 	}
+
+	bServrIsRunning = true;
 
 	while (bRun)
 	{
@@ -225,7 +231,6 @@ void UStreamingServer::StreamingFunction()
 			FrameIndex++;
 		}
 
-
 		if (FFmpegParam->Local_AVPacket->stream_index == 4)
 		{
 			AVBSFContext* bsf_ctx;
@@ -268,11 +273,22 @@ void UStreamingServer::StreamingFunction()
 
 		av_packet_unref(FFmpegParam->Local_AVPacket);
 		//av_packet_free(&FFmpegParam->Local_AVPacket);
-		ret = 0;
 	}
 
 _Error:
-	OutLog("Streaming Close!");
+	OutLog("Streaming Closing!");
+
+	if (FFmpegParam->Local_OutAVFormatContext && bServrIsRunning)
+	{
+		ret = av_write_trailer(FFmpegParam->Local_OutAVFormatContext);
+		if (ret != 0)
+		{
+			OutLog("Error at av_write_trailer()");
+		}
+	}
+
+	av_dict_free(&Local_AVDictionary);
+
 	if (FFmpegParam != nullptr && IsValid(this))
 	{
 		//FFmpegParam->ReleaseFFmpegParam();
