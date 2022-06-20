@@ -9,6 +9,9 @@
 /**
  * 
  */
+
+DECLARE_LOG_CATEGORY_EXTERN(FFmpegExtensionLog, Log, All);
+
 UCLASS()
 class FFMPEGEXTENSION_API UFFmpegFunctionLib : public UBlueprintFunctionLibrary
 {
@@ -21,7 +24,7 @@ public:
 		{
 			AsyncTask(ENamedThreads::GameThread, [=]()
 				{
-					UE_LOG(LogTemp, Warning, TEXT("PlayerObject: %s, %s"), *CallObject->GetName(), *OutMessage);
+					UE_LOG(FFmpegExtensionLog, Warning, TEXT("PlayerObject: %s, %s"), *CallObject->GetName(), *OutMessage);
 				});
 		}
 	}

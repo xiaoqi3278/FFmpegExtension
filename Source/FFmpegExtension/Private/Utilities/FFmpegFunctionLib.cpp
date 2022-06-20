@@ -3,3 +3,4 @@
 
 #include "Utilities/FFmpegFunctionLib.h"
 
+DEFINE_LOG_CATEGORY(FFmpegExtensionLog);

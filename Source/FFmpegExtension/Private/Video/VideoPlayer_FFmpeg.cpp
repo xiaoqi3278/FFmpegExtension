@@ -28,18 +28,18 @@ void UVideoPlayer_FFmpeg::VideoThread()
 {
 	FFmpegParam = new FLocal_FFmpegParam();
 
-	//Ê¹ÓÃ EUpdateTextureMethod::Memcpy Ê± Realloc µÄÖ¡Êý¾ÝÖ¸Õë
+	//ä½¿ç”¨ EUpdateTextureMethod::Memcpy æ—¶ Realloc çš„å¸§æ•°æ®æŒ‡é’ˆ
 	void* TextureData = nullptr;
 
-	//FFmpeg API ·µ»Ø´íÎóÂë
+	//FFmpeg API è¿”å›žé”™è¯¯ç 
 	int32 ret;
 
-	//³õÊ¼»¯ÍøÂç¿â
+	//åˆå§‹åŒ–ç½‘ç»œåº“
 	avformat_network_init();
 
-	//ÊÓÆµµØÖ·
+	//è§†é¢‘åœ°å€
 	const char* LocalVideoURL = TCHAR_TO_UTF8(*VideoInfo.VideoURL);
-	//´ò¿ªÊÓÆµ
+	//æ‰“å¼€è§†é¢‘
 	ret = avformat_open_input(&FFmpegParam->Local_AVFormatContext, LocalVideoURL, 0, 0);
 	if (ret != 0)
 	{
@@ -55,7 +55,7 @@ void UVideoPlayer_FFmpeg::VideoThread()
 		goto _Error;
 	}
 
-	//Ì½²âÎÄ¼þÐÅÏ¢
+	//æŽ¢æµ‹æ–‡ä»¶ä¿¡æ¯
 	ret = avformat_find_stream_info(FFmpegParam->Local_AVFormatContext, NULL);
 	if (ret < 0)
 	{
@@ -67,20 +67,20 @@ void UVideoPlayer_FFmpeg::VideoThread()
 		goto _Error;
 	}
 
-	//ÕÒµ½µÚÒ»¸ö¿ÉÓÃµÄÊÓÆµÁ÷
+	//æ‰¾åˆ°ç¬¬ä¸€ä¸ªå¯ç”¨çš„è§†é¢‘æµ
 	for (uint32 i = 0; i < FFmpegParam->Local_AVFormatContext->nb_streams; i++)
 	{
 		AVStream* LocalStream = FFmpegParam->Local_AVFormatContext->streams[i];
 		if (LocalStream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
 		{
-			//²éÕÒÊÊºÏµÄ½âÂëÆ÷
+			//æŸ¥æ‰¾é€‚åˆçš„è§£ç å™¨
 			FFmpegParam->Local_AVCodec = avcodec_find_decoder(LocalStream->codecpar->codec_id);
 			if (FFmpegParam->Local_AVCodec == NULL)
 			{
 				OutLog(FString("The suitable decoder not found"));
 				goto _Error;
 			}
-			//Ê¹ÓÃ²éÕÒµ½µÄ½âÂëÆ÷³õÊ¼»¯±à½âÂëÆ÷ÉÏÏÂÎÄ
+			//ä½¿ç”¨æŸ¥æ‰¾åˆ°çš„è§£ç å™¨åˆå§‹åŒ–ç¼–è§£ç å™¨ä¸Šä¸‹æ–‡
 			FFmpegParam->Local_AVCodecContext = avcodec_alloc_context3(FFmpegParam->Local_AVCodec);
 			av_opt_set(FFmpegParam->Local_AVCodecContext->priv_data, "tune", "zerolatency", 0);
 			if (FFmpegParam->Local_AVCodecContext == NULL)
@@ -88,7 +88,7 @@ void UVideoPlayer_FFmpeg::VideoThread()
 				OutLog(FString("Error at avcodec_alloc_context3()"));
 				goto _Error;
 			}
-			//Îª±ä½âÂëÆ÷ÉÏÏÂÎÄÉèÖÃ²ÎÊý
+			//ä¸ºç¼–è§£ç å™¨ä¸Šä¸‹æ–‡è®¾ç½®å‚æ•°
 			ret = avcodec_parameters_to_context(FFmpegParam->Local_AVCodecContext, LocalStream->codecpar);
 			if (ret < 0)
 			{
@@ -104,7 +104,7 @@ void UVideoPlayer_FFmpeg::VideoThread()
 		}
 	}
 
-	//³õÊ¼»¯Ò»¸öÊÓÒôÆµ±à½âÂëÆ÷µÄÉÏÏÂÎÄ
+	//åˆå§‹åŒ–ä¸€ä¸ªè§†éŸ³é¢‘ç¼–è§£ç å™¨çš„ä¸Šä¸‹æ–‡
 	ret = avcodec_open2(FFmpegParam->Local_AVCodecContext, FFmpegParam->Local_AVCodec, NULL);
 	if (ret != 0)
 	{
@@ -112,7 +112,7 @@ void UVideoPlayer_FFmpeg::VideoThread()
 		goto _Error;
 	}
 
-	//³õÊ¼»¯Í¼Ïñ×ª»»ÉÏÏÂÎÄ
+	//åˆå§‹åŒ–å›¾åƒè½¬æ¢ä¸Šä¸‹æ–‡
 	FFmpegParam->Local_SwsContext = sws_getContext(FFmpegParam->Local_AVCodecContext->width, FFmpegParam->Local_AVCodecContext->height,
 		FFmpegParam->Local_AVCodecContext->pix_fmt,
 		FFmpegParam->Local_AVCodecContext->width, FFmpegParam->Local_AVCodecContext->height,
@@ -123,15 +123,15 @@ void UVideoPlayer_FFmpeg::VideoThread()
 	AVFrame* Local_AVFrameBeforeScale = av_frame_alloc();
 	AVFrame* Local_AVFrameAfterScale = av_frame_alloc();
 
-	//Í¨¹ýÖ¸¶¨ÏñËØ¸ñÊ½¡¢Í¼Ïñ¿í¡¢Í¼Ïñ¸ßÀ´¼ÆËãÖ¡»º´æËùÐèµÄÄÚ´æ´óÐ¡
+	//é€šè¿‡æŒ‡å®šåƒç´ æ ¼å¼ã€å›¾åƒå®½ã€å›¾åƒé«˜æ¥è®¡ç®—å¸§ç¼“å­˜æ‰€éœ€çš„å†…å­˜å¤§å°
 	int32 Local_FrameBufferSize = av_image_get_buffer_size(AV_PIX_FMT_BGRA, VideoInfo.FrameWidth, VideoInfo.FrameHeight, 1);
 
 	VideoInfo.FrameBuffer = (uint8*)av_malloc(Local_FrameBufferSize * sizeof(uint8));
-	//¸ñÊ½»¯ÒÑ¾­ÉêÇëµÄÄÚ´æ²¢½« Local_FrameBuffer °ó¶¨µ½ Local_AVFrameAfterScale
+	//æ ¼å¼åŒ–å·²ç»ç”³è¯·çš„å†…å­˜å¹¶å°† Local_FrameBuffer ç»‘å®šåˆ° Local_AVFrameAfterScale
 	av_image_fill_arrays(Local_AVFrameAfterScale->data, Local_AVFrameAfterScale->linesize, VideoInfo.FrameBuffer, AV_PIX_FMT_BGRA,
 		VideoInfo.FrameWidth, VideoInfo.FrameHeight, 1);
 
-	//Êä³öÊÓÆµÐÅÏ¢
+	//è¾“å‡ºè§†é¢‘ä¿¡æ¯
 	//FString UE_VideoURL(std::string(FFmpegParam->Local_AVFormatContext->url).c_str());
 	//VideoInfo.VideoTotalTime = FFmpegParam->Local_AVFormatContext->duration;
 	//if (bOutLog)
@@ -143,7 +143,7 @@ void UVideoPlayer_FFmpeg::VideoThread()
 	//		});
 	//}
 
-	//×¼±¸ UTexture2D
+	//å‡†å¤‡ UTexture2D
 	AsyncTask(ENamedThreads::GameThread, [&]()
 		{
 			VideoInfo.VideoTexture = UTexture2D::CreateTransient(VideoInfo.FrameWidth, VideoInfo.FrameHeight, PF_B8G8R8A8);
@@ -156,7 +156,7 @@ void UVideoPlayer_FFmpeg::VideoThread()
 	while (bRun)
 	{
 		begin_time = clock();
-		//¶ÁÈ¡ÂëÁ÷ÖÐµÄÒôÆµÈô¸ÉÖ¡»òÕßÊÓÆµÒ»Ö¡
+		//è¯»å–ç æµä¸­çš„éŸ³é¢‘è‹¥å¹²å¸§æˆ–è€…è§†é¢‘ä¸€å¸§
 		ret = av_read_frame(FFmpegParam->Local_AVFormatContext, Local_AVPacket);
 		if (ret < 0)
 		{
@@ -168,7 +168,7 @@ void UVideoPlayer_FFmpeg::VideoThread()
 			continue;
 		}
 
-		//½«Êý¾Ý°ü·¢ËÍµ½½âÂë¶ÓÁÐ
+		//å°†æ•°æ®åŒ…å‘é€åˆ°è§£ç é˜Ÿåˆ—
 		ret = avcodec_send_packet(FFmpegParam->Local_AVCodecContext, Local_AVPacket);
 		if (ret != 0)
 		{
@@ -176,7 +176,7 @@ void UVideoPlayer_FFmpeg::VideoThread()
 			goto _Error;
 		}
 
-		//¶ÁÈ¡½âÂëºóµÄÒ»Ö¡
+		//è¯»å–è§£ç åŽçš„ä¸€å¸§
 		ret = avcodec_receive_frame(FFmpegParam->Local_AVCodecContext, Local_AVFrameBeforeScale);
 		if (ret == AVERROR_EOF)
 		{
@@ -206,7 +206,7 @@ void UVideoPlayer_FFmpeg::VideoThread()
 						FMemory::Memcpy(TextureData, Local_AVFrameAfterScale->data[0], sizeof(uint8) * VideoInfo.FrameWidth * VideoInfo.FrameHeight * 4);
 						VideoInfo.VideoTexture->PlatformData->Mips[0].BulkData.Unlock();
 
-						//¸üÐÂUTexture2D
+						//æ›´æ–°UTexture2D
 						VideoInfo.VideoTexture->UpdateResource();
 
 						milliseconds = float(clock() - begin_time);
