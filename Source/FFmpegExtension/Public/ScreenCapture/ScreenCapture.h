@@ -5,23 +5,24 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 
-#include "Utilities/CusEnum.h"
-
 extern "C"
 {
 #include "libavformat/avformat.h"
-#include "Video/VideoPlayer_FFmpeg.h"
+#include "libavcodec/avcodec.h"
+#include "libswscale/swscale.h"
 }
+
+#include "Utilities/CusEnum.h"
 
 #include "ScreenCapture.generated.h"
 
 struct FScreenCap_Param
 {
 	AVFormatContext* AV_fmctx = NULL;
-	const AVInputFormat* AV_Infm = NULL;
+	AVInputFormat* AV_Infm = NULL;
 	AVStream* AV_InStream = NULL;
 
-	const AVCodec* AV_EnCodec = NULL;
+	AVCodec* AV_EnCodec = NULL;
 	AVCodecContext* AV_EnCoctx = NULL;
 
 	const AVCodec* AV_DeCodec = NULL;
@@ -34,12 +35,30 @@ struct FScreenCap_Param
 
 	AVFrame* SrcFrame = NULL;
 	AVFrame* DestFrame = NULL;
-	AVPacket* DePacket = NULL;
-	AVPacket* EnPacket = NULL;
+	AVPacket* Packet = NULL;
+	//AVPacket* EnPacket = NULL;
 
 	void ReleaseParam()
 	{
-		if (AV_fmctx)	avformat_free_context(AV_fmctx);
+		if (AV_fmctx)
+		{
+			avformat_close_input(&AV_fmctx);
+			avformat_free_context(AV_fmctx);
+		}
+
+		if (AV_Outfmctx)
+		{
+			avio_close(AV_Outfmctx->pb);
+			avformat_free_context(AV_Outfmctx);
+		}
+
+		if (AV_EnCoctx) avcodec_free_context(&AV_EnCoctx);
+		if (AV_DeCoctx) avcodec_free_context(&AV_DeCoctx);
+		if (SrcFrame) av_frame_free(&SrcFrame);
+		if (DestFrame) av_frame_free(&DestFrame);
+		if (Packet) av_packet_free(&Packet);
+		if (AV_OutStream) av_free(AV_OutStream);
+		if (Swsctx) sws_freeContext(Swsctx);
 	}
 };
 
@@ -49,47 +68,47 @@ struct FEncodeParam
 	GENERATED_BODY()
 
 	//比特率
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|ScreenCapture|EncodeParam")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|ScreenCapture|EncodeParam")
 	int32 BitRate = 3000;
 
 	//两个I帧之间的帧数目
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|ScreenCapture|EncodeParam")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|ScreenCapture|EncodeParam")
 	int32 GopSize = 20;
 
 	//关键帧之间的最小间隔
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|ScreenCapture|EncodeParam")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|ScreenCapture|EncodeParam")
 	int32 KeyMin = 20;
 
 	//相邻两个非B帧之间最多出现的B帧数量
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|ScreenCapture|EncodeParam")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|ScreenCapture|EncodeParam")
 	int32 MaxBFrames = 0;
 
 	//像素编码格式
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|ScreenCapture|EncodeParam")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|ScreenCapture|EncodeParam")
 	EPixFormat PixFormat;
 
 	//编码器
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|ScreenCapture|EncodeParam")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|ScreenCapture|EncodeParam")
 	ECoder Coder;
 
 	//多线程编码
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|ScreenCapture|EncodeParam")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|ScreenCapture|EncodeParam")
 	int32 ThreadCounts = 8;
 
 	//最小量化因子, 1~51
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|ScreenCapture|EncodeParam")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|ScreenCapture|EncodeParam")
 	int32 QMin = 20;
 
 	//最大量化因子, 1~51
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|ScreenCapture|EncodeParam")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|ScreenCapture|EncodeParam")
 	int32 QMax = 30;
 
 	//编码速度，速度越快压缩率越低
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|ScreenCapture|EncodeParam")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|ScreenCapture|EncodeParam")
 	EPresetParam PresetParam;
 
 	//为视频类型和视觉效果优化
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|ScreenCapture|EncodeParam")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|ScreenCapture|EncodeParam")
 	ETuneParam TuneParam;
 };
 
@@ -157,6 +176,7 @@ public:
 	bool bRun = true;
 
 	FScreenCap_Param* ScreenCap_Param;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|ScreenCapture", Meta = (ExposeOnSpawn = true))
 	FScreenCapInfo ScreenCapInfo;
 
 	//~ Begin UObject Interface.
@@ -181,4 +201,9 @@ private:
 
 	/** 初始化格式转换上下文 */
 	bool InitSwsContext();
+
+	void closeCapture();
+
+	virtual void BeginDestroy() override;
+	~UScreenCapture();
 };

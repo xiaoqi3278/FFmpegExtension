@@ -1,96 +1,46 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
-  <head>
-    <meta charset="utf-8">
-    <title>
-      FFmpeg FAQ
-    </title>
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="style.min.css">
-  </head>
-  <body>
-    <div class="container">
-      <h1>
-      FFmpeg FAQ
-      </h1>
-<div align="center">
-</div>
+<!-- Created by GNU Texinfo 6.8, https://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>FFmpeg FAQ</title>
+
+<meta name="description" content="FFmpeg FAQ">
+<meta name="keywords" content="FFmpeg FAQ">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="#SEC_Contents" rel="contents" title="Table of Contents">
+<style type="text/css">
+<!--
+a.copiable-anchor {visibility: hidden; text-decoration: none; line-height: 0em}
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+span:hover a.copiable-anchor {visibility: visible}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<h1 class="settitle" align="center">FFmpeg FAQ</h1>
 
 
 <a name="SEC_Top"></a>
-
-<span id="SEC_Contents"></span>
-<h2 class="contents-heading">Table of Contents</h2>
-
-<div class="contents">
-
-<ul class="no-bullet">
-  <li><a id="toc-General-Questions" href="#General-Questions">1 General Questions</a>
-  <ul class="no-bullet">
-    <li><a id="toc-Why-doesn_0027t-FFmpeg-support-feature-_005bxyz_005d_003f" href="#Why-doesn_0027t-FFmpeg-support-feature-_005bxyz_005d_003f">1.1 Why doesn&rsquo;t FFmpeg support feature [xyz]?</a></li>
-    <li><a id="toc-FFmpeg-does-not-support-codec-XXX_002e-Can-you-include-a-Windows-DLL-loader-to-support-it_003f" href="#FFmpeg-does-not-support-codec-XXX_002e-Can-you-include-a-Windows-DLL-loader-to-support-it_003f">1.2 FFmpeg does not support codec XXX. Can you include a Windows DLL loader to support it?</a></li>
-    <li><a id="toc-I-cannot-read-this-file-although-this-format-seems-to-be-supported-by-ffmpeg_002e" href="#I-cannot-read-this-file-although-this-format-seems-to-be-supported-by-ffmpeg_002e">1.3 I cannot read this file although this format seems to be supported by ffmpeg.</a></li>
-    <li><a id="toc-Which-codecs-are-supported-by-Windows_003f" href="#Which-codecs-are-supported-by-Windows_003f">1.4 Which codecs are supported by Windows?</a></li>
-  </ul></li>
-  <li><a id="toc-Compilation" href="#Compilation">2 Compilation</a>
-  <ul class="no-bullet">
-    <li><a id="toc-error_003a-can_0027t-find-a-register-in-class-_0027GENERAL_005fREGS_0027-while-reloading-_0027asm_0027" href="#error_003a-can_0027t-find-a-register-in-class-_0027GENERAL_005fREGS_0027-while-reloading-_0027asm_0027">2.1 <code>error: can't find a register in class 'GENERAL_REGS' while reloading 'asm'</code></a></li>
-    <li><a id="toc-I-have-installed-this-library-with-my-distro_0027s-package-manager_002e-Why-does-configure-not-see-it_003f" href="#I-have-installed-this-library-with-my-distro_0027s-package-manager_002e-Why-does-configure-not-see-it_003f">2.2 I have installed this library with my distro&rsquo;s package manager. Why does <code>configure</code> not see it?</a></li>
-    <li><a id="toc-How-do-I-make-pkg_002dconfig-find-my-libraries_003f" href="#How-do-I-make-pkg_002dconfig-find-my-libraries_003f">2.3 How do I make <code>pkg-config</code> find my libraries?</a></li>
-    <li><a id="toc-How-do-I-use-pkg_002dconfig-when-cross_002dcompiling_003f" href="#How-do-I-use-pkg_002dconfig-when-cross_002dcompiling_003f">2.4 How do I use <code>pkg-config</code> when cross-compiling?</a></li>
-  </ul></li>
-  <li><a id="toc-Usage" href="#Usage">3 Usage</a>
-  <ul class="no-bullet">
-    <li><a id="toc-ffmpeg-does-not-work_003b-what-is-wrong_003f" href="#ffmpeg-does-not-work_003b-what-is-wrong_003f">3.1 ffmpeg does not work; what is wrong?</a></li>
-    <li><a id="toc-How-do-I-encode-single-pictures-into-movies_003f" href="#How-do-I-encode-single-pictures-into-movies_003f">3.2 How do I encode single pictures into movies?</a></li>
-    <li><a id="toc-How-do-I-encode-movie-to-single-pictures_003f" href="#How-do-I-encode-movie-to-single-pictures_003f">3.3 How do I encode movie to single pictures?</a></li>
-    <li><a id="toc-Why-do-I-see-a-slight-quality-degradation-with-multithreaded-MPEG_002a-encoding_003f" href="#Why-do-I-see-a-slight-quality-degradation-with-multithreaded-MPEG_002a-encoding_003f">3.4 Why do I see a slight quality degradation with multithreaded MPEG* encoding?</a></li>
-    <li><a id="toc-How-can-I-read-from-the-standard-input-or-write-to-the-standard-output_003f" href="#How-can-I-read-from-the-standard-input-or-write-to-the-standard-output_003f">3.5 How can I read from the standard input or write to the standard output?</a></li>
-    <li><a id="toc-_002df-jpeg-doesn_0027t-work_002e" href="#g_t_002df-jpeg-doesn_0027t-work_002e">3.6 -f jpeg doesn&rsquo;t work.</a></li>
-    <li><a id="toc-Why-can-I-not-change-the-frame-rate_003f" href="#Why-can-I-not-change-the-frame-rate_003f">3.7 Why can I not change the frame rate?</a></li>
-    <li><a id="toc-How-do-I-encode-Xvid-or-DivX-video-with-ffmpeg_003f" href="#How-do-I-encode-Xvid-or-DivX-video-with-ffmpeg_003f">3.8 How do I encode Xvid or DivX video with ffmpeg?</a></li>
-    <li><a id="toc-Which-are-good-parameters-for-encoding-high-quality-MPEG_002d4_003f" href="#Which-are-good-parameters-for-encoding-high-quality-MPEG_002d4_003f">3.9 Which are good parameters for encoding high quality MPEG-4?</a></li>
-    <li><a id="toc-Which-are-good-parameters-for-encoding-high-quality-MPEG_002d1_002fMPEG_002d2_003f" href="#Which-are-good-parameters-for-encoding-high-quality-MPEG_002d1_002fMPEG_002d2_003f">3.10 Which are good parameters for encoding high quality MPEG-1/MPEG-2?</a></li>
-    <li><a id="toc-Interlaced-video-looks-very-bad-when-encoded-with-ffmpeg_002c-what-is-wrong_003f" href="#Interlaced-video-looks-very-bad-when-encoded-with-ffmpeg_002c-what-is-wrong_003f">3.11 Interlaced video looks very bad when encoded with ffmpeg, what is wrong?</a></li>
-    <li><a id="toc-How-can-I-read-DirectShow-files_003f" href="#How-can-I-read-DirectShow-files_003f">3.12 How can I read DirectShow files?</a></li>
-    <li><a id="toc-How-can-I-join-video-files_003f" href="#How-can-I-join-video-files_003f">3.13 How can I join video files?</a></li>
-    <li><a id="toc-How-can-I-concatenate-video-files_003f" href="#How-can-I-concatenate-video-files_003f">3.14 How can I concatenate video files?</a>
-    <ul class="no-bullet">
-      <li><a id="toc-Concatenating-using-the-concat-filter" href="#Concatenating-using-the-concat-filter">3.14.1 Concatenating using the concat <em>filter</em></a></li>
-      <li><a id="toc-Concatenating-using-the-concat-demuxer" href="#Concatenating-using-the-concat-demuxer">3.14.2 Concatenating using the concat <em>demuxer</em></a></li>
-      <li><a id="toc-Concatenating-using-the-concat-protocol-_0028file-level_0029" href="#Concatenating-using-the-concat-protocol-_0028file-level_0029">3.14.3 Concatenating using the concat <em>protocol</em> (file level)</a></li>
-      <li><a id="toc-Concatenating-using-raw-audio-and-video" href="#Concatenating-using-raw-audio-and-video">3.14.4 Concatenating using raw audio and video</a></li>
-    </ul></li>
-    <li><a id="toc-Using-_002df-lavfi_002c-audio-becomes-mono-for-no-apparent-reason_002e" href="#Using-_002df-lavfi_002c-audio-becomes-mono-for-no-apparent-reason_002e">3.15 Using <samp>-f lavfi</samp>, audio becomes mono for no apparent reason.</a></li>
-    <li><a id="toc-Why-does-FFmpeg-not-see-the-subtitles-in-my-VOB-file_003f" href="#Why-does-FFmpeg-not-see-the-subtitles-in-my-VOB-file_003f">3.16 Why does FFmpeg not see the subtitles in my VOB file?</a></li>
-    <li><a id="toc-Why-was-the-ffmpeg-_002dsameq-option-removed_003f-What-to-use-instead_003f" href="#Why-was-the-ffmpeg-_002dsameq-option-removed_003f-What-to-use-instead_003f">3.17 Why was the <code>ffmpeg</code> <samp>-sameq</samp> option removed? What to use instead?</a></li>
-    <li><a id="toc-I-have-a-stretched-video_002c-why-does-scaling-does-not-fix-it_003f" href="#I-have-a-stretched-video_002c-why-does-scaling-does-not-fix-it_003f">3.18 I have a stretched video, why does scaling does not fix it?</a></li>
-    <li><a id="toc-How-do-I-run-ffmpeg-as-a-background-task_003f" href="#How-do-I-run-ffmpeg-as-a-background-task_003f">3.19 How do I run ffmpeg as a background task?</a></li>
-    <li><a id="toc-How-do-I-prevent-ffmpeg-from-suspending-with-a-message-like-suspended-_0028tty-output_0029_003f" href="#How-do-I-prevent-ffmpeg-from-suspending-with-a-message-like-suspended-_0028tty-output_0029_003f">3.20 How do I prevent ffmpeg from suspending with a message like <em>suspended (tty output)</em>?</a></li>
-  </ul></li>
-  <li><a id="toc-Development" href="#Development">4 Development</a>
-  <ul class="no-bullet">
-    <li><a id="toc-Are-there-examples-illustrating-how-to-use-the-FFmpeg-libraries_002c-particularly-libavcodec-and-libavformat_003f" href="#Are-there-examples-illustrating-how-to-use-the-FFmpeg-libraries_002c-particularly-libavcodec-and-libavformat_003f">4.1 Are there examples illustrating how to use the FFmpeg libraries, particularly libavcodec and libavformat?</a></li>
-    <li><a id="toc-Can-you-support-my-C-compiler-XXX_003f" href="#Can-you-support-my-C-compiler-XXX_003f">4.2 Can you support my C compiler XXX?</a></li>
-    <li><a id="toc-Is-Microsoft-Visual-C_002b_002b-supported_003f" href="#Is-Microsoft-Visual-C_002b_002b-supported_003f">4.3 Is Microsoft Visual C++ supported?</a></li>
-    <li><a id="toc-Can-you-add-automake_002c-libtool-or-autoconf-support_003f" href="#Can-you-add-automake_002c-libtool-or-autoconf-support_003f">4.4 Can you add automake, libtool or autoconf support?</a></li>
-    <li><a id="toc-Why-not-rewrite-FFmpeg-in-object_002doriented-C_002b_002b_003f" href="#Why-not-rewrite-FFmpeg-in-object_002doriented-C_002b_002b_003f">4.5 Why not rewrite FFmpeg in object-oriented C++?</a></li>
-    <li><a id="toc-Why-are-the-ffmpeg-programs-devoid-of-debugging-symbols_003f" href="#Why-are-the-ffmpeg-programs-devoid-of-debugging-symbols_003f">4.6 Why are the ffmpeg programs devoid of debugging symbols?</a></li>
-    <li><a id="toc-I-do-not-like-the-LGPL_002c-can-I-contribute-code-under-the-GPL-instead_003f" href="#I-do-not-like-the-LGPL_002c-can-I-contribute-code-under-the-GPL-instead_003f">4.7 I do not like the LGPL, can I contribute code under the GPL instead?</a></li>
-    <li><a id="toc-I_0027m-using-FFmpeg-from-within-my-C-application-but-the-linker-complains-about-missing-symbols-from-the-libraries-themselves_002e" href="#I_0027m-using-FFmpeg-from-within-my-C-application-but-the-linker-complains-about-missing-symbols-from-the-libraries-themselves_002e">4.8 I&rsquo;m using FFmpeg from within my C application but the linker complains about missing symbols from the libraries themselves.</a></li>
-    <li><a id="toc-I_0027m-using-FFmpeg-from-within-my-C_002b_002b-application-but-the-linker-complains-about-missing-symbols-which-seem-to-be-available_002e" href="#I_0027m-using-FFmpeg-from-within-my-C_002b_002b-application-but-the-linker-complains-about-missing-symbols-which-seem-to-be-available_002e">4.9 I&rsquo;m using FFmpeg from within my C++ application but the linker complains about missing symbols which seem to be available.</a></li>
-    <li><a id="toc-I_0027m-using-libavutil-from-within-my-C_002b_002b-application-but-the-compiler-complains-about-_0027UINT64_005fC_0027-was-not-declared-in-this-scope" href="#I_0027m-using-libavutil-from-within-my-C_002b_002b-application-but-the-compiler-complains-about-_0027UINT64_005fC_0027-was-not-declared-in-this-scope">4.10 I&rsquo;m using libavutil from within my C++ application but the compiler complains about &rsquo;UINT64_C&rsquo; was not declared in this scope</a></li>
-    <li><a id="toc-I-have-a-file-in-memory-_002f-a-API-different-from-_002aopen_002f_002aread_002f-libc-how-do-I-use-it-with-libavformat_003f" href="#I-have-a-file-in-memory-_002f-a-API-different-from-_002aopen_002f_002aread_002f-libc-how-do-I-use-it-with-libavformat_003f">4.11 I have a file in memory / a API different from *open/*read/ libc how do I use it with libavformat?</a></li>
-    <li><a id="toc-Where-is-the-documentation-about-ffv1_002c-msmpeg4_002c-asv1_002c-4xm_003f" href="#Where-is-the-documentation-about-ffv1_002c-msmpeg4_002c-asv1_002c-4xm_003f">4.12 Where is the documentation about ffv1, msmpeg4, asv1, 4xm?</a></li>
-    <li><a id="toc-How-do-I-feed-H_002e263_002dRTP-_0028and-other-codecs-in-RTP_0029-to-libavcodec_003f" href="#How-do-I-feed-H_002e263_002dRTP-_0028and-other-codecs-in-RTP_0029-to-libavcodec_003f">4.13 How do I feed H.263-RTP (and other codecs in RTP) to libavcodec?</a></li>
-    <li><a id="toc-AVStream_002er_005fframe_005frate-is-wrong_002c-it-is-much-larger-than-the-frame-rate_002e" href="#AVStream_002er_005fframe_005frate-is-wrong_002c-it-is-much-larger-than-the-frame-rate_002e">4.14 AVStream.r_frame_rate is wrong, it is much larger than the frame rate.</a></li>
-    <li><a id="toc-Why-is-make-fate-not-running-all-tests_003f" href="#Why-is-make-fate-not-running-all-tests_003f">4.15 Why is <code>make fate</code> not running all tests?</a></li>
-    <li><a id="toc-Why-is-make-fate-not-finding-the-samples_003f" href="#Why-is-make-fate-not-finding-the-samples_003f">4.16 Why is <code>make fate</code> not finding the samples?</a></li>
-  </ul></li>
-</ul>
-</div>
 
 
 <a name="General-Questions"></a>
@@ -126,22 +76,22 @@ install some additional codecs.
 </p>
 <p>The following list of video codecs should work on most Windows systems:
 </p><dl compact="compact">
-<dt><samp>msmpeg4v2</samp></dt>
+<dt><span><samp>msmpeg4v2</samp></span></dt>
 <dd><p>.avi/.asf
 </p></dd>
-<dt><samp>msmpeg4</samp></dt>
+<dt><span><samp>msmpeg4</samp></span></dt>
 <dd><p>.asf only
 </p></dd>
-<dt><samp>wmv1</samp></dt>
+<dt><span><samp>wmv1</samp></span></dt>
 <dd><p>.asf only
 </p></dd>
-<dt><samp>wmv2</samp></dt>
+<dt><span><samp>wmv2</samp></span></dt>
 <dd><p>.asf only
 </p></dd>
-<dt><samp>mpeg4</samp></dt>
+<dt><span><samp>mpeg4</samp></span></dt>
 <dd><p>Only if you have some MPEG-4 codec like ffdshow or Xvid installed.
 </p></dd>
-<dt><samp>mpeg1video</samp></dt>
+<dt><span><samp>mpeg1video</samp></span></dt>
 <dd><p>.mpg only
 </p></dd>
 </dl>
@@ -152,12 +102,12 @@ strongly advised to avoid ASF where possible.
 </p>
 <p>The following list of audio codecs should work on most Windows systems:
 </p><dl compact="compact">
-<dt><samp>adpcm_ima_wav</samp></dt>
-<dt><samp>adpcm_ms</samp></dt>
-<dt><samp>pcm_s16le</samp></dt>
+<dt><span><samp>adpcm_ima_wav</samp></span></dt>
+<dt><span><samp>adpcm_ms</samp></span></dt>
+<dt><span><samp>pcm_s16le</samp></span></dt>
 <dd><p>always
 </p></dd>
-<dt><samp>libmp3lame</samp></dt>
+<dt><span><samp>libmp3lame</samp></span></dt>
 <dd><p>If some MP3 codec like LAME is installed.
 </p></dd>
 </dl>
@@ -317,9 +267,9 @@ that match <code>*jpg</code> to the <samp>/tmp</samp> directory in the sequence 
 </p>
 <p>Instead of relying on file format self-recognition, you may also use
 </p><dl compact="compact">
-<dt><samp>-c:v ppm</samp></dt>
-<dt><samp>-c:v png</samp></dt>
-<dt><samp>-c:v mjpeg</samp></dt>
+<dt><span><samp>-c:v ppm</samp></span></dt>
+<dt><span><samp>-c:v png</samp></span></dt>
+<dt><span><samp>-c:v mjpeg</samp></span></dt>
 </dl>
 <p>to force the encoding.
 </p>
@@ -816,9 +766,7 @@ home directory? The value is used in ways where the shell cannot expand it,
 causing FATE to not find files. Just replace <code>~</code> by the full path.
 </p>
 
-      <p style="font-size: small;">
-        This document was generated using <a href="http://www.gnu.org/software/texinfo/"><em>makeinfo</em></a>.
-      </p>
-    </div>
-  </body>
+
+
+</body>
 </html>

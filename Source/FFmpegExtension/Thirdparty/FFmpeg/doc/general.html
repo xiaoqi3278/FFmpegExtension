@@ -1,80 +1,46 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
-  <head>
-    <meta charset="utf-8">
-    <title>
-      General Documentation
-    </title>
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="style.min.css">
-  </head>
-  <body>
-    <div class="container">
-      <h1>
-      General Documentation
-      </h1>
-<div align="center">
-</div>
+<!-- Created by GNU Texinfo 6.8, https://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>General Documentation</title>
+
+<meta name="description" content="General Documentation">
+<meta name="keywords" content="General Documentation">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="#SEC_Contents" rel="contents" title="Table of Contents">
+<style type="text/css">
+<!--
+a.copiable-anchor {visibility: hidden; text-decoration: none; line-height: 0em}
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+span:hover a.copiable-anchor {visibility: visible}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<h1 class="settitle" align="center">General Documentation</h1>
 
 
 <a name="SEC_Top"></a>
-
-<span id="SEC_Contents"></span>
-<h2 class="contents-heading">Table of Contents</h2>
-
-<div class="contents">
-
-<ul class="no-bullet">
-  <li><a id="toc-External-libraries" href="#External-libraries">1 External libraries</a>
-  <ul class="no-bullet">
-    <li><a id="toc-Alliance-for-Open-Media-_0028AOM_0029" href="#Alliance-for-Open-Media-_0028AOM_0029">1.1 Alliance for Open Media (AOM)</a></li>
-    <li><a id="toc-AMD-AMF_002fVCE" href="#AMD-AMF_002fVCE">1.2 AMD AMF/VCE</a></li>
-    <li><a id="toc-AviSynth" href="#AviSynth">1.3 AviSynth</a></li>
-    <li><a id="toc-Chromaprint" href="#Chromaprint">1.4 Chromaprint</a></li>
-    <li><a id="toc-codec2" href="#codec2">1.5 codec2</a></li>
-    <li><a id="toc-dav1d" href="#dav1d">1.6 dav1d</a></li>
-    <li><a id="toc-davs2" href="#davs2">1.7 davs2</a></li>
-    <li><a id="toc-uavs3d" href="#uavs3d">1.8 uavs3d</a></li>
-    <li><a id="toc-Game-Music-Emu" href="#Game-Music-Emu">1.9 Game Music Emu</a></li>
-    <li><a id="toc-Intel-QuickSync-Video" href="#Intel-QuickSync-Video">1.10 Intel QuickSync Video</a></li>
-    <li><a id="toc-Kvazaar" href="#Kvazaar">1.11 Kvazaar</a></li>
-    <li><a id="toc-LAME" href="#LAME">1.12 LAME</a></li>
-    <li><a id="toc-libilbc" href="#libilbc">1.13 libilbc</a></li>
-    <li><a id="toc-libvpx" href="#libvpx">1.14 libvpx</a></li>
-    <li><a id="toc-ModPlug" href="#ModPlug">1.15 ModPlug</a></li>
-    <li><a id="toc-OpenCORE_002c-VisualOn_002c-and-Fraunhofer-libraries" href="#OpenCORE_002c-VisualOn_002c-and-Fraunhofer-libraries">1.16 OpenCORE, VisualOn, and Fraunhofer libraries</a>
-    <ul class="no-bullet">
-      <li><a id="toc-OpenCORE-AMR" href="#OpenCORE-AMR">1.16.1 OpenCORE AMR</a></li>
-      <li><a id="toc-VisualOn-AMR_002dWB-encoder-library" href="#VisualOn-AMR_002dWB-encoder-library">1.16.2 VisualOn AMR-WB encoder library</a></li>
-      <li><a id="toc-Fraunhofer-AAC-library" href="#Fraunhofer-AAC-library">1.16.3 Fraunhofer AAC library</a></li>
-    </ul></li>
-    <li><a id="toc-OpenH264" href="#OpenH264">1.17 OpenH264</a></li>
-    <li><a id="toc-OpenJPEG" href="#OpenJPEG">1.18 OpenJPEG</a></li>
-    <li><a id="toc-rav1e" href="#rav1e">1.19 rav1e</a></li>
-    <li><a id="toc-SVT_002dAV1" href="#SVT_002dAV1">1.20 SVT-AV1</a></li>
-    <li><a id="toc-TwoLAME" href="#TwoLAME">1.21 TwoLAME</a></li>
-    <li><a id="toc-VapourSynth" href="#VapourSynth">1.22 VapourSynth</a></li>
-    <li><a id="toc-x264" href="#x264">1.23 x264</a></li>
-    <li><a id="toc-x265" href="#x265">1.24 x265</a></li>
-    <li><a id="toc-xavs" href="#xavs">1.25 xavs</a></li>
-    <li><a id="toc-xavs2" href="#xavs2">1.26 xavs2</a></li>
-    <li><a id="toc-ZVBI" href="#ZVBI">1.27 ZVBI</a></li>
-  </ul></li>
-  <li><a id="toc-Supported-File-Formats_002c-Codecs-or-Features" href="#Supported-File-Formats_002c-Codecs-or-Features">2 Supported File Formats, Codecs or Features</a>
-  <ul class="no-bullet">
-    <li><a id="toc-File-Formats" href="#File-Formats">2.1 File Formats</a></li>
-    <li><a id="toc-Image-Formats" href="#Image-Formats">2.2 Image Formats</a></li>
-    <li><a id="toc-Video-Codecs" href="#Video-Codecs">2.3 Video Codecs</a></li>
-    <li><a id="toc-Audio-Codecs" href="#Audio-Codecs">2.4 Audio Codecs</a></li>
-    <li><a id="toc-Subtitle-Formats" href="#Subtitle-Formats">2.5 Subtitle Formats</a></li>
-    <li><a id="toc-Network-Protocols" href="#Network-Protocols">2.6 Network Protocols</a></li>
-    <li><a id="toc-Input_002fOutput-Devices" href="#Input_002fOutput-Devices">2.7 Input/Output Devices</a></li>
-    <li><a id="toc-Timecode" href="#Timecode">2.8 Timecode</a></li>
-  </ul></li>
-</ul>
-</div>
 
 
 <a name="External-libraries"></a>
@@ -134,7 +100,7 @@ system, or by using the supplied <code>GNUmakefile</code>.
 <p>For Linux, macOS, and BSD, the only supported AviSynth variant is
 <a href="https://github.com/AviSynth/AviSynthPlus">AviSynth+</a>, starting with version 3.5.
 </p>
-<div class="info">
+<div class="float">
 <p>In 2016, AviSynth+ added support for building with GCC. However, due to
 the eccentricities of Windows&rsquo; calling conventions, 32-bit GCC builds
 of AviSynth+ are not compatible with typical 32-bit builds of FFmpeg.
@@ -147,14 +113,16 @@ GCC builds of AviSynth+ by passing <code>-DAVSC_WIN32_GCC32</code> to
 </p>
 <p>64-bit builds of FFmpeg are not affected, and can use either MSVC or
 GCC builds of AviSynth+ without any special flags.
-</p></div>
-<div class="info">
+</p><div class="float-caption"><p><strong>NOTE
+</strong></p></div></div>
+<div class="float">
 <p>AviSynth(+) is loaded dynamically.  Distributors can build FFmpeg
 with <code>--enable-avisynth</code>, and the binaries will work regardless
 of the end user having AviSynth installed.  If/when an end user
 would like to use AviSynth scripts, then they can install AviSynth(+)
 and FFmpeg will be able to find and use it to open scripts.
-</p></div>
+</p><div class="float-caption"><p><strong>NOTE
+</strong></p></div></div>
 <a name="Chromaprint"></a>
 <h3 class="section">1.4 Chromaprint<span class="pull-right"><a class="anchor hidden-xs" href="#Chromaprint" aria-hidden="true">#</a> <a class="anchor hidden-xs"href="#toc-Chromaprint" aria-hidden="true">TOC</a></span></h3>
 
@@ -198,11 +166,12 @@ installing the library. Then pass <code>--enable-libdav1d</code> to configure to
 installing the library. Then pass <code>--enable-libdavs2</code> to configure to
 enable it.
 </p>
-<div class="info">
+<div class="float">
 <p>libdavs2 is under the GNU Public License Version 2 or later
 (see <a href="http://www.gnu.org/licenses/old-licenses/gpl-2.0.html">http://www.gnu.org/licenses/old-licenses/gpl-2.0.html</a> for
 details), you must upgrade FFmpeg&rsquo;s license to GPL in order to use it.
-</p></div>
+</p><div class="float-caption"><p><strong>NOTE
+</strong></p></div></div>
 <a name="uavs3d"></a>
 <h3 class="section">1.8 uavs3d<span class="pull-right"><a class="anchor hidden-xs" href="#uavs3d" aria-hidden="true">#</a> <a class="anchor hidden-xs"href="#toc-uavs3d" aria-hidden="true">TOC</a></span></h3>
 
@@ -283,7 +252,7 @@ enable it.
 <p>Spun off Google Android sources, OpenCore, VisualOn and Fraunhofer
 libraries provide encoders for a number of audio codecs.
 </p>
-<div class="info">
+<div class="float">
 <p>OpenCORE and VisualOn libraries are under the Apache License 2.0
 (see <a href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a> for details), which is
 incompatible to the LGPL version 2.1 and GPL version 2. You have to
@@ -295,7 +264,8 @@ order to use it.
 Therefore, for GPL builds, you have to pass <code>--enable-nonfree</code> to
 configure in order to use it. To the best of our knowledge, it is
 compatible with the LGPL.
-</p></div>
+</p><div class="float-caption"><p><strong>NOTE
+</strong></p></div></div>
 <a name="OpenCORE-AMR"></a>
 <h4 class="subsection">1.16.1 OpenCORE AMR<span class="pull-right"><a class="anchor hidden-xs" href="#OpenCORE-AMR" aria-hidden="true">#</a> <a class="anchor hidden-xs"href="#toc-OpenCORE-AMR" aria-hidden="true">TOC</a></span></h4>
 
@@ -362,7 +332,7 @@ to <samp>./configure</samp>.
 
 <p>FFmpeg can make use of the Scalable Video Technology for AV1 library for AV1 encoding.
 </p>
-<p>Go to <a href="https://gitlab.com/AOMediaCodec/SVT-AV1/">https://gitlab.com/AOMediaCodec/SVT-AV1/</a> and follow the instructions
+<p>Go to <a href="https://github.com/OpenVisualCloud/SVT-AV1/">https://github.com/OpenVisualCloud/SVT-AV1/</a> and follow the instructions
 for installing the library. Then pass <code>--enable-libsvtav1</code> to configure to
 enable it.
 </p>
@@ -396,11 +366,12 @@ add <code>-f vapoursynth</code> before the input <code>-i yourscript.vpy</code>.
 instructions for installing the library. Then pass <code>--enable-libx264</code> to
 configure to enable it.
 </p>
-<div class="info">
+<div class="float">
 <p>x264 is under the GNU Public License Version 2 or later
 (see <a href="http://www.gnu.org/licenses/old-licenses/gpl-2.0.html">http://www.gnu.org/licenses/old-licenses/gpl-2.0.html</a> for
 details), you must upgrade FFmpeg&rsquo;s license to GPL in order to use it.
-</p></div>
+</p><div class="float-caption"><p><strong>NOTE
+</strong></p></div></div>
 <a name="x265"></a>
 <h3 class="section">1.24 x265<span class="pull-right"><a class="anchor hidden-xs" href="#x265" aria-hidden="true">#</a> <a class="anchor hidden-xs"href="#toc-x265" aria-hidden="true">TOC</a></span></h3>
 
@@ -410,11 +381,12 @@ details), you must upgrade FFmpeg&rsquo;s license to GPL in order to use it.
 for installing the library. Then pass <code>--enable-libx265</code> to configure
 to enable it.
 </p>
-<div class="info">
+<div class="float">
 <p>x265 is under the GNU Public License Version 2 or later
 (see <a href="http://www.gnu.org/licenses/old-licenses/gpl-2.0.html">http://www.gnu.org/licenses/old-licenses/gpl-2.0.html</a> for
 details), you must upgrade FFmpeg&rsquo;s license to GPL in order to use it.
-</p></div>
+</p><div class="float-caption"><p><strong>NOTE
+</strong></p></div></div>
 <a name="xavs"></a>
 <h3 class="section">1.25 xavs<span class="pull-right"><a class="anchor hidden-xs" href="#xavs" aria-hidden="true">#</a> <a class="anchor hidden-xs"href="#toc-xavs" aria-hidden="true">TOC</a></span></h3>
 
@@ -433,11 +405,12 @@ enable it.
 installing the library. Then pass <code>--enable-libxavs2</code> to configure to
 enable it.
 </p>
-<div class="info">
+<div class="float">
 <p>libxavs2 is under the GNU Public License Version 2 or later
 (see <a href="http://www.gnu.org/licenses/old-licenses/gpl-2.0.html">http://www.gnu.org/licenses/old-licenses/gpl-2.0.html</a> for
 details), you must upgrade FFmpeg&rsquo;s license to GPL in order to use it.
-</p></div>
+</p><div class="float-caption"><p><strong>NOTE
+</strong></p></div></div>
 <a name="ZVBI"></a>
 <h3 class="section">1.27 ZVBI<span class="pull-right"><a class="anchor hidden-xs" href="#ZVBI" aria-hidden="true">#</a> <a class="anchor hidden-xs"href="#toc-ZVBI" aria-hidden="true">TOC</a></span></h3>
 
@@ -630,7 +603,6 @@ library:
 <tr><td width="40%">raw NULL</td><td width="10%">X</td><td width="10%"></td></tr>
 <tr><td width="40%">raw video</td><td width="10%">X</td><td width="10%">X</td></tr>
 <tr><td width="40%">raw id RoQ</td><td width="10%">X</td><td width="10%"></td></tr>
-<tr><td width="40%">raw OBU</td><td width="10%">X</td><td width="10%">X</td></tr>
 <tr><td width="40%">raw SBC</td><td width="10%">X</td><td width="10%">X</td></tr>
 <tr><td width="40%">raw Shorten</td><td width="10%"></td><td width="10%">X</td></tr>
 <tr><td width="40%">raw TAK</td><td width="10%"></td><td width="10%">X</td></tr>
@@ -711,7 +683,7 @@ library:
 <tr><td width="40%">WebM</td><td width="10%">X</td><td width="10%">X</td></tr>
 <tr><td width="40%">Windows Televison (WTV)</td><td width="10%">X</td><td width="10%">X</td></tr>
 <tr><td width="40%">Wing Commander III movie</td><td width="10%"></td><td width="10%">X</td><td width="40%">Multimedia format used in Origin&rsquo;s Wing Commander III computer game.</td></tr>
-<tr><td width="40%">Westwood Studios audio</td><td width="10%">X</td><td width="10%">X</td><td width="40%">Multimedia format used in Westwood Studios games.</td></tr>
+<tr><td width="40%">Westwood Studios audio</td><td width="10%"></td><td width="10%">X</td><td width="40%">Multimedia format used in Westwood Studios games.</td></tr>
 <tr><td width="40%">Westwood Studios VQA</td><td width="10%"></td><td width="10%">X</td><td width="40%">Multimedia format used in Westwood Studios games.</td></tr>
 <tr><td width="40%">Wideband Single-bit Data (WSD)</td><td width="10%"></td><td width="10%">X</td></tr>
 <tr><td width="40%">WVE</td><td width="10%"></td><td width="10%">X</td></tr>
@@ -743,7 +715,6 @@ following image formats are supported:
 <tr><td width="40%">DPX</td><td width="10%">X</td><td width="10%">X</td><td width="40%">Digital Picture Exchange</td></tr>
 <tr><td width="40%">EXR</td><td width="10%"></td><td width="10%">X</td><td width="40%">OpenEXR</td></tr>
 <tr><td width="40%">FITS</td><td width="10%">X</td><td width="10%">X</td><td width="40%">Flexible Image Transport System</td></tr>
-<tr><td width="40%">IMG</td><td width="10%"></td><td width="10%">X</td><td width="40%">GEM Raster image</td></tr>
 <tr><td width="40%">JPEG</td><td width="10%">X</td><td width="10%">X</td><td width="40%">Progressive JPEG is not supported.</td></tr>
 <tr><td width="40%">JPEG 2000</td><td width="10%">X</td><td width="10%">X</td></tr>
 <tr><td width="40%">JPEG-LS</td><td width="10%">X</td><td width="10%">X</td></tr>
@@ -926,7 +897,7 @@ following image formats are supported:
 <tr><td width="40%">Q-team QPEG</td><td width="10%"></td><td width="10%">X</td><td width="40%">fourccs: QPEG, Q1.0, Q1.1</td></tr>
 <tr><td width="40%">QuickTime 8BPS video</td><td width="10%"></td><td width="10%">X</td></tr>
 <tr><td width="40%">QuickTime Animation (RLE) video</td><td width="10%">X</td><td width="10%">X</td><td width="40%">fourcc: &rsquo;rle &rsquo;</td></tr>
-<tr><td width="40%">QuickTime Graphics (SMC)</td><td width="10%">X</td><td width="10%">X</td><td width="40%">fourcc: &rsquo;smc &rsquo;</td></tr>
+<tr><td width="40%">QuickTime Graphics (SMC)</td><td width="10%"></td><td width="10%">X</td><td width="40%">fourcc: &rsquo;smc &rsquo;</td></tr>
 <tr><td width="40%">QuickTime video (RPZA)</td><td width="10%">X</td><td width="10%">X</td><td width="40%">fourcc: rpza</td></tr>
 <tr><td width="40%">R10K AJA Kona 10-bit RGB Codec</td><td width="10%">X</td><td width="10%">X</td></tr>
 <tr><td width="40%">R210 Quicktime Uncompressed RGB 10-bit</td><td width="10%">X</td><td width="10%">X</td></tr>
@@ -1008,7 +979,6 @@ following image formats are supported:
 <tr><td width="40%">ADPCM Electronic Arts XAS</td><td width="10%"></td><td width="10%">X</td></tr>
 <tr><td width="40%">ADPCM G.722</td><td width="10%">X</td><td width="10%">X</td></tr>
 <tr><td width="40%">ADPCM G.726</td><td width="10%">X</td><td width="10%">X</td></tr>
-<tr><td width="40%">ADPCM IMA Acorn Replay</td><td width="10%"></td><td width="10%">X</td></tr>
 <tr><td width="40%">ADPCM IMA AMV</td><td width="10%">X</td><td width="10%">X</td><td width="40%">Used in AMV files</td></tr>
 <tr><td width="40%">ADPCM IMA Cunning Developments</td><td width="10%"></td><td width="10%">X</td></tr>
 <tr><td width="40%">ADPCM IMA Electronic Arts EACS</td><td width="10%"></td><td width="10%">X</td></tr>
@@ -1039,7 +1009,7 @@ following image formats are supported:
 <tr><td width="40%">ADPCM Sound Blaster Pro 2.6-bit</td><td width="10%"></td><td width="10%">X</td></tr>
 <tr><td width="40%">ADPCM Sound Blaster Pro 4-bit</td><td width="10%"></td><td width="10%">X</td></tr>
 <tr><td width="40%">ADPCM VIMA</td><td width="10%"></td><td width="10%">X</td><td width="40%">Used in LucasArts SMUSH animations.</td></tr>
-<tr><td width="40%">ADPCM Westwood Studios IMA</td><td width="10%">X</td><td width="10%">X</td><td width="40%">Used in Westwood Studios games like Command and Conquer.</td></tr>
+<tr><td width="40%">ADPCM Westwood Studios IMA</td><td width="10%"></td><td width="10%">X</td><td width="40%">Used in Westwood Studios games like Command and Conquer.</td></tr>
 <tr><td width="40%">ADPCM Yamaha</td><td width="10%">X</td><td width="10%">X</td></tr>
 <tr><td width="40%">ADPCM Zork</td><td width="10%"></td><td width="10%">X</td></tr>
 <tr><td width="40%">AMR-NB</td><td width="10%">E</td><td width="10%">X</td><td width="40%">encoding supported through external library libopencore-amrnb</td></tr>
@@ -1085,7 +1055,7 @@ following image formats are supported:
 <tr><td width="40%">GSM</td><td width="10%">E</td><td width="10%">X</td><td width="40%">encoding supported through external library libgsm</td></tr>
 <tr><td width="40%">GSM Microsoft variant</td><td width="10%">E</td><td width="10%">X</td><td width="40%">encoding supported through external library libgsm</td></tr>
 <tr><td width="40%">IAC (Indeo Audio Coder)</td><td width="10%"></td><td width="10%">X</td></tr>
-<tr><td width="40%">iLBC (Internet Low Bitrate Codec)</td><td width="10%">E</td><td width="10%">EX</td><td width="40%">encoding and decoding supported through external library libilbc</td></tr>
+<tr><td width="40%">iLBC (Internet Low Bitrate Codec)</td><td width="10%">E</td><td width="10%">E</td><td width="40%">encoding and decoding supported through external library libilbc</td></tr>
 <tr><td width="40%">IMC (Intel Music Coder)</td><td width="10%"></td><td width="10%">X</td></tr>
 <tr><td width="40%">Interplay ACM</td><td width="10%"></td><td width="10%">X</td></tr>
 <tr><td width="40%">MACE (Macintosh Audio Compression/Expansion) 3:1</td><td width="10%"></td><td width="10%">X</td></tr>
@@ -1144,7 +1114,7 @@ following image formats are supported:
 <tr><td width="40%">SMPTE 302M AES3 audio</td><td width="10%">X</td><td width="10%">X</td></tr>
 <tr><td width="40%">Sonic</td><td width="10%">X</td><td width="10%">X</td><td width="40%">experimental codec</td></tr>
 <tr><td width="40%">Sonic lossless</td><td width="10%">X</td><td width="10%">X</td><td width="40%">experimental codec</td></tr>
-<tr><td width="40%">Speex</td><td width="10%">E</td><td width="10%">EX</td><td width="40%">supported through external library libspeex</td></tr>
+<tr><td width="40%">Speex</td><td width="10%">E</td><td width="10%">E</td><td width="40%">supported through external library libspeex</td></tr>
 <tr><td width="40%">TAK (Tom&rsquo;s lossless Audio Kompressor)</td><td width="10%"></td><td width="10%">X</td></tr>
 <tr><td width="40%">True Audio (TTA)</td><td width="10%">X</td><td width="10%">X</td></tr>
 <tr><td width="40%">TrueHD</td><td width="10%">X</td><td width="10%">X</td><td width="40%">Used in HD-DVD and Blu-Ray discs.</td></tr>
@@ -1285,9 +1255,7 @@ performance on systems without hardware floating point support).
 </table>
 
 
-      <p style="font-size: small;">
-        This document was generated using <a href="http://www.gnu.org/software/texinfo/"><em>makeinfo</em></a>.
-      </p>
-    </div>
-  </body>
+
+
+</body>
 </html>

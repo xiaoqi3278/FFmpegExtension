@@ -4,13 +4,14 @@
 #include "ScreenCapture/ScreenCapture.h"
 
 #include <thread>
-
 #include "Utilities/FFmpegFunctionLib.h"
 
 extern "C"
 {
 #include "libavutil/dict.h"
 #include "libavcodec/avcodec.h"
+#include "libavutil/time.h"
+#include "libavdevice/avdevice.h"
 }
 
 void UScreenCapture::PostInitProperties()
@@ -58,31 +59,89 @@ void UScreenCapture::CaptureFunction()
 		goto _Error;
 	}
 
-	ScreenCap_Param->DePacket = av_packet_alloc();
-	ScreenCap_Param->DePacket = av_packet_alloc();
+	ScreenCap_Param->Packet = av_packet_alloc();
+	ScreenCap_Param->Packet = av_packet_alloc();
 
-	int32 FrameIndex = 0;
+	long long FrameIndex = 0;
+	//以微秒为单位获取当前的时间戳
+	long long StartTime = av_gettime();
 	while(bRun)
 	{
-		Ret = av_read_frame(ScreenCap_Param->AV_fmctx, ScreenCap_Param->DePacket);
+		Ret = av_read_frame(ScreenCap_Param->AV_fmctx, ScreenCap_Param->Packet);
 		if (Ret < 0)
 		{
 			UFFmpegFunctionLib::OutLog(this, ScreenCapInfo.bOutLog, "Error at av_read_frame()");
-			continue;
+			break;
 		}
 
-		if (ScreenCap_Param->DePacket->stream_index == ScreenCapInfo.CapStreamIndex)
+		//ScreenCap_Param->EnPacket->dts = 0;
+		if (ScreenCap_Param->Packet->stream_index == ScreenCapInfo.CapStreamIndex)
 		{
-			ScreenCap_Param->AV_InStream = ScreenCap_Param->AV_fmctx->streams[ScreenCapInfo.CapStreamIndex];
+			//ScreenCap_Param->AV_InStream = ScreenCap_Param->AV_fmctx->streams[ScreenCapInfo.CapStreamIndex];
 			sws_scale(ScreenCap_Param->Swsctx, ScreenCap_Param->SrcFrame->data, ScreenCap_Param->SrcFrame->linesize,
 			          0, ScreenCapInfo.CapHeight, ScreenCap_Param->DestFrame->data,
 			          ScreenCap_Param->DestFrame->linesize);
-			FrameIndex++;
-			ScreenCap_Param->DestFrame->pts = FrameIndex;
+			//FrameIndex++;
+			//ScreenCap_Param->DestFrame->pts = FrameIndex;
 		}
+
+		if (ScreenCap_Param->Packet->pts == AV_NOPTS_VALUE)
+		{
+			//AVRational time_base：时基。通过该值可以把PTS，DTS转化为真正的时间。
+			AVRational TimeBase = ScreenCap_Param->AV_fmctx->streams[ScreenCapInfo.CapStreamIndex]->time_base;
+
+			int64_t calc_duration = (double)AV_TIME_BASE / av_q2d(ScreenCap_Param->AV_fmctx->streams[ScreenCapInfo.CapStreamIndex]->r_frame_rate);
+
+			//配置参数
+			ScreenCap_Param->Packet->pts = (double)(FrameIndex * calc_duration) / (double)(av_q2d(TimeBase) * AV_TIME_BASE);
+			ScreenCap_Param->Packet->dts = ScreenCap_Param->Packet->pts;
+			ScreenCap_Param->Packet->duration = (double)calc_duration / (double)(av_q2d(TimeBase) * AV_TIME_BASE);
+		}
+
+		if (ScreenCap_Param->Packet->stream_index == ScreenCapInfo.CapStreamIndex)
+		{
+			AVRational TimeBase = ScreenCap_Param->AV_fmctx->streams[ScreenCapInfo.CapStreamIndex]->time_base;
+			AVRational TimeBase_Q = { 1,AV_TIME_BASE };
+
+			int64_t PTSTime = av_rescale_q(ScreenCap_Param->Packet->dts, TimeBase, TimeBase_Q);
+			int64_t NowTime = av_gettime() - StartTime;
+
+			if (PTSTime > NowTime)
+			{
+				av_usleep((unsigned int)PTSTime - NowTime);
+			}
+		}
+
+		ScreenCap_Param->AV_InStream = ScreenCap_Param->AV_fmctx->streams[ScreenCap_Param->Packet->stream_index];
+		ScreenCap_Param->AV_OutStream = ScreenCap_Param->AV_fmctx->streams[ScreenCap_Param->Packet->stream_index];
+
+		ScreenCap_Param->Packet->pts = av_rescale_q_rnd(ScreenCap_Param->Packet->pts, ScreenCap_Param->AV_InStream->time_base,
+			ScreenCap_Param->AV_OutStream->time_base, (AVRounding)(AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX));
+		ScreenCap_Param->Packet->dts = av_rescale_q_rnd(ScreenCap_Param->Packet->dts, ScreenCap_Param->AV_InStream->time_base,
+			ScreenCap_Param->AV_OutStream->time_base, (AVRounding)(AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX));
+
+		ScreenCap_Param->Packet->pos = -1;
+		if (ScreenCap_Param->Packet->stream_index == ScreenCapInfo.CapStreamIndex)
+		{
+			FrameIndex++;
+		}
+
+		Ret = av_interleaved_write_frame(ScreenCap_Param->AV_Outfmctx, ScreenCap_Param->Packet);
+		if (Ret < 0)
+		{
+			UFFmpegFunctionLib::OutLog(this, ScreenCapInfo.bOutLog, "Error at av_interleaved_write_frame()");
+			goto _Error;
+		}
+
+		av_packet_unref(ScreenCap_Param->Packet);
 	}
 
+	av_write_trailer(ScreenCap_Param->AV_Outfmctx);
+
 _Error:
+
+	UFFmpegFunctionLib::OutLog(this, ScreenCapInfo.bOutLog, "Screen Capture Closing!");
+
 	ScreenCap_Param->ReleaseParam();
 	delete ScreenCap_Param;
 	ScreenCap_Param = nullptr;
@@ -90,6 +149,7 @@ _Error:
 
 bool UScreenCapture::InitFormatContext()
 {
+	avdevice_register_all();
 	AVDictionary* Options = NULL;
 
 	FString CapSizeOrigin = FString::FromInt(ScreenCapInfo.CapWidth) + "x" + FString::FromInt(ScreenCapInfo.CapHeight);
@@ -109,10 +169,15 @@ bool UScreenCapture::InitFormatContext()
 	}
 
 	//根据输入格式的短名称查找解复用器对象
-	ScreenCap_Param->AV_Infm = av_find_input_format("gdigrab");
+	ScreenCap_Param->AV_Infm = av_find_input_format("3.");
+	if (!ScreenCap_Param->AV_Infm)
+	{
+		UFFmpegFunctionLib::OutLog(this, ScreenCapInfo.bOutLog, "Error at av_find_input_format()");
+		goto _Error;
+	}
 	Ret = avformat_open_input(&ScreenCap_Param->AV_fmctx, TCHAR_TO_ANSI(*ScreenCapInfo.CapMethod),
 	                          ScreenCap_Param->AV_Infm, &Options);
-	if (Ret != 0)
+	if (Ret < 0)
 	{
 		UFFmpegFunctionLib::OutLog(this, ScreenCapInfo.bOutLog, "Error at avformat_open_input()");
 		goto _Error;
@@ -274,14 +339,14 @@ _Error:
 
 bool UScreenCapture::InitSwsContext()
 {
-	if (static_cast<int32>(ScreenCapInfo.ScaleFlag) == 0)
-	{
-		ScreenCapInfo.ScaleFlag = EScaleFlag::E_SWS_FAST_BILINEAR;
-	}
+	//if (static_cast<int32>(ScreenCapInfo.ScaleFlag) == 0)
+	//{
+	//	ScreenCapInfo.ScaleFlag = EScaleFlag::E_SWS_FAST_BILINEAR;
+	//}
 	
 	ScreenCap_Param->Swsctx = sws_getContext(ScreenCapInfo.CapWidth, ScreenCapInfo.CapHeight, AV_PIX_FMT_BGRA,
 	                                         ScreenCapInfo.CapWidth, ScreenCapInfo.CapHeight, AVPixelFormat(ScreenCapInfo.OutPixFormat),
-	                                         static_cast<int>(ScreenCapInfo.ScaleFlag), NULL, NULL, NULL);
+	                                         UCusEnum::GetScaleFlagFFmpegIndex(ScreenCapInfo.ScaleFlag), NULL, NULL, NULL);
 
 	if (!ScreenCap_Param->Swsctx)
 	{
@@ -293,4 +358,24 @@ bool UScreenCapture::InitSwsContext()
 
 _Error:
 	return false;
+}
+
+void UScreenCapture::closeCapture()
+{
+	bRun = false;
+}
+
+void UScreenCapture::BeginDestroy()
+{
+	UObject::BeginDestroy();
+
+	if (bRun && !HasAnyFlags(RF_ClassDefaultObject) && this->GetWorld())
+	{
+		closeCapture();
+	}
+}
+
+UScreenCapture::~UScreenCapture()
+{
+	closeCapture();
 }

@@ -30,22 +30,22 @@ public class FFmpegExtension : ModuleRules
 		PublicAdditionalLibraries.Add(Path.Combine(LibPath, "swresample.lib"));
 		PublicAdditionalLibraries.Add(Path.Combine(LibPath, "swscale.lib"));
 
-		PublicDelayLoadDLLs.Add(Path.Combine(DLLPath + "avcodec-59.dll"));
-		RuntimeDependencies.Add(Path.Combine(DLLPath + "avcodec-59.dll"));
-		PublicDelayLoadDLLs.Add(Path.Combine(DLLPath + "avdevice-59.dll"));
-		RuntimeDependencies.Add(Path.Combine(DLLPath + "avdevice-59.dll"));
-		PublicDelayLoadDLLs.Add(Path.Combine(DLLPath + "avfilter-8.dll"));
-		RuntimeDependencies.Add(Path.Combine(DLLPath + "avfilter-8.dll"));
-		PublicDelayLoadDLLs.Add(Path.Combine(DLLPath + "avformat-59.dll"));
-		RuntimeDependencies.Add(Path.Combine(DLLPath + "avformat-59.dll"));
-		PublicDelayLoadDLLs.Add(Path.Combine(DLLPath + "avutil-57.dll"));
-		RuntimeDependencies.Add(Path.Combine(DLLPath + "avutil-57.dll"));
-		PublicDelayLoadDLLs.Add(Path.Combine(DLLPath + "postproc-56.dll"));
-		RuntimeDependencies.Add(Path.Combine(DLLPath + "postproc-56.dll"));
-		PublicDelayLoadDLLs.Add(Path.Combine(DLLPath + "swresample-4.dll"));
-		RuntimeDependencies.Add(Path.Combine(DLLPath + "swresample-4.dll"));
-		PublicDelayLoadDLLs.Add(Path.Combine(DLLPath + "swscale-6.dll"));
-		RuntimeDependencies.Add(Path.Combine(DLLPath + "swscale-6.dll"));
+		PublicDelayLoadDLLs.Add(Path.Combine(DLLPath + "avcodec-58.dll"));
+		RuntimeDependencies.Add(Path.Combine(DLLPath + "avcodec-58.dll"));
+		PublicDelayLoadDLLs.Add(Path.Combine(DLLPath + "avdevice-58.dll"));
+		RuntimeDependencies.Add(Path.Combine(DLLPath + "avdevice-58.dll"));
+		PublicDelayLoadDLLs.Add(Path.Combine(DLLPath + "avfilter-7.dll"));
+		RuntimeDependencies.Add(Path.Combine(DLLPath + "avfilter-7.dll"));
+		PublicDelayLoadDLLs.Add(Path.Combine(DLLPath + "avformat-58.dll"));
+		RuntimeDependencies.Add(Path.Combine(DLLPath + "avformat-58.dll"));
+		PublicDelayLoadDLLs.Add(Path.Combine(DLLPath + "avutil-56.dll"));
+		RuntimeDependencies.Add(Path.Combine(DLLPath + "avutil-56.dll"));
+		PublicDelayLoadDLLs.Add(Path.Combine(DLLPath + "postproc-55.dll"));
+		RuntimeDependencies.Add(Path.Combine(DLLPath + "postproc-55.dll"));
+		PublicDelayLoadDLLs.Add(Path.Combine(DLLPath + "swresample-3.dll"));
+		RuntimeDependencies.Add(Path.Combine(DLLPath + "swresample-3.dll"));
+		PublicDelayLoadDLLs.Add(Path.Combine(DLLPath + "swscale-5.dll"));
+		RuntimeDependencies.Add(Path.Combine(DLLPath + "swscale-5.dll"));
 
 		return true;
 	}

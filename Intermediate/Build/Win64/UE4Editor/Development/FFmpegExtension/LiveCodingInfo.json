@@ -1,0 +1,21 @@
+{
+	"RemapUnityFiles": 
+	{
+		"Module.FFmpegExtension.cpp.obj": [
+			"FFmpegExtension.cpp.obj",
+			"ScreenCapture.cpp.obj",
+			"CusEnum.cpp.obj",
+			"FFmpegFunctionLib.cpp.obj",
+			"StreamingServer.cpp.obj",
+			"VideoPlayer_FFmpeg.cpp.obj"
+		],
+		"Module.FFmpegExtension.gen.cpp.obj": [
+			"CusEnum.gen.cpp.obj",
+			"FFmpegExtension.init.gen.cpp.obj",
+			"FFmpegFunctionLib.gen.cpp.obj",
+			"ScreenCapture.gen.cpp.obj",
+			"StreamingServer.gen.cpp.obj",
+			"VideoPlayer_FFmpeg.gen.cpp.obj"
+		]
+	}
+}

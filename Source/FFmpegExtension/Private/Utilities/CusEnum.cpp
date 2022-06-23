@@ -10,6 +10,8 @@ FString UCusEnum::PixFormatToFString(EPixFormat PixFormat)
 	case EPixFormat::YUV420P :
 		return FString("yuv420p");
 	}
+
+	return FString("yuv420p");
 }
 
 std::string UCusEnum::PixFormatToStandardString(EPixFormat PixFormat)
@@ -19,6 +21,8 @@ std::string UCusEnum::PixFormatToStandardString(EPixFormat PixFormat)
 	case EPixFormat::YUV420P:
 		return std::string("yuv420p");
 	}
+
+	return std::string("yuv420p");
 }
 
 const char* UCusEnum::PixFormatToChar(EPixFormat PixFormat)
@@ -28,6 +32,8 @@ const char* UCusEnum::PixFormatToChar(EPixFormat PixFormat)
 	case EPixFormat::YUV420P:
 		return "yuv420p";
 	}
+
+	return "yuv420p";
 }
 
 AVCodecID UCusEnum::CoderToAvCodecID(ECoder Coder)
@@ -37,6 +43,8 @@ AVCodecID UCusEnum::CoderToAvCodecID(ECoder Coder)
 	case ECoder::H264:
 		return AVCodecID::AV_CODEC_ID_H264;
 	}
+
+	return AVCodecID::AV_CODEC_ID_H264;
 }
 
 std::string UCusEnum::PresetParamToStandardString(EPresetParam PresetParam)
@@ -64,6 +72,8 @@ std::string UCusEnum::PresetParamToStandardString(EPresetParam PresetParam)
 	case EPresetParam::PLACEBO:
 		return std::string("placebo");
 	}
+
+	return std::string("superfast");
 }
 
 std::string UCusEnum::TuneParamToStandardString(ETuneParam TuneParam)
@@ -87,4 +97,37 @@ std::string UCusEnum::TuneParamToStandardString(ETuneParam TuneParam)
 	case ETuneParam::ZEROLATENCY:
 		return std::string("zerolatency");
 	}
+
+	return std::string("zerolatency");
+}
+
+int32 UCusEnum::GetScaleFlagFFmpegIndex(EScaleFlag ScaleFlag)
+{
+	switch (ScaleFlag)
+	{
+	case EScaleFlag::E_SWS_FAST_BILINEAR:
+		return 1;
+	case EScaleFlag::E_SWS_BILINEAR :
+		return 2;
+	case EScaleFlag::E_SWS_BICUBIC :
+		return 4;
+	case EScaleFlag::E_SWS_X :
+		return 8;
+	case EScaleFlag::E_SWS_POINT :
+		return 16;
+	case EScaleFlag::E_SWS_AREA :
+		return 32;
+	case EScaleFlag::E_SWS_BICUBLIN :
+		return 64;
+	case EScaleFlag::E_SWS_GAUSS :
+		return 128;
+	case EScaleFlag::E_SWS_SINC :
+		return 256;
+	case EScaleFlag::E_SWS_LANCZOS :
+		return 512;
+	case EScaleFlag::E_SWS_SPLINE :
+		return 1024;
+	}
+
+	return 1;
 }

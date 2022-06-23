@@ -1,79 +1,46 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
-  <head>
-    <meta charset="utf-8">
-    <title>
-      FFmpeg Mailing List FAQ
-    </title>
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="style.min.css">
-  </head>
-  <body>
-    <div class="container">
-      <h1>
-      FFmpeg Mailing List FAQ
-      </h1>
-<div align="center">
-</div>
+<!-- Created by GNU Texinfo 6.8, https://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>FFmpeg Mailing List FAQ</title>
+
+<meta name="description" content="FFmpeg Mailing List FAQ">
+<meta name="keywords" content="FFmpeg Mailing List FAQ">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="#SEC_Contents" rel="contents" title="Table of Contents">
+<style type="text/css">
+<!--
+a.copiable-anchor {visibility: hidden; text-decoration: none; line-height: 0em}
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+span:hover a.copiable-anchor {visibility: visible}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<h1 class="settitle" align="center">FFmpeg Mailing List FAQ</h1>
 
 
 <a name="SEC_Top"></a>
-
-<span id="SEC_Contents"></span>
-<h2 class="contents-heading">Table of Contents</h2>
-
-<div class="contents">
-
-<ul class="no-bullet">
-  <li><a id="toc-General-Questions" href="#General-Questions">1 General Questions</a>
-  <ul class="no-bullet">
-    <li><a id="toc-What-is-a-mailing-list_003f" href="#What-is-a-mailing-list_003f">1.1 What is a mailing list?</a></li>
-    <li><a id="toc-What-type-of-questions-can-I-ask_003f" href="#What-type-of-questions-can-I-ask_003f">1.2 What type of questions can I ask?</a></li>
-    <li><a id="toc-How-do-I-ask-a-question-or-send-a-message-to-a-mailing-list_003f-1" href="#How-do-I-ask-a-question-or-send-a-message-to-a-mailing-list_003f-1">1.3 How do I ask a question or send a message to a mailing list?</a></li>
-  </ul></li>
-  <li><a id="toc-Subscribing-_002f-Unsubscribing" href="#Subscribing-_002f-Unsubscribing">2 Subscribing / Unsubscribing</a>
-  <ul class="no-bullet">
-    <li><a id="toc-How-do-I-subscribe_003f-1" href="#How-do-I-subscribe_003f-1">2.1 How do I subscribe?</a></li>
-    <li><a id="toc-How-do-I-unsubscribe_003f" href="#How-do-I-unsubscribe_003f">2.2 How do I unsubscribe?</a></li>
-  </ul></li>
-  <li><a id="toc-Moderation-Queue" href="#Moderation-Queue">3 Moderation Queue</a>
-  <ul class="no-bullet">
-    <li><a id="toc-Why-is-my-message-awaiting-moderator-approval_003f-1" href="#Why-is-my-message-awaiting-moderator-approval_003f-1">3.1 Why is my message awaiting moderator approval?</a></li>
-    <li><a id="toc-How-long-does-it-take-for-my-message-in-the-moderation-queue-to-be-approved_003f" href="#How-long-does-it-take-for-my-message-in-the-moderation-queue-to-be-approved_003f">3.2 How long does it take for my message in the moderation queue to be approved?</a></li>
-    <li><a id="toc-How-do-I-delete-my-message-in-the-moderation-queue_003f-1" href="#How-do-I-delete-my-message-in-the-moderation-queue_003f-1">3.3 How do I delete my message in the moderation queue?</a></li>
-  </ul></li>
-  <li><a id="toc-Archives" href="#Archives">4 Archives</a>
-  <ul class="no-bullet">
-    <li><a id="toc-Where-are-the-archives_003f-1" href="#Where-are-the-archives_003f-1">4.1 Where are the archives?</a></li>
-    <li><a id="toc-How-do-I-reply-to-a-message-in-the-archives_003f" href="#How-do-I-reply-to-a-message-in-the-archives_003f">4.2 How do I reply to a message in the archives?</a></li>
-    <li><a id="toc-How-do-I-search-the-archives_003f" href="#How-do-I-search-the-archives_003f">4.3 How do I search the archives?</a></li>
-  </ul></li>
-  <li><a id="toc-Other" href="#Other">5 Other</a>
-  <ul class="no-bullet">
-    <li><a id="toc-Is-there-an-alternative-to-the-mailing-list_003f" href="#Is-there-an-alternative-to-the-mailing-list_003f">5.1 Is there an alternative to the mailing list?</a></li>
-    <li><a id="toc-What-is-top_002dposting_003f-1" href="#What-is-top_002dposting_003f-1">5.2 What is top-posting?</a></li>
-    <li><a id="toc-What-is-the-message-size-limit_003f-1" href="#What-is-the-message-size-limit_003f-1">5.3 What is the message size limit?</a></li>
-    <li><a id="toc-Where-can-I-upload-sample-files_003f" href="#Where-can-I-upload-sample-files_003f">5.4 Where can I upload sample files?</a></li>
-    <li><a id="toc-Will-I-receive-spam-if-I-send-and_002for-subscribe-to-a-mailing-list_003f" href="#Will-I-receive-spam-if-I-send-and_002for-subscribe-to-a-mailing-list_003f">5.5 Will I receive spam if I send and/or subscribe to a mailing list?</a></li>
-    <li><a id="toc-How-do-I-filter-mailing-list-messages_003f" href="#How-do-I-filter-mailing-list-messages_003f">5.6 How do I filter mailing list messages?</a></li>
-    <li><a id="toc-How-do-I-disable-mail-delivery-without-unsubscribing_003f-1" href="#How-do-I-disable-mail-delivery-without-unsubscribing_003f-1">5.7 How do I disable mail delivery without unsubscribing?</a></li>
-    <li><a id="toc-Why-is-the-mailing-list-munging-my-address_003f-1" href="#Why-is-the-mailing-list-munging-my-address_003f-1">5.8 Why is the mailing list munging my address?</a></li>
-  </ul></li>
-  <li><a id="toc-Rules-and-Etiquette" href="#Rules-and-Etiquette">6 Rules and Etiquette</a>
-  <ul class="no-bullet">
-    <li><a id="toc-What-are-the-rules-and-the-proper-etiquette_003f" href="#What-are-the-rules-and-the-proper-etiquette_003f">6.1 What are the rules and the proper etiquette?</a></li>
-  </ul></li>
-  <li><a id="toc-Help" href="#Help">7 Help</a>
-  <ul class="no-bullet">
-    <li><a id="toc-Why-am-I-not-receiving-any-messages_003f" href="#Why-am-I-not-receiving-any-messages_003f">7.1 Why am I not receiving any messages?</a></li>
-    <li><a id="toc-Why-are-my-sent-messages-not-showing-up_003f" href="#Why-are-my-sent-messages-not-showing-up_003f">7.2 Why are my sent messages not showing up?</a></li>
-    <li><a id="toc-Why-do-I-keep-getting-unsubscribed-from-ffmpeg_002ddevel_003f-1" href="#Why-do-I-keep-getting-unsubscribed-from-ffmpeg_002ddevel_003f-1">7.3 Why do I keep getting unsubscribed from ffmpeg-devel?</a></li>
-    <li><a id="toc-Who-do-I-contact-if-I-have-a-problem-with-the-mailing-list_003f-1" href="#Who-do-I-contact-if-I-have-a-problem-with-the-mailing-list_003f-1">7.4 Who do I contact if I have a problem with the mailing list?</a></li>
-  </ul></li>
-</ul>
-</div>
 
 
 <a name="General-Questions"></a>
@@ -180,7 +147,7 @@ or is abusive towards others).
 <h3 class="section">3.2 How long does it take for my message in the moderation queue to be approved?<span class="pull-right"><a class="anchor hidden-xs" href="#How-long-does-it-take-for-my-message-in-the-moderation-queue-to-be-approved_003f" aria-hidden="true">#</a> <a class="anchor hidden-xs"href="#toc-How-long-does-it-take-for-my-message-in-the-moderation-queue-to-be-approved_003f" aria-hidden="true">TOC</a></span></h3>
 
 <p>The queue is not checked on a regular basis. You can ask on the
-<tt>#ffmpeg-devel</tt> IRC channel on Libera Chat for someone to approve your message.
+<tt>#ffmpeg-devel</tt> IRC channel on Freenode for someone to approve your message.
 </p>
 <span id="How-do-I-delete-my-message-in-the-moderation-queue_003f"></span><a name="How-do-I-delete-my-message-in-the-moderation-queue_003f-1"></a>
 <h3 class="section">3.3 How do I delete my message in the moderation queue?<span class="pull-right"><a class="anchor hidden-xs" href="#How-do-I-delete-my-message-in-the-moderation-queue_003f-1" aria-hidden="true">#</a> <a class="anchor hidden-xs"href="#toc-How-do-I-delete-my-message-in-the-moderation-queue_003f-1" aria-hidden="true">TOC</a></span></h3>
@@ -224,7 +191,7 @@ libav-user mailing lists.
 <a name="Is-there-an-alternative-to-the-mailing-list_003f"></a>
 <h3 class="section">5.1 Is there an alternative to the mailing list?<span class="pull-right"><a class="anchor hidden-xs" href="#Is-there-an-alternative-to-the-mailing-list_003f" aria-hidden="true">#</a> <a class="anchor hidden-xs"href="#toc-Is-there-an-alternative-to-the-mailing-list_003f" aria-hidden="true">TOC</a></span></h3>
 
-<p>You can ask for help in the official <tt>#ffmpeg</tt> IRC channel on Libera Chat.
+<p>You can ask for help in the official <tt>#ffmpeg</tt> IRC channel on Freenode.
 </p>
 <p>Some users prefer the third-party <a href="http://www.ffmpeg-archive.org/">Nabble</a>
 interface which presents the mailing lists in a typical forum layout.
@@ -441,9 +408,7 @@ list messages being continuously rejected and bounced back.
 <p>Send a message to <a href="mailto:ffmpeg-user-owner@ffmpeg.org">ffmpeg-user-owner@ffmpeg.org</a>.
 </p>
 
-      <p style="font-size: small;">
-        This document was generated using <a href="http://www.gnu.org/software/texinfo/"><em>makeinfo</em></a>.
-      </p>
-    </div>
-  </body>
+
+
+</body>
 </html>

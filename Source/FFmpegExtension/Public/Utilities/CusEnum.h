@@ -116,18 +116,17 @@ enum class ETuneParam : uint8
 UENUM(BlueprintType)
 enum class EScaleFlag : uint8
 {
-	DEFAULT = 0,
-	E_SWS_FAST_BILINEAR = 1,
-	E_SWS_BILINEAR = 2,
-	E_SWS_BICUBIC = 4,
-	E_SWS_X = 8,
-	E_SWS_POINT = 0x10,
-	E_SWS_AREA = 0x20,
-	E_SWS_BICUBLIN = 0x40,
-	E_SWS_GAUSS = 0x80,
-	E_SWS_SINC = 0x100,
-	E_SWS_LANCZOS = 0x200,
-	E_SWS_SPLINE = 0x400
+	E_SWS_FAST_BILINEAR,
+	E_SWS_BILINEAR,
+	E_SWS_BICUBIC,
+	E_SWS_X,
+	E_SWS_POINT,
+	E_SWS_AREA,
+	E_SWS_BICUBLIN,
+	E_SWS_GAUSS,
+	E_SWS_SINC,
+	E_SWS_LANCZOS,
+	E_SWS_SPLINE
 };
 
 UCLASS()
@@ -145,4 +144,6 @@ public:
 	static std::string PresetParamToStandardString(EPresetParam PresetParam);
 
 	static std::string TuneParamToStandardString(ETuneParam TuneParam);
+
+	static int32 GetScaleFlagFFmpegIndex(EScaleFlag ScaleFlag);
 };

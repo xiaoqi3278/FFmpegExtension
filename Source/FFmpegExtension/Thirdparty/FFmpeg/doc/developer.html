@@ -1,67 +1,46 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
-  <head>
-    <meta charset="utf-8">
-    <title>
-      Developer Documentation
-    </title>
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="style.min.css">
-  </head>
-  <body>
-    <div class="container">
-      <h1>
-      Developer Documentation
-      </h1>
-<div align="center">
-</div>
+<!-- Created by GNU Texinfo 6.8, https://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Developer Documentation</title>
+
+<meta name="description" content="Developer Documentation">
+<meta name="keywords" content="Developer Documentation">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="#SEC_Contents" rel="contents" title="Table of Contents">
+<style type="text/css">
+<!--
+a.copiable-anchor {visibility: hidden; text-decoration: none; line-height: 0em}
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+span:hover a.copiable-anchor {visibility: visible}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<h1 class="settitle" align="center">Developer Documentation</h1>
 
 
 <a name="SEC_Top"></a>
-
-<span id="SEC_Contents"></span>
-<h2 class="contents-heading">Table of Contents</h2>
-
-<div class="contents">
-
-<ul class="no-bullet">
-  <li><a id="toc-Notes-for-external-developers" href="#Notes-for-external-developers">1 Notes for external developers</a></li>
-  <li><a id="toc-Contributing" href="#Contributing">2 Contributing</a></li>
-  <li><a id="toc-Coding-Rules-1" href="#Coding-Rules-1">3 Coding Rules</a>
-  <ul class="no-bullet">
-    <li><a id="toc-Code-formatting-conventions" href="#Code-formatting-conventions">3.1 Code formatting conventions</a></li>
-    <li><a id="toc-Comments" href="#Comments">3.2 Comments</a></li>
-    <li><a id="toc-C-language-features" href="#C-language-features">3.3 C language features</a></li>
-    <li><a id="toc-Naming-conventions" href="#Naming-conventions">3.4 Naming conventions</a></li>
-    <li><a id="toc-Miscellaneous-conventions" href="#Miscellaneous-conventions">3.5 Miscellaneous conventions</a></li>
-    <li><a id="toc-Editor-configuration" href="#Editor-configuration">3.6 Editor configuration</a></li>
-  </ul></li>
-  <li><a id="toc-Development-Policy" href="#Development-Policy">4 Development Policy</a>
-  <ul class="no-bullet">
-    <li><a id="toc-Patches_002fCommitting" href="#Patches_002fCommitting">4.1 Patches/Committing</a></li>
-    <li><a id="toc-Code" href="#Code">4.2 Code</a></li>
-    <li><a id="toc-Documentation_002fOther" href="#Documentation_002fOther">4.3 Documentation/Other</a></li>
-  </ul></li>
-  <li><a id="toc-Code-of-conduct" href="#Code-of-conduct">5 Code of conduct</a></li>
-  <li><a id="toc-Submitting-patches-1" href="#Submitting-patches-1">6 Submitting patches</a></li>
-  <li><a id="toc-New-codecs-or-formats-checklist" href="#New-codecs-or-formats-checklist">7 New codecs or formats checklist</a></li>
-  <li><a id="toc-Patch-submission-checklist" href="#Patch-submission-checklist">8 Patch submission checklist</a></li>
-  <li><a id="toc-Patch-review-process" href="#Patch-review-process">9 Patch review process</a></li>
-  <li><a id="toc-Regression-tests-1" href="#Regression-tests-1">10 Regression tests</a>
-  <ul class="no-bullet">
-    <li><a id="toc-Adding-files-to-the-fate_002dsuite-dataset" href="#Adding-files-to-the-fate_002dsuite-dataset">10.1 Adding files to the fate-suite dataset</a></li>
-    <li><a id="toc-Visualizing-Test-Coverage" href="#Visualizing-Test-Coverage">10.2 Visualizing Test Coverage</a></li>
-    <li><a id="toc-Using-Valgrind" href="#Using-Valgrind">10.3 Using Valgrind</a></li>
-  </ul></li>
-  <li><a id="toc-Release-process-1" href="#Release-process-1">11 Release process</a>
-  <ul class="no-bullet">
-    <li><a id="toc-Criteria-for-Point-Releases-1" href="#Criteria-for-Point-Releases-1">11.1 Criteria for Point Releases</a></li>
-    <li><a id="toc-Release-Checklist" href="#Release-Checklist">11.2 Release Checklist</a></li>
-  </ul></li>
-</ul>
-</div>
 
 
 <a name="Notes-for-external-developers"></a>
@@ -278,7 +257,7 @@ autocmd InsertEnter * match ForbiddenWhitespace /\t\|\s\+\%#\@&lt;!$/
 </pre></div>
 
 <p>For Emacs, add these roughly equivalent lines to your <samp>.emacs.d/init.el</samp>:
-</p><div class="lisp">
+</p><div class="example lisp">
 <pre class="lisp">(c-add-style &quot;ffmpeg&quot;
              '(&quot;k&amp;r&quot;
                (c-basic-offset . 4)
@@ -539,20 +518,6 @@ patch is inline or attached per mail.
 You can check <a href="https://patchwork.ffmpeg.org">https://patchwork.ffmpeg.org</a>, if your patch does not show up, its mime type
 likely was wrong.
 </p>
-<a name="Sending-patches-from-email-clients"></a>
-<p>Using <code>git send-email</code> might not be desirable for everyone. The
-following trick allows to send patches via email clients in a safe
-way. It has been tested with Outlook and Thunderbird (with X-Unsent
-extension) and might work with other applications.
-</p>
-<p>Create your patch like this:
-</p>
-<pre class="verbatim">git format-patch -s -o &quot;outputfolder&quot; --add-header &quot;X-Unsent: 1&quot; --suffix .eml --to ffmpeg-devel@ffmpeg.org -1 1a2b3c4d
-</pre>
-<p>Now you&rsquo;ll just need to open the eml file with the email application
-and execute &rsquo;Send&rsquo;.
-</p>
-<a name="Reviews"></a>
 <p>Your patch will be reviewed on the mailing list. You will likely be asked
 to make some changes and are expected to send in an improved version that
 incorporates the requests from the review. This process may go through
@@ -869,9 +834,7 @@ with a news entry for the website.
 </li></ol>
 
 
-      <p style="font-size: small;">
-        This document was generated using <a href="http://www.gnu.org/software/texinfo/"><em>makeinfo</em></a>.
-      </p>
-    </div>
-  </body>
+
+
+</body>
 </html>
