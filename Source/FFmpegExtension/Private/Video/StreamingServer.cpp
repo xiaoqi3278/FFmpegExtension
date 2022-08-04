@@ -297,7 +297,13 @@ _Error:
 	}
 }
 
-void UStreamingServer::closeStreaming()
+void UStreamingServer::OpenStreaming()
+{
+	std::thread StreamingThread(&UStreamingServer::StreamingFunction, this);
+	StreamingThread.detach();
+}
+
+void UStreamingServer::CloseStreaming()
 {
 	bRun = false;
 }
@@ -308,11 +314,11 @@ void UStreamingServer::BeginDestroy()
 
 	if (bRun && !HasAnyFlags(RF_ClassDefaultObject) && this->GetWorld())
 	{
-		closeStreaming();
+		CloseStreaming();
 	}
 }
 
 UStreamingServer::~UStreamingServer()
 {
-	closeStreaming();
+	CloseStreaming();
 }

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/Image.h"
 #include "Utilities/CusEnum.h"
+#include "Widgets/Layout/SConstraintCanvas.h"
 
 extern "C"
 {
@@ -18,6 +19,15 @@ extern "C"
 /**
  * 
  */
+
+UENUM(BlueprintType)
+enum class EKeepVideoRatio : uint8
+{
+	No,
+	Height,
+	Width,
+	Auto
+};
 
 struct FLocal_FFmpegParam
 {
@@ -96,9 +106,17 @@ struct FVideoInfo
 	bool bOutLog = false;
 
 	//视频帧更新方法
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
 	EUpdateTextureMethod UpdateTextureMethod;
 
+	/** 预期大小 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
+	FVector2D ExpectedSize;
+
+	/** 保持宽高比 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
+	EKeepVideoRatio KeepVideoRatio;
+	
 	UTexture2D* VideoTexture;
 	FUpdateTextureRegion2D Region;
 
@@ -132,6 +150,8 @@ struct FVideoInfo
 	}
 };
 
+class SConstraintCanvas;
+
 UCLASS()
 class FFMPEGEXTENSION_API UVideoPlayer_FFmpeg : public UImage
 {
@@ -153,6 +173,7 @@ private:
 public:
 
 	FLocal_FFmpegParam* FFmpegParam;
+	SConstraintCanvas::FSlot* ParentSlateSlot;
 
 	//视频相关参数
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Video|VideoPlayer", meta = (ExposeOnSpawn = true))
@@ -167,6 +188,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "FFmpegExtension|Video")
 	void CloseVideo();
 
+	UFUNCTION(BlueprintCallable, Category = "FFmpegExtension|Video")
+	void OpenVideo();
+
+	UFUNCTION(BlueprintCallable, Category = "v")
+	void SetVideoKeepRatio(EKeepVideoRatio KeepVideoRatio);
+	
+	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
+	
 	virtual void BeginDestroy() override;
 	virtual void ReleaseSlateResources(bool bReleaseChildren) override;
 };

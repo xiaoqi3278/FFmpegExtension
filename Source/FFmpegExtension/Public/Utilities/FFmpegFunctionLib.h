@@ -22,7 +22,7 @@ public:
 	{
 		if (bOutLog)
 		{
-			AsyncTask(ENamedThreads::GameThread, [=]()
+			AsyncTask(ENamedThreads::GameThread, [&]()
 				{
 					UE_LOG(FFmpegExtensionLog, Warning, TEXT("PlayerObject: %s, %s"), *CallObject->GetName(), *OutMessage);
 				});

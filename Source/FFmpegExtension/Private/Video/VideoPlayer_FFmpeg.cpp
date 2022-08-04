@@ -2,8 +2,10 @@
 
 
 #include "Video/VideoPlayer_FFmpeg.h"
-
 #include <thread>
+
+#include "Components/CanvasPanelSlot.h"
+#include "Widgets/Images/SImage.h"
 
 extern "C"
 {
@@ -43,10 +45,6 @@ void UVideoPlayer_FFmpeg::VideoThread()
 	ret = avformat_open_input(&FFmpegParam->Local_AVFormatContext, LocalVideoURL, 0, 0);
 	if (ret != 0)
 	{
-		//AsyncTask(ENamedThreads::GameThread, [&]()
-		//	{
-		//		UE_LOG(LogTemp, Warning, TEXT("Player Object: %s, avformat_open_input() Open Stream Failed"), *this->GetName());
-		//	});
 		OutLog(FString("Error at avformat_open_input()"));
 		goto _Error;
 	}
@@ -54,15 +52,11 @@ void UVideoPlayer_FFmpeg::VideoThread()
 	{
 		goto _Error;
 	}
-
+	
 	//探测文件信息
 	ret = avformat_find_stream_info(FFmpegParam->Local_AVFormatContext, NULL);
 	if (ret < 0)
 	{
-		//AsyncTask(ENamedThreads::GameThread, [&]()
-		//	{
-		//		UE_LOG(LogTemp, Warning, TEXT("Player Object: %s, avformat_open_input() Open Stream Failed"), *this->GetName());
-		//	});
 		OutLog(FString("Error at avformat_find_stream_info()"));
 		goto _Error;
 	}
@@ -112,6 +106,14 @@ void UVideoPlayer_FFmpeg::VideoThread()
 		goto _Error;
 	}
 
+	//初始化 Image 大小
+	AsyncTask(ENamedThreads::GameThread, [&]()
+	{
+		this->Brush.SetImageSize(FVector2D(FFmpegParam->Local_AVCodecContext->width, FFmpegParam->Local_AVCodecContext->height));
+		UE_LOG(LogTemp, Warning, TEXT("%s"), *this->Brush.GetImageSize().ToString());
+		this->SetVideoKeepRatio(VideoInfo.KeepVideoRatio);
+	});
+	
 	//初始化图像转换上下文
 	FFmpegParam->Local_SwsContext = sws_getContext(FFmpegParam->Local_AVCodecContext->width, FFmpegParam->Local_AVCodecContext->height,
 		FFmpegParam->Local_AVCodecContext->pix_fmt,
@@ -275,6 +277,113 @@ _Error:
 void UVideoPlayer_FFmpeg::CloseVideo()
 {
 	bRun = false;
+}
+
+void UVideoPlayer_FFmpeg::OpenVideo()
+{
+	std::thread VideoThread(&UVideoPlayer_FFmpeg::VideoThread, this);
+	VideoThread.detach();
+	UE_LOG(LogTemp, Warning, TEXT("Video Player Object: %s, Is Constructed!"), *this->GetName());
+}
+
+void UVideoPlayer_FFmpeg::SetVideoKeepRatio(EKeepVideoRatio KeepVideoRatio)
+{
+	bool bIsSlateParent = false;
+	UCanvasPanelSlot* VideoCanvasPanelSlot = Cast<UCanvasPanelSlot>(this->Slot);
+	const FVector2D BrushSize = this->Brush.GetImageSize();
+	FVector2D SlotSize;
+	if (VideoCanvasPanelSlot != nullptr)
+	{
+		SlotSize = VideoCanvasPanelSlot->GetSize();
+	}
+	FVector2D NewSize;
+	float NewSizeY;
+
+	EKeepVideoRatio NewRatioType;
+	
+	//如果是自动，则需要判断缩放方式
+	if (KeepVideoRatio == EKeepVideoRatio::Auto)
+	{
+		NewSizeY = (VideoInfo.ExpectedSize.X / BrushSize.X) * BrushSize.Y;
+		if (NewSizeY > VideoInfo.ExpectedSize.Y)
+		{
+			NewRatioType = EKeepVideoRatio::Height;
+		}
+		else
+		{
+			NewRatioType = EKeepVideoRatio::Width;
+		}
+	}
+	
+	if (VideoCanvasPanelSlot == nullptr)
+	{
+		if (ParentSlateSlot == nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ExtImage::KeepRatio Valid Only When the Parent Widget is UCanvasPanelSlot Or SConstraintCanvas!"));
+			return;
+		}
+		bIsSlateParent = true;
+		SlotSize = FVector2D(ParentSlateSlot->GetOffset().Right, ParentSlateSlot->GetOffset().Bottom);
+	}
+	switch (NewRatioType)
+	{
+	case EKeepVideoRatio::No :
+		//ImageSlot->SetSize(ExpectedSize);
+		break;
+		//保持高度不变
+		case EKeepVideoRatio::Height :
+		NewSize.Y = VideoInfo.ExpectedSize.Y;
+		NewSize.X = (NewSize.Y / BrushSize.Y) * BrushSize.X;
+		if (VideoInfo.ExpectedSize.X != NewSize.X || NewSize != SlotSize)
+		{
+			if (bIsSlateParent)
+			{
+				FMargin OldMargin = ParentSlateSlot->GetOffset();
+				OldMargin.Right = NewSize.X;
+				OldMargin.Bottom = NewSize.Y;
+				ParentSlateSlot->SetOffset(OldMargin);
+			}
+			else
+			{
+				VideoCanvasPanelSlot->SetSize(NewSize);
+			}
+		}
+		break;
+		//保持宽度不变
+		case EKeepVideoRatio::Width :
+		NewSize.X = VideoInfo.ExpectedSize.X;
+		NewSize.Y = (NewSize.X / BrushSize.X) * BrushSize.Y;
+		if (VideoInfo.ExpectedSize.Y != NewSize.Y || NewSize != SlotSize)
+		{
+			if (bIsSlateParent)
+            {
+            	FMargin OldMargin = ParentSlateSlot->GetOffset();
+            	OldMargin.Right = NewSize.X;
+            	OldMargin.Bottom = NewSize.Y;
+            	ParentSlateSlot->SetOffset(OldMargin);
+            }
+            else
+            {
+            	VideoCanvasPanelSlot->SetSize(NewSize);
+            }
+		}
+		break;
+		//自动判断
+		case EKeepVideoRatio::Auto :
+
+		break;
+	default:
+		break;
+	}
+}
+
+void UVideoPlayer_FFmpeg::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+
+#if WITH_EDITOR
+	SetVideoKeepRatio(VideoInfo.KeepVideoRatio);
+#endif
 }
 
 void UVideoPlayer_FFmpeg::BeginDestroy()

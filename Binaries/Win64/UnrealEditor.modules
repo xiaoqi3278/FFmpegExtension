@@ -1,0 +1,8 @@
+{
+	"BuildId": "19505902",
+	"Modules": 
+	{
+		"FFmpegEditor": "UnrealEditor-FFmpegEditor.dll",
+		"FFmpegExtension": "UnrealEditor-FFmpegExtension.dll"
+	}
+}

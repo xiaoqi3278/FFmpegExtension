@@ -85,7 +85,7 @@ struct FStreamingInfo
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Video|StreamingServer")
-	bool bAutoStreaming = true;
+	bool bAutoStreaming = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Video|StreamingServer")
 	FString InURL;
@@ -94,7 +94,7 @@ struct FStreamingInfo
 	FString OutURL;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Video|StreamingServer")
-	bool bOutLog = false;
+	bool bOutLog = true;
 
 	//首个可用的视频流
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -137,7 +137,8 @@ public:
 
 	void StreamingFunction();
 
-	void closeStreaming();
+	void OpenStreaming();
+	void CloseStreaming();
 
 	virtual void BeginDestroy() override;
 	~UStreamingServer();
