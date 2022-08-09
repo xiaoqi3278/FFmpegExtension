@@ -41,7 +41,7 @@ void SStreamingServerWidget::Construct(const FArguments& InArgs)
 				.AutoWidth()
 				[
 					SNew(STextBlock)
-					.Text(LOCTEXT("Text_InputURL", "输入流地址:"))
+					.Text(LOCTEXT("InputStreamURL", "输入流地址:"))
 				]
 				+ SHorizontalBox::Slot()
 				.Padding(0)
@@ -62,7 +62,7 @@ void SStreamingServerWidget::Construct(const FArguments& InArgs)
 				.AutoWidth()
 				[
 					SNew(STextBlock)
-					.Text(LOCTEXT("Text_OutputURL", "推流地址:"))
+					.Text(LOCTEXT("PushStreamURL", "推流地址:"))
 				]
 				+ SHorizontalBox::Slot()
 				.Padding(0)
@@ -86,7 +86,7 @@ void SStreamingServerWidget::Construct(const FArguments& InArgs)
 				.Content()
 				[
 					SNew(STextBlock)
-					.Text(LOCTEXT("Text_OutputURL", "开始推流"))
+					.Text(LOCTEXT("BeginPush", "开始推流"))
 				]
 			]
 			//添加停止推流按钮
@@ -104,7 +104,7 @@ void SStreamingServerWidget::Construct(const FArguments& InArgs)
 				.Content()
 				[
 					SNew(STextBlock)
-					.Text(LOCTEXT("Text_OutputURL", "停止推流"))
+					.Text(LOCTEXT("StopPush", "停止推流"))
 				]
 			]
 		]
