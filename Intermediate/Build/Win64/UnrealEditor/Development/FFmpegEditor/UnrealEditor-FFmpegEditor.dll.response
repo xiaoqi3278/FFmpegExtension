@@ -41,7 +41,7 @@
 /NODEFAULTLIB:"LIBCD"
 /NODEFAULTLIB:"LIBCPD"
 /FUNCTIONPADMIN
-"D:\Project_Unreal_5\PluginTest\Intermediate\Build\Win64\PluginTestEditor\Development\Engine\SharedPCH.Engine.ShadowErrors.h.obj"
+"D:\Project_Unreal_5\PluginTest\Intermediate\Build\Win64\PluginTestEditor\Development\UnrealEd\SharedPCH.UnrealEd.ShadowErrors.h.obj"
 "D:\Project_Unreal_5\PluginTest\Plugins\FFmpegExtension\Intermediate\Build\Win64\UnrealEditor\Development\FFmpegEditor\Module.FFmpegEditor.cpp.obj"
 "D:\Project_Unreal_5\PluginTest\Plugins\FFmpegExtension\Intermediate\Build\Win64\UnrealEditor\Development\FFmpegEditor\Default.rc2.res"
 "D:\Project_Unreal_5\PluginTest\Plugins\FFmpegExtension\Source\FFmpegExtension\Thirdparty\FFmpeg\lib\avcodec.lib"
@@ -60,6 +60,7 @@
 "..\Intermediate\Build\Win64\UnrealEditor\Development\EditorStyle\UnrealEditor-EditorStyle.lib"
 "..\Intermediate\Build\Win64\UnrealEditor\Development\UMG\UnrealEditor-UMG.lib"
 "..\Intermediate\Build\Win64\UnrealEditor\Development\Json\UnrealEditor-Json.lib"
+"..\Intermediate\Build\Win64\UnrealEditor\Development\UnrealEd\UnrealEditor-UnrealEd.lib"
 "..\Intermediate\Build\Win64\UnrealEditor\Development\Core\UnrealEditor-Core.lib"
 "..\Intermediate\Build\Win64\UnrealEditor\Development\InputCore\UnrealEditor-InputCore.lib"
 "..\Intermediate\Build\Win64\UnrealEditor\Development\RHI\UnrealEditor-RHI.lib"

@@ -21,7 +21,8 @@ public class FFmpegEditor : ModuleRules
 		"MainFrame",
 		"EditorStyle",
 		"UMG",
-		"Json"
+		"Json",
+		"UnrealEd"
 		});
 	}
 }

@@ -2,18 +2,24 @@
 #include "SlateOptMacros.h"
 #include "Kismet/KismetSystemLibrary.h"
 //#include "Widgets/Layout/SConstraintCanvas.h"
+#include "Editor.h"
 #include "Widgets/Input/SEditableTextBox.h"
 #include "Widgets/Input/SButton.h"
 #include "SlateCore/Public/Types/SlateStructs.h"
 #include "Video/VideoPlayer_FFmpeg.h"
 #include "Video/StreamingServer.h"
+#include "Dom/JsonObject.h"
+#include "Misc/FileHelper.h"
+#include "Serialization/JsonReader.h"
+#include "Serialization/JsonSerializer.h"
 
 #define LOCTEXT_NAMESPACE "FFFmpegEditorModule"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SStreamingServerWidget::Construct(const FArguments& InArgs)
 {
-	Player = NewObject<UVideoPlayer_FFmpeg>();
+	Player = NewObject<UVideoPlayer_FFmpeg>(GEditor->GetEditorWorldContext().World());
+	TSharedRef<SWidget> VideoPlayerRef = Player->TakeWidget();
 	TSharedPtr<FJsonObject> JsonObject = GetConfigJsonObject();
 	FString DefaultInputURL = JsonObject->GetStringField("DefaultStremingInputURL");
 	FString DefaultOutputURL = JsonObject->GetStringField("DefaultStremingOutputURL");
@@ -129,7 +135,7 @@ void SStreamingServerWidget::Construct(const FArguments& InArgs)
 			.Alignment(FVector2D(0.5, 1.f))
 			.Expose(PlayerCanvasSlot)
 			[
-				Player->TakeWidget()
+				VideoPlayerRef
 			]
 		]
 	];

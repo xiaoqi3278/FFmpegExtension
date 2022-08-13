@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Video/VideoPlayer_FFmpeg.h"
 #include "FFmpegFunctionLib.generated.h"
 
 /**
@@ -28,4 +29,14 @@ public:
 				});
 		}
 	}
+
+	UFUNCTION(BlueprintPure, Category = "FFmpegExtension|FFmpegFunctionLibrary")
+	static FString ToString(FVideoInfo VideoInfo)
+	{
+		return "VideoURL:" + VideoInfo.VideoURL +
+			"\n" + "VideoFPS:" + FString::FromInt(VideoInfo.FPS) +
+			"\n" + "ValidFirstVideoStreamIndex" + FString::FromInt(VideoInfo.ValidFirstVideoStreamIndex) +
+			"\n" + "VideoTotalTime:" + FString::FromInt(VideoInfo.VideoTotalTime) +
+			"\n" + "VideoWidth:" + FString::FromInt(VideoInfo.FrameWidth) + "     " + "VideoHeight:" + FString::FromInt(VideoInfo.FrameHeight);
+	};
 };

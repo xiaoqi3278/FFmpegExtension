@@ -26,6 +26,7 @@ enum class EKeepVideoRatio : uint8
 	No,
 	Height,
 	Width,
+	Origin,
 	Auto
 };
 
@@ -94,15 +95,15 @@ struct FVideoInfo
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, Category = "FFmpegExtension|Video|VideoPlayer")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
 	bool bAutoPlay = false;
 
 	//视频地址
-	UPROPERTY(EditAnywhere, Category = "FFmpegExtension|Video|VideoPlayer")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
 	FString VideoURL;
 
 	//是否输出到日志,可能会影响性能
-	UPROPERTY(EditAnywhere, Category = "FFmpegExtension|Video|VideoPlayer")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
 	bool bOutLog = false;
 
 	//视频帧更新方法
@@ -121,25 +122,31 @@ struct FVideoInfo
 	FUpdateTextureRegion2D Region;
 
 	//视频帧率
+	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
 	float FPS;
 
 	//首个可用的视频流
+	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
 	int32 ValidFirstVideoStreamIndex = -1;
 
 	//视频总时长
+	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
 	int32 VideoTotalTime;
 
 	//帧间隔时间
+	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
 	int32 FrameInterval_ms;
 
 	//视频帧缓存
 	uint8* FrameBuffer = nullptr;
 
 	//帧宽
+	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
 	int32 FrameWidth;
 	//帧高
+	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
 	int32 FrameHeight;
-
+	
 	~FVideoInfo()
 	{
 		//if (FrameBuffer != nullptr)
@@ -151,6 +158,11 @@ struct FVideoInfo
 };
 
 class SConstraintCanvas;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFindVideoSuccessfully, FVideoInfo, VideoInfo);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnVideoPlayBegin);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnVideoPlayEnd);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnVideoError, FString, ErrorMessage);
 
 UCLASS()
 class FFMPEGEXTENSION_API UVideoPlayer_FFmpeg : public UImage
@@ -178,6 +190,22 @@ public:
 	//视频相关参数
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Video|VideoPlayer", meta = (ExposeOnSpawn = true))
 	FVideoInfo VideoInfo;
+
+	//获取视频流成功
+	UPROPERTY(BlueprintAssignable, Category = "FFmpegExtension|Video|VideoPlayer")
+	FOnFindVideoSuccessfully OnFindVideoSuccessfully;
+
+	//视频开始播放
+	UPROPERTY(BlueprintAssignable, Category = "FFmpegExtension|Video|VideoPlayer")
+	FOnVideoPlayBegin OnVideoPlayBegin;
+
+	//视频播放完成
+	UPROPERTY(BlueprintAssignable, Category = "FFmpegExtension|Video|VideoPlayer")
+	FOnVideoPlayEnd OnVideoPlayEnd;
+
+	//视频播放完成
+	UPROPERTY(BlueprintAssignable, Category = "FFmpegExtension|Video|VideoPlayer")
+	FOnVideoError OnVideoError;
 
 	//控制线程退出
 	bool bRun = true;

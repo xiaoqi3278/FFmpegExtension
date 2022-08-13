@@ -14,6 +14,10 @@ void EmptyLinkFunctionForGeneratedCodeVideoPlayer_FFmpeg() {}
 	FFMPEGEXTENSION_API UScriptStruct* Z_Construct_UScriptStruct_FVideoInfo();
 	FFMPEGEXTENSION_API UEnum* Z_Construct_UEnum_FFmpegExtension_EUpdateTextureMethod();
 	COREUOBJECT_API UScriptStruct* Z_Construct_UScriptStruct_FVector2D();
+	FFMPEGEXTENSION_API UFunction* Z_Construct_UDelegateFunction_FFmpegExtension_OnFindVideoSuccessfully__DelegateSignature();
+	FFMPEGEXTENSION_API UFunction* Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoPlayBegin__DelegateSignature();
+	FFMPEGEXTENSION_API UFunction* Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoPlayEnd__DelegateSignature();
+	FFMPEGEXTENSION_API UFunction* Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoError__DelegateSignature();
 	FFMPEGEXTENSION_API UClass* Z_Construct_UClass_UVideoPlayer_FFmpeg_NoRegister();
 	FFMPEGEXTENSION_API UClass* Z_Construct_UClass_UVideoPlayer_FFmpeg();
 	UMG_API UClass* Z_Construct_UClass_UImage();
@@ -43,6 +47,7 @@ void EmptyLinkFunctionForGeneratedCodeVideoPlayer_FFmpeg() {}
 		{ "EKeepVideoRatio::No", (int64)EKeepVideoRatio::No },
 		{ "EKeepVideoRatio::Height", (int64)EKeepVideoRatio::Height },
 		{ "EKeepVideoRatio::Width", (int64)EKeepVideoRatio::Width },
+		{ "EKeepVideoRatio::Origin", (int64)EKeepVideoRatio::Origin },
 		{ "EKeepVideoRatio::Auto", (int64)EKeepVideoRatio::Auto },
 	};
 #if WITH_METADATA
@@ -56,6 +61,8 @@ void EmptyLinkFunctionForGeneratedCodeVideoPlayer_FFmpeg() {}
 		{ "ModuleRelativePath", "Public/Video/VideoPlayer_FFmpeg.h" },
 		{ "No.Comment", "/**\n * \n */" },
 		{ "No.Name", "EKeepVideoRatio::No" },
+		{ "Origin.Comment", "/**\n * \n */" },
+		{ "Origin.Name", "EKeepVideoRatio::Origin" },
 		{ "Width.Comment", "/**\n * \n */" },
 		{ "Width.Name", "EKeepVideoRatio::Width" },
 	};
@@ -127,6 +134,30 @@ template<> FFMPEGEXTENSION_API UScriptStruct* StaticStruct<FVideoInfo>()
 		static const UECodeGen_Private::FMetaDataPairParam NewProp_KeepVideoRatio_MetaData[];
 #endif
 		static const UECodeGen_Private::FEnumPropertyParams NewProp_KeepVideoRatio;
+#if WITH_METADATA
+		static const UECodeGen_Private::FMetaDataPairParam NewProp_FPS_MetaData[];
+#endif
+		static const UECodeGen_Private::FFloatPropertyParams NewProp_FPS;
+#if WITH_METADATA
+		static const UECodeGen_Private::FMetaDataPairParam NewProp_ValidFirstVideoStreamIndex_MetaData[];
+#endif
+		static const UECodeGen_Private::FIntPropertyParams NewProp_ValidFirstVideoStreamIndex;
+#if WITH_METADATA
+		static const UECodeGen_Private::FMetaDataPairParam NewProp_VideoTotalTime_MetaData[];
+#endif
+		static const UECodeGen_Private::FIntPropertyParams NewProp_VideoTotalTime;
+#if WITH_METADATA
+		static const UECodeGen_Private::FMetaDataPairParam NewProp_FrameInterval_ms_MetaData[];
+#endif
+		static const UECodeGen_Private::FIntPropertyParams NewProp_FrameInterval_ms;
+#if WITH_METADATA
+		static const UECodeGen_Private::FMetaDataPairParam NewProp_FrameWidth_MetaData[];
+#endif
+		static const UECodeGen_Private::FIntPropertyParams NewProp_FrameWidth;
+#if WITH_METADATA
+		static const UECodeGen_Private::FMetaDataPairParam NewProp_FrameHeight_MetaData[];
+#endif
+		static const UECodeGen_Private::FIntPropertyParams NewProp_FrameHeight;
 		static const UECodeGen_Private::FPropertyParamsBase* const PropPointers[];
 		static const UECodeGen_Private::FStructParams ReturnStructParams;
 	};
@@ -150,7 +181,7 @@ template<> FFMPEGEXTENSION_API UScriptStruct* StaticStruct<FVideoInfo>()
 	{
 		((FVideoInfo*)Obj)->bAutoPlay = 1;
 	}
-	const UECodeGen_Private::FBoolPropertyParams Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_bAutoPlay = { "bAutoPlay", nullptr, (EPropertyFlags)0x0010000000000001, UECodeGen_Private::EPropertyGenFlags::Bool | UECodeGen_Private::EPropertyGenFlags::NativeBool, RF_Public|RF_Transient|RF_MarkAsNative, 1, sizeof(bool), sizeof(FVideoInfo), &Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_bAutoPlay_SetBit, METADATA_PARAMS(Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_bAutoPlay_MetaData, UE_ARRAY_COUNT(Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_bAutoPlay_MetaData)) };
+	const UECodeGen_Private::FBoolPropertyParams Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_bAutoPlay = { "bAutoPlay", nullptr, (EPropertyFlags)0x0010000000000015, UECodeGen_Private::EPropertyGenFlags::Bool | UECodeGen_Private::EPropertyGenFlags::NativeBool, RF_Public|RF_Transient|RF_MarkAsNative, 1, sizeof(bool), sizeof(FVideoInfo), &Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_bAutoPlay_SetBit, METADATA_PARAMS(Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_bAutoPlay_MetaData, UE_ARRAY_COUNT(Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_bAutoPlay_MetaData)) };
 #if WITH_METADATA
 	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_VideoURL_MetaData[] = {
 		{ "Category", "FFmpegExtension|Video|VideoPlayer" },
@@ -159,7 +190,7 @@ template<> FFMPEGEXTENSION_API UScriptStruct* StaticStruct<FVideoInfo>()
 		{ "ToolTip", "\xe8\xa7\x86\xe9\xa2\x91\xe5\x9c\xb0\xe5\x9d\x80" },
 	};
 #endif
-	const UECodeGen_Private::FStrPropertyParams Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_VideoURL = { "VideoURL", nullptr, (EPropertyFlags)0x0010000000000001, UECodeGen_Private::EPropertyGenFlags::Str, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(FVideoInfo, VideoURL), METADATA_PARAMS(Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_VideoURL_MetaData, UE_ARRAY_COUNT(Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_VideoURL_MetaData)) };
+	const UECodeGen_Private::FStrPropertyParams Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_VideoURL = { "VideoURL", nullptr, (EPropertyFlags)0x0010000000000015, UECodeGen_Private::EPropertyGenFlags::Str, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(FVideoInfo, VideoURL), METADATA_PARAMS(Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_VideoURL_MetaData, UE_ARRAY_COUNT(Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_VideoURL_MetaData)) };
 #if WITH_METADATA
 	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_bOutLog_MetaData[] = {
 		{ "Category", "FFmpegExtension|Video|VideoPlayer" },
@@ -172,7 +203,7 @@ template<> FFMPEGEXTENSION_API UScriptStruct* StaticStruct<FVideoInfo>()
 	{
 		((FVideoInfo*)Obj)->bOutLog = 1;
 	}
-	const UECodeGen_Private::FBoolPropertyParams Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_bOutLog = { "bOutLog", nullptr, (EPropertyFlags)0x0010000000000001, UECodeGen_Private::EPropertyGenFlags::Bool | UECodeGen_Private::EPropertyGenFlags::NativeBool, RF_Public|RF_Transient|RF_MarkAsNative, 1, sizeof(bool), sizeof(FVideoInfo), &Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_bOutLog_SetBit, METADATA_PARAMS(Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_bOutLog_MetaData, UE_ARRAY_COUNT(Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_bOutLog_MetaData)) };
+	const UECodeGen_Private::FBoolPropertyParams Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_bOutLog = { "bOutLog", nullptr, (EPropertyFlags)0x0010000000000015, UECodeGen_Private::EPropertyGenFlags::Bool | UECodeGen_Private::EPropertyGenFlags::NativeBool, RF_Public|RF_Transient|RF_MarkAsNative, 1, sizeof(bool), sizeof(FVideoInfo), &Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_bOutLog_SetBit, METADATA_PARAMS(Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_bOutLog_MetaData, UE_ARRAY_COUNT(Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_bOutLog_MetaData)) };
 	const UECodeGen_Private::FBytePropertyParams Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_UpdateTextureMethod_Underlying = { "UnderlyingType", nullptr, (EPropertyFlags)0x0000000000000000, UECodeGen_Private::EPropertyGenFlags::Byte, RF_Public|RF_Transient|RF_MarkAsNative, 1, 0, nullptr, METADATA_PARAMS(nullptr, 0) };
 #if WITH_METADATA
 	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_UpdateTextureMethod_MetaData[] = {
@@ -201,7 +232,61 @@ template<> FFMPEGEXTENSION_API UScriptStruct* StaticStruct<FVideoInfo>()
 		{ "ToolTip", "\xe4\xbf\x9d\xe6\x8c\x81\xe5\xae\xbd\xe9\xab\x98\xe6\xaf\x94" },
 	};
 #endif
-	const UECodeGen_Private::FEnumPropertyParams Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_KeepVideoRatio = { "KeepVideoRatio", nullptr, (EPropertyFlags)0x0010000000000015, UECodeGen_Private::EPropertyGenFlags::Enum, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(FVideoInfo, KeepVideoRatio), Z_Construct_UEnum_FFmpegExtension_EKeepVideoRatio, METADATA_PARAMS(Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_KeepVideoRatio_MetaData, UE_ARRAY_COUNT(Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_KeepVideoRatio_MetaData)) }; // 1883470778
+	const UECodeGen_Private::FEnumPropertyParams Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_KeepVideoRatio = { "KeepVideoRatio", nullptr, (EPropertyFlags)0x0010000000000015, UECodeGen_Private::EPropertyGenFlags::Enum, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(FVideoInfo, KeepVideoRatio), Z_Construct_UEnum_FFmpegExtension_EKeepVideoRatio, METADATA_PARAMS(Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_KeepVideoRatio_MetaData, UE_ARRAY_COUNT(Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_KeepVideoRatio_MetaData)) }; // 878430022
+#if WITH_METADATA
+	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_FPS_MetaData[] = {
+		{ "Category", "FFmpegExtension|Video|VideoPlayer" },
+		{ "Comment", "//\xe8\xa7\x86\xe9\xa2\x91\xe5\xb8\xa7\xe7\x8e\x87\n" },
+		{ "ModuleRelativePath", "Public/Video/VideoPlayer_FFmpeg.h" },
+		{ "ToolTip", "\xe8\xa7\x86\xe9\xa2\x91\xe5\xb8\xa7\xe7\x8e\x87" },
+	};
+#endif
+	const UECodeGen_Private::FFloatPropertyParams Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_FPS = { "FPS", nullptr, (EPropertyFlags)0x0010000000000014, UECodeGen_Private::EPropertyGenFlags::Float, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(FVideoInfo, FPS), METADATA_PARAMS(Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_FPS_MetaData, UE_ARRAY_COUNT(Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_FPS_MetaData)) };
+#if WITH_METADATA
+	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_ValidFirstVideoStreamIndex_MetaData[] = {
+		{ "Category", "FFmpegExtension|Video|VideoPlayer" },
+		{ "Comment", "//\xe9\xa6\x96\xe4\xb8\xaa\xe5\x8f\xaf\xe7\x94\xa8\xe7\x9a\x84\xe8\xa7\x86\xe9\xa2\x91\xe6\xb5\x81\n" },
+		{ "ModuleRelativePath", "Public/Video/VideoPlayer_FFmpeg.h" },
+		{ "ToolTip", "\xe9\xa6\x96\xe4\xb8\xaa\xe5\x8f\xaf\xe7\x94\xa8\xe7\x9a\x84\xe8\xa7\x86\xe9\xa2\x91\xe6\xb5\x81" },
+	};
+#endif
+	const UECodeGen_Private::FIntPropertyParams Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_ValidFirstVideoStreamIndex = { "ValidFirstVideoStreamIndex", nullptr, (EPropertyFlags)0x0010000000000014, UECodeGen_Private::EPropertyGenFlags::Int, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(FVideoInfo, ValidFirstVideoStreamIndex), METADATA_PARAMS(Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_ValidFirstVideoStreamIndex_MetaData, UE_ARRAY_COUNT(Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_ValidFirstVideoStreamIndex_MetaData)) };
+#if WITH_METADATA
+	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_VideoTotalTime_MetaData[] = {
+		{ "Category", "FFmpegExtension|Video|VideoPlayer" },
+		{ "Comment", "//\xe8\xa7\x86\xe9\xa2\x91\xe6\x80\xbb\xe6\x97\xb6\xe9\x95\xbf\n" },
+		{ "ModuleRelativePath", "Public/Video/VideoPlayer_FFmpeg.h" },
+		{ "ToolTip", "\xe8\xa7\x86\xe9\xa2\x91\xe6\x80\xbb\xe6\x97\xb6\xe9\x95\xbf" },
+	};
+#endif
+	const UECodeGen_Private::FIntPropertyParams Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_VideoTotalTime = { "VideoTotalTime", nullptr, (EPropertyFlags)0x0010000000000014, UECodeGen_Private::EPropertyGenFlags::Int, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(FVideoInfo, VideoTotalTime), METADATA_PARAMS(Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_VideoTotalTime_MetaData, UE_ARRAY_COUNT(Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_VideoTotalTime_MetaData)) };
+#if WITH_METADATA
+	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_FrameInterval_ms_MetaData[] = {
+		{ "Category", "FFmpegExtension|Video|VideoPlayer" },
+		{ "Comment", "//\xe5\xb8\xa7\xe9\x97\xb4\xe9\x9a\x94\xe6\x97\xb6\xe9\x97\xb4\n" },
+		{ "ModuleRelativePath", "Public/Video/VideoPlayer_FFmpeg.h" },
+		{ "ToolTip", "\xe5\xb8\xa7\xe9\x97\xb4\xe9\x9a\x94\xe6\x97\xb6\xe9\x97\xb4" },
+	};
+#endif
+	const UECodeGen_Private::FIntPropertyParams Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_FrameInterval_ms = { "FrameInterval_ms", nullptr, (EPropertyFlags)0x0010000000000014, UECodeGen_Private::EPropertyGenFlags::Int, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(FVideoInfo, FrameInterval_ms), METADATA_PARAMS(Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_FrameInterval_ms_MetaData, UE_ARRAY_COUNT(Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_FrameInterval_ms_MetaData)) };
+#if WITH_METADATA
+	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_FrameWidth_MetaData[] = {
+		{ "Category", "FFmpegExtension|Video|VideoPlayer" },
+		{ "Comment", "//\xe5\xb8\xa7\xe5\xae\xbd\n" },
+		{ "ModuleRelativePath", "Public/Video/VideoPlayer_FFmpeg.h" },
+		{ "ToolTip", "\xe5\xb8\xa7\xe5\xae\xbd" },
+	};
+#endif
+	const UECodeGen_Private::FIntPropertyParams Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_FrameWidth = { "FrameWidth", nullptr, (EPropertyFlags)0x0010000000000014, UECodeGen_Private::EPropertyGenFlags::Int, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(FVideoInfo, FrameWidth), METADATA_PARAMS(Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_FrameWidth_MetaData, UE_ARRAY_COUNT(Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_FrameWidth_MetaData)) };
+#if WITH_METADATA
+	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_FrameHeight_MetaData[] = {
+		{ "Category", "FFmpegExtension|Video|VideoPlayer" },
+		{ "Comment", "//\xe5\xb8\xa7\xe9\xab\x98\n" },
+		{ "ModuleRelativePath", "Public/Video/VideoPlayer_FFmpeg.h" },
+		{ "ToolTip", "\xe5\xb8\xa7\xe9\xab\x98" },
+	};
+#endif
+	const UECodeGen_Private::FIntPropertyParams Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_FrameHeight = { "FrameHeight", nullptr, (EPropertyFlags)0x0010000000000014, UECodeGen_Private::EPropertyGenFlags::Int, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(FVideoInfo, FrameHeight), METADATA_PARAMS(Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_FrameHeight_MetaData, UE_ARRAY_COUNT(Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_FrameHeight_MetaData)) };
 	const UECodeGen_Private::FPropertyParamsBase* const Z_Construct_UScriptStruct_FVideoInfo_Statics::PropPointers[] = {
 		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_bAutoPlay,
 		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_VideoURL,
@@ -211,6 +296,12 @@ template<> FFMPEGEXTENSION_API UScriptStruct* StaticStruct<FVideoInfo>()
 		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_ExpectedSize,
 		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_KeepVideoRatio_Underlying,
 		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_KeepVideoRatio,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_FPS,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_ValidFirstVideoStreamIndex,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_VideoTotalTime,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_FrameInterval_ms,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_FrameWidth,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UScriptStruct_FVideoInfo_Statics::NewProp_FrameHeight,
 	};
 	const UECodeGen_Private::FStructParams Z_Construct_UScriptStruct_FVideoInfo_Statics::ReturnStructParams = {
 		(UObject* (*)())Z_Construct_UPackage__Script_FFmpegExtension,
@@ -232,6 +323,114 @@ template<> FFMPEGEXTENSION_API UScriptStruct* StaticStruct<FVideoInfo>()
 			UECodeGen_Private::ConstructUScriptStruct(Z_Registration_Info_UScriptStruct_VideoInfo.InnerSingleton, Z_Construct_UScriptStruct_FVideoInfo_Statics::ReturnStructParams);
 		}
 		return Z_Registration_Info_UScriptStruct_VideoInfo.InnerSingleton;
+	}
+	struct Z_Construct_UDelegateFunction_FFmpegExtension_OnFindVideoSuccessfully__DelegateSignature_Statics
+	{
+		struct _Script_FFmpegExtension_eventOnFindVideoSuccessfully_Parms
+		{
+			FVideoInfo VideoInfo;
+		};
+		static const UECodeGen_Private::FStructPropertyParams NewProp_VideoInfo;
+		static const UECodeGen_Private::FPropertyParamsBase* const PropPointers[];
+#if WITH_METADATA
+		static const UECodeGen_Private::FMetaDataPairParam Function_MetaDataParams[];
+#endif
+		static const UECodeGen_Private::FFunctionParams FuncParams;
+	};
+	const UECodeGen_Private::FStructPropertyParams Z_Construct_UDelegateFunction_FFmpegExtension_OnFindVideoSuccessfully__DelegateSignature_Statics::NewProp_VideoInfo = { "VideoInfo", nullptr, (EPropertyFlags)0x0010000000000080, UECodeGen_Private::EPropertyGenFlags::Struct, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(_Script_FFmpegExtension_eventOnFindVideoSuccessfully_Parms, VideoInfo), Z_Construct_UScriptStruct_FVideoInfo, METADATA_PARAMS(nullptr, 0) }; // 2956152520
+	const UECodeGen_Private::FPropertyParamsBase* const Z_Construct_UDelegateFunction_FFmpegExtension_OnFindVideoSuccessfully__DelegateSignature_Statics::PropPointers[] = {
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UDelegateFunction_FFmpegExtension_OnFindVideoSuccessfully__DelegateSignature_Statics::NewProp_VideoInfo,
+	};
+#if WITH_METADATA
+	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UDelegateFunction_FFmpegExtension_OnFindVideoSuccessfully__DelegateSignature_Statics::Function_MetaDataParams[] = {
+		{ "ModuleRelativePath", "Public/Video/VideoPlayer_FFmpeg.h" },
+	};
+#endif
+	const UECodeGen_Private::FFunctionParams Z_Construct_UDelegateFunction_FFmpegExtension_OnFindVideoSuccessfully__DelegateSignature_Statics::FuncParams = { (UObject*(*)())Z_Construct_UPackage__Script_FFmpegExtension, nullptr, "OnFindVideoSuccessfully__DelegateSignature", nullptr, nullptr, sizeof(Z_Construct_UDelegateFunction_FFmpegExtension_OnFindVideoSuccessfully__DelegateSignature_Statics::_Script_FFmpegExtension_eventOnFindVideoSuccessfully_Parms), Z_Construct_UDelegateFunction_FFmpegExtension_OnFindVideoSuccessfully__DelegateSignature_Statics::PropPointers, UE_ARRAY_COUNT(Z_Construct_UDelegateFunction_FFmpegExtension_OnFindVideoSuccessfully__DelegateSignature_Statics::PropPointers), RF_Public|RF_Transient|RF_MarkAsNative, (EFunctionFlags)0x00130000, 0, 0, METADATA_PARAMS(Z_Construct_UDelegateFunction_FFmpegExtension_OnFindVideoSuccessfully__DelegateSignature_Statics::Function_MetaDataParams, UE_ARRAY_COUNT(Z_Construct_UDelegateFunction_FFmpegExtension_OnFindVideoSuccessfully__DelegateSignature_Statics::Function_MetaDataParams)) };
+	UFunction* Z_Construct_UDelegateFunction_FFmpegExtension_OnFindVideoSuccessfully__DelegateSignature()
+	{
+		static UFunction* ReturnFunction = nullptr;
+		if (!ReturnFunction)
+		{
+			UECodeGen_Private::ConstructUFunction(&ReturnFunction, Z_Construct_UDelegateFunction_FFmpegExtension_OnFindVideoSuccessfully__DelegateSignature_Statics::FuncParams);
+		}
+		return ReturnFunction;
+	}
+	struct Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoPlayBegin__DelegateSignature_Statics
+	{
+#if WITH_METADATA
+		static const UECodeGen_Private::FMetaDataPairParam Function_MetaDataParams[];
+#endif
+		static const UECodeGen_Private::FFunctionParams FuncParams;
+	};
+#if WITH_METADATA
+	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoPlayBegin__DelegateSignature_Statics::Function_MetaDataParams[] = {
+		{ "ModuleRelativePath", "Public/Video/VideoPlayer_FFmpeg.h" },
+	};
+#endif
+	const UECodeGen_Private::FFunctionParams Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoPlayBegin__DelegateSignature_Statics::FuncParams = { (UObject*(*)())Z_Construct_UPackage__Script_FFmpegExtension, nullptr, "OnVideoPlayBegin__DelegateSignature", nullptr, nullptr, 0, nullptr, 0, RF_Public|RF_Transient|RF_MarkAsNative, (EFunctionFlags)0x00130000, 0, 0, METADATA_PARAMS(Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoPlayBegin__DelegateSignature_Statics::Function_MetaDataParams, UE_ARRAY_COUNT(Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoPlayBegin__DelegateSignature_Statics::Function_MetaDataParams)) };
+	UFunction* Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoPlayBegin__DelegateSignature()
+	{
+		static UFunction* ReturnFunction = nullptr;
+		if (!ReturnFunction)
+		{
+			UECodeGen_Private::ConstructUFunction(&ReturnFunction, Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoPlayBegin__DelegateSignature_Statics::FuncParams);
+		}
+		return ReturnFunction;
+	}
+	struct Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoPlayEnd__DelegateSignature_Statics
+	{
+#if WITH_METADATA
+		static const UECodeGen_Private::FMetaDataPairParam Function_MetaDataParams[];
+#endif
+		static const UECodeGen_Private::FFunctionParams FuncParams;
+	};
+#if WITH_METADATA
+	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoPlayEnd__DelegateSignature_Statics::Function_MetaDataParams[] = {
+		{ "ModuleRelativePath", "Public/Video/VideoPlayer_FFmpeg.h" },
+	};
+#endif
+	const UECodeGen_Private::FFunctionParams Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoPlayEnd__DelegateSignature_Statics::FuncParams = { (UObject*(*)())Z_Construct_UPackage__Script_FFmpegExtension, nullptr, "OnVideoPlayEnd__DelegateSignature", nullptr, nullptr, 0, nullptr, 0, RF_Public|RF_Transient|RF_MarkAsNative, (EFunctionFlags)0x00130000, 0, 0, METADATA_PARAMS(Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoPlayEnd__DelegateSignature_Statics::Function_MetaDataParams, UE_ARRAY_COUNT(Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoPlayEnd__DelegateSignature_Statics::Function_MetaDataParams)) };
+	UFunction* Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoPlayEnd__DelegateSignature()
+	{
+		static UFunction* ReturnFunction = nullptr;
+		if (!ReturnFunction)
+		{
+			UECodeGen_Private::ConstructUFunction(&ReturnFunction, Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoPlayEnd__DelegateSignature_Statics::FuncParams);
+		}
+		return ReturnFunction;
+	}
+	struct Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoError__DelegateSignature_Statics
+	{
+		struct _Script_FFmpegExtension_eventOnVideoError_Parms
+		{
+			FString ErrorMessage;
+		};
+		static const UECodeGen_Private::FStrPropertyParams NewProp_ErrorMessage;
+		static const UECodeGen_Private::FPropertyParamsBase* const PropPointers[];
+#if WITH_METADATA
+		static const UECodeGen_Private::FMetaDataPairParam Function_MetaDataParams[];
+#endif
+		static const UECodeGen_Private::FFunctionParams FuncParams;
+	};
+	const UECodeGen_Private::FStrPropertyParams Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoError__DelegateSignature_Statics::NewProp_ErrorMessage = { "ErrorMessage", nullptr, (EPropertyFlags)0x0010000000000080, UECodeGen_Private::EPropertyGenFlags::Str, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(_Script_FFmpegExtension_eventOnVideoError_Parms, ErrorMessage), METADATA_PARAMS(nullptr, 0) };
+	const UECodeGen_Private::FPropertyParamsBase* const Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoError__DelegateSignature_Statics::PropPointers[] = {
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoError__DelegateSignature_Statics::NewProp_ErrorMessage,
+	};
+#if WITH_METADATA
+	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoError__DelegateSignature_Statics::Function_MetaDataParams[] = {
+		{ "ModuleRelativePath", "Public/Video/VideoPlayer_FFmpeg.h" },
+	};
+#endif
+	const UECodeGen_Private::FFunctionParams Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoError__DelegateSignature_Statics::FuncParams = { (UObject*(*)())Z_Construct_UPackage__Script_FFmpegExtension, nullptr, "OnVideoError__DelegateSignature", nullptr, nullptr, sizeof(Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoError__DelegateSignature_Statics::_Script_FFmpegExtension_eventOnVideoError_Parms), Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoError__DelegateSignature_Statics::PropPointers, UE_ARRAY_COUNT(Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoError__DelegateSignature_Statics::PropPointers), RF_Public|RF_Transient|RF_MarkAsNative, (EFunctionFlags)0x00130000, 0, 0, METADATA_PARAMS(Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoError__DelegateSignature_Statics::Function_MetaDataParams, UE_ARRAY_COUNT(Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoError__DelegateSignature_Statics::Function_MetaDataParams)) };
+	UFunction* Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoError__DelegateSignature()
+	{
+		static UFunction* ReturnFunction = nullptr;
+		if (!ReturnFunction)
+		{
+			UECodeGen_Private::ConstructUFunction(&ReturnFunction, Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoError__DelegateSignature_Statics::FuncParams);
+		}
+		return ReturnFunction;
 	}
 	DEFINE_FUNCTION(UVideoPlayer_FFmpeg::execSetVideoKeepRatio)
 	{
@@ -326,7 +525,7 @@ template<> FFMPEGEXTENSION_API UScriptStruct* StaticStruct<FVideoInfo>()
 		static const UECodeGen_Private::FFunctionParams FuncParams;
 	};
 	const UECodeGen_Private::FBytePropertyParams Z_Construct_UFunction_UVideoPlayer_FFmpeg_SetVideoKeepRatio_Statics::NewProp_KeepVideoRatio_Underlying = { "UnderlyingType", nullptr, (EPropertyFlags)0x0000000000000000, UECodeGen_Private::EPropertyGenFlags::Byte, RF_Public|RF_Transient|RF_MarkAsNative, 1, 0, nullptr, METADATA_PARAMS(nullptr, 0) };
-	const UECodeGen_Private::FEnumPropertyParams Z_Construct_UFunction_UVideoPlayer_FFmpeg_SetVideoKeepRatio_Statics::NewProp_KeepVideoRatio = { "KeepVideoRatio", nullptr, (EPropertyFlags)0x0010000000000080, UECodeGen_Private::EPropertyGenFlags::Enum, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(VideoPlayer_FFmpeg_eventSetVideoKeepRatio_Parms, KeepVideoRatio), Z_Construct_UEnum_FFmpegExtension_EKeepVideoRatio, METADATA_PARAMS(nullptr, 0) }; // 1883470778
+	const UECodeGen_Private::FEnumPropertyParams Z_Construct_UFunction_UVideoPlayer_FFmpeg_SetVideoKeepRatio_Statics::NewProp_KeepVideoRatio = { "KeepVideoRatio", nullptr, (EPropertyFlags)0x0010000000000080, UECodeGen_Private::EPropertyGenFlags::Enum, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(VideoPlayer_FFmpeg_eventSetVideoKeepRatio_Parms, KeepVideoRatio), Z_Construct_UEnum_FFmpegExtension_EKeepVideoRatio, METADATA_PARAMS(nullptr, 0) }; // 878430022
 	const UECodeGen_Private::FPropertyParamsBase* const Z_Construct_UFunction_UVideoPlayer_FFmpeg_SetVideoKeepRatio_Statics::PropPointers[] = {
 		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UVideoPlayer_FFmpeg_SetVideoKeepRatio_Statics::NewProp_KeepVideoRatio_Underlying,
 		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UVideoPlayer_FFmpeg_SetVideoKeepRatio_Statics::NewProp_KeepVideoRatio,
@@ -363,6 +562,22 @@ template<> FFMPEGEXTENSION_API UScriptStruct* StaticStruct<FVideoInfo>()
 		static const UECodeGen_Private::FMetaDataPairParam NewProp_VideoInfo_MetaData[];
 #endif
 		static const UECodeGen_Private::FStructPropertyParams NewProp_VideoInfo;
+#if WITH_METADATA
+		static const UECodeGen_Private::FMetaDataPairParam NewProp_OnFindVideoSuccessfully_MetaData[];
+#endif
+		static const UECodeGen_Private::FMulticastDelegatePropertyParams NewProp_OnFindVideoSuccessfully;
+#if WITH_METADATA
+		static const UECodeGen_Private::FMetaDataPairParam NewProp_OnVideoPlayBegin_MetaData[];
+#endif
+		static const UECodeGen_Private::FMulticastDelegatePropertyParams NewProp_OnVideoPlayBegin;
+#if WITH_METADATA
+		static const UECodeGen_Private::FMetaDataPairParam NewProp_OnVideoPlayEnd_MetaData[];
+#endif
+		static const UECodeGen_Private::FMulticastDelegatePropertyParams NewProp_OnVideoPlayEnd;
+#if WITH_METADATA
+		static const UECodeGen_Private::FMetaDataPairParam NewProp_OnVideoError_MetaData[];
+#endif
+		static const UECodeGen_Private::FMulticastDelegatePropertyParams NewProp_OnVideoError;
 		static const UECodeGen_Private::FPropertyParamsBase* const PropPointers[];
 		static const FCppClassTypeInfoStatic StaticCppClassTypeInfo;
 		static const UECodeGen_Private::FClassParams ClassParams;
@@ -374,7 +589,7 @@ template<> FFMPEGEXTENSION_API UScriptStruct* StaticStruct<FVideoInfo>()
 	const FClassFunctionLinkInfo Z_Construct_UClass_UVideoPlayer_FFmpeg_Statics::FuncInfo[] = {
 		{ &Z_Construct_UFunction_UVideoPlayer_FFmpeg_CloseVideo, "CloseVideo" }, // 2529965781
 		{ &Z_Construct_UFunction_UVideoPlayer_FFmpeg_OpenVideo, "OpenVideo" }, // 4218961284
-		{ &Z_Construct_UFunction_UVideoPlayer_FFmpeg_SetVideoKeepRatio, "SetVideoKeepRatio" }, // 3958494394
+		{ &Z_Construct_UFunction_UVideoPlayer_FFmpeg_SetVideoKeepRatio, "SetVideoKeepRatio" }, // 585987050
 	};
 #if WITH_METADATA
 	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UClass_UVideoPlayer_FFmpeg_Statics::Class_MetaDataParams[] = {
@@ -391,9 +606,49 @@ template<> FFMPEGEXTENSION_API UScriptStruct* StaticStruct<FVideoInfo>()
 		{ "ToolTip", "\xe8\xa7\x86\xe9\xa2\x91\xe7\x9b\xb8\xe5\x85\xb3\xe5\x8f\x82\xe6\x95\xb0" },
 	};
 #endif
-	const UECodeGen_Private::FStructPropertyParams Z_Construct_UClass_UVideoPlayer_FFmpeg_Statics::NewProp_VideoInfo = { "VideoInfo", nullptr, (EPropertyFlags)0x0011000000000005, UECodeGen_Private::EPropertyGenFlags::Struct, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(UVideoPlayer_FFmpeg, VideoInfo), Z_Construct_UScriptStruct_FVideoInfo, METADATA_PARAMS(Z_Construct_UClass_UVideoPlayer_FFmpeg_Statics::NewProp_VideoInfo_MetaData, UE_ARRAY_COUNT(Z_Construct_UClass_UVideoPlayer_FFmpeg_Statics::NewProp_VideoInfo_MetaData)) }; // 2288163745
+	const UECodeGen_Private::FStructPropertyParams Z_Construct_UClass_UVideoPlayer_FFmpeg_Statics::NewProp_VideoInfo = { "VideoInfo", nullptr, (EPropertyFlags)0x0011000000000005, UECodeGen_Private::EPropertyGenFlags::Struct, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(UVideoPlayer_FFmpeg, VideoInfo), Z_Construct_UScriptStruct_FVideoInfo, METADATA_PARAMS(Z_Construct_UClass_UVideoPlayer_FFmpeg_Statics::NewProp_VideoInfo_MetaData, UE_ARRAY_COUNT(Z_Construct_UClass_UVideoPlayer_FFmpeg_Statics::NewProp_VideoInfo_MetaData)) }; // 2956152520
+#if WITH_METADATA
+	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UClass_UVideoPlayer_FFmpeg_Statics::NewProp_OnFindVideoSuccessfully_MetaData[] = {
+		{ "Category", "FFmpegExtension|Video|VideoPlayer" },
+		{ "Comment", "//\xe8\x8e\xb7\xe5\x8f\x96\xe8\xa7\x86\xe9\xa2\x91\xe6\xb5\x81\xe6\x88\x90\xe5\x8a\x9f\n" },
+		{ "ModuleRelativePath", "Public/Video/VideoPlayer_FFmpeg.h" },
+		{ "ToolTip", "\xe8\x8e\xb7\xe5\x8f\x96\xe8\xa7\x86\xe9\xa2\x91\xe6\xb5\x81\xe6\x88\x90\xe5\x8a\x9f" },
+	};
+#endif
+	const UECodeGen_Private::FMulticastDelegatePropertyParams Z_Construct_UClass_UVideoPlayer_FFmpeg_Statics::NewProp_OnFindVideoSuccessfully = { "OnFindVideoSuccessfully", nullptr, (EPropertyFlags)0x0010000010080000, UECodeGen_Private::EPropertyGenFlags::InlineMulticastDelegate, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(UVideoPlayer_FFmpeg, OnFindVideoSuccessfully), Z_Construct_UDelegateFunction_FFmpegExtension_OnFindVideoSuccessfully__DelegateSignature, METADATA_PARAMS(Z_Construct_UClass_UVideoPlayer_FFmpeg_Statics::NewProp_OnFindVideoSuccessfully_MetaData, UE_ARRAY_COUNT(Z_Construct_UClass_UVideoPlayer_FFmpeg_Statics::NewProp_OnFindVideoSuccessfully_MetaData)) }; // 4202630543
+#if WITH_METADATA
+	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UClass_UVideoPlayer_FFmpeg_Statics::NewProp_OnVideoPlayBegin_MetaData[] = {
+		{ "Category", "FFmpegExtension|Video|VideoPlayer" },
+		{ "Comment", "//\xe8\xa7\x86\xe9\xa2\x91\xe5\xbc\x80\xe5\xa7\x8b\xe6\x92\xad\xe6\x94\xbe\n" },
+		{ "ModuleRelativePath", "Public/Video/VideoPlayer_FFmpeg.h" },
+		{ "ToolTip", "\xe8\xa7\x86\xe9\xa2\x91\xe5\xbc\x80\xe5\xa7\x8b\xe6\x92\xad\xe6\x94\xbe" },
+	};
+#endif
+	const UECodeGen_Private::FMulticastDelegatePropertyParams Z_Construct_UClass_UVideoPlayer_FFmpeg_Statics::NewProp_OnVideoPlayBegin = { "OnVideoPlayBegin", nullptr, (EPropertyFlags)0x0010000010080000, UECodeGen_Private::EPropertyGenFlags::InlineMulticastDelegate, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(UVideoPlayer_FFmpeg, OnVideoPlayBegin), Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoPlayBegin__DelegateSignature, METADATA_PARAMS(Z_Construct_UClass_UVideoPlayer_FFmpeg_Statics::NewProp_OnVideoPlayBegin_MetaData, UE_ARRAY_COUNT(Z_Construct_UClass_UVideoPlayer_FFmpeg_Statics::NewProp_OnVideoPlayBegin_MetaData)) }; // 1023510447
+#if WITH_METADATA
+	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UClass_UVideoPlayer_FFmpeg_Statics::NewProp_OnVideoPlayEnd_MetaData[] = {
+		{ "Category", "FFmpegExtension|Video|VideoPlayer" },
+		{ "Comment", "//\xe8\xa7\x86\xe9\xa2\x91\xe6\x92\xad\xe6\x94\xbe\xe5\xae\x8c\xe6\x88\x90\n" },
+		{ "ModuleRelativePath", "Public/Video/VideoPlayer_FFmpeg.h" },
+		{ "ToolTip", "\xe8\xa7\x86\xe9\xa2\x91\xe6\x92\xad\xe6\x94\xbe\xe5\xae\x8c\xe6\x88\x90" },
+	};
+#endif
+	const UECodeGen_Private::FMulticastDelegatePropertyParams Z_Construct_UClass_UVideoPlayer_FFmpeg_Statics::NewProp_OnVideoPlayEnd = { "OnVideoPlayEnd", nullptr, (EPropertyFlags)0x0010000010080000, UECodeGen_Private::EPropertyGenFlags::InlineMulticastDelegate, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(UVideoPlayer_FFmpeg, OnVideoPlayEnd), Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoPlayEnd__DelegateSignature, METADATA_PARAMS(Z_Construct_UClass_UVideoPlayer_FFmpeg_Statics::NewProp_OnVideoPlayEnd_MetaData, UE_ARRAY_COUNT(Z_Construct_UClass_UVideoPlayer_FFmpeg_Statics::NewProp_OnVideoPlayEnd_MetaData)) }; // 3675754918
+#if WITH_METADATA
+	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UClass_UVideoPlayer_FFmpeg_Statics::NewProp_OnVideoError_MetaData[] = {
+		{ "Category", "FFmpegExtension|Video|VideoPlayer" },
+		{ "Comment", "//\xe8\xa7\x86\xe9\xa2\x91\xe6\x92\xad\xe6\x94\xbe\xe5\xae\x8c\xe6\x88\x90\n" },
+		{ "ModuleRelativePath", "Public/Video/VideoPlayer_FFmpeg.h" },
+		{ "ToolTip", "\xe8\xa7\x86\xe9\xa2\x91\xe6\x92\xad\xe6\x94\xbe\xe5\xae\x8c\xe6\x88\x90" },
+	};
+#endif
+	const UECodeGen_Private::FMulticastDelegatePropertyParams Z_Construct_UClass_UVideoPlayer_FFmpeg_Statics::NewProp_OnVideoError = { "OnVideoError", nullptr, (EPropertyFlags)0x0010000010080000, UECodeGen_Private::EPropertyGenFlags::InlineMulticastDelegate, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(UVideoPlayer_FFmpeg, OnVideoError), Z_Construct_UDelegateFunction_FFmpegExtension_OnVideoError__DelegateSignature, METADATA_PARAMS(Z_Construct_UClass_UVideoPlayer_FFmpeg_Statics::NewProp_OnVideoError_MetaData, UE_ARRAY_COUNT(Z_Construct_UClass_UVideoPlayer_FFmpeg_Statics::NewProp_OnVideoError_MetaData)) }; // 1403423291
 	const UECodeGen_Private::FPropertyParamsBase* const Z_Construct_UClass_UVideoPlayer_FFmpeg_Statics::PropPointers[] = {
 		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_UVideoPlayer_FFmpeg_Statics::NewProp_VideoInfo,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_UVideoPlayer_FFmpeg_Statics::NewProp_OnFindVideoSuccessfully,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_UVideoPlayer_FFmpeg_Statics::NewProp_OnVideoPlayBegin,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_UVideoPlayer_FFmpeg_Statics::NewProp_OnVideoPlayEnd,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_UVideoPlayer_FFmpeg_Statics::NewProp_OnVideoError,
 	};
 	const FCppClassTypeInfoStatic Z_Construct_UClass_UVideoPlayer_FFmpeg_Statics::StaticCppClassTypeInfo = {
 		TCppClassTypeTraits<UVideoPlayer_FFmpeg>::IsAbstract,
@@ -433,15 +688,15 @@ template<> FFMPEGEXTENSION_API UScriptStruct* StaticStruct<FVideoInfo>()
 		static const FClassRegisterCompiledInInfo ClassInfo[];
 	};
 	const FEnumRegisterCompiledInInfo Z_CompiledInDeferFile_FID_PluginTest_Plugins_FFmpegExtension_Source_FFmpegExtension_Public_Video_VideoPlayer_FFmpeg_h_Statics::EnumInfo[] = {
-		{ EKeepVideoRatio_StaticEnum, TEXT("EKeepVideoRatio"), &Z_Registration_Info_UEnum_EKeepVideoRatio, CONSTRUCT_RELOAD_VERSION_INFO(FEnumReloadVersionInfo, 1883470778U) },
+		{ EKeepVideoRatio_StaticEnum, TEXT("EKeepVideoRatio"), &Z_Registration_Info_UEnum_EKeepVideoRatio, CONSTRUCT_RELOAD_VERSION_INFO(FEnumReloadVersionInfo, 878430022U) },
 	};
 	const FStructRegisterCompiledInInfo Z_CompiledInDeferFile_FID_PluginTest_Plugins_FFmpegExtension_Source_FFmpegExtension_Public_Video_VideoPlayer_FFmpeg_h_Statics::ScriptStructInfo[] = {
-		{ FVideoInfo::StaticStruct, Z_Construct_UScriptStruct_FVideoInfo_Statics::NewStructOps, TEXT("VideoInfo"), &Z_Registration_Info_UScriptStruct_VideoInfo, CONSTRUCT_RELOAD_VERSION_INFO(FStructReloadVersionInfo, sizeof(FVideoInfo), 2288163745U) },
+		{ FVideoInfo::StaticStruct, Z_Construct_UScriptStruct_FVideoInfo_Statics::NewStructOps, TEXT("VideoInfo"), &Z_Registration_Info_UScriptStruct_VideoInfo, CONSTRUCT_RELOAD_VERSION_INFO(FStructReloadVersionInfo, sizeof(FVideoInfo), 2956152520U) },
 	};
 	const FClassRegisterCompiledInInfo Z_CompiledInDeferFile_FID_PluginTest_Plugins_FFmpegExtension_Source_FFmpegExtension_Public_Video_VideoPlayer_FFmpeg_h_Statics::ClassInfo[] = {
-		{ Z_Construct_UClass_UVideoPlayer_FFmpeg, UVideoPlayer_FFmpeg::StaticClass, TEXT("UVideoPlayer_FFmpeg"), &Z_Registration_Info_UClass_UVideoPlayer_FFmpeg, CONSTRUCT_RELOAD_VERSION_INFO(FClassReloadVersionInfo, sizeof(UVideoPlayer_FFmpeg), 4101288736U) },
+		{ Z_Construct_UClass_UVideoPlayer_FFmpeg, UVideoPlayer_FFmpeg::StaticClass, TEXT("UVideoPlayer_FFmpeg"), &Z_Registration_Info_UClass_UVideoPlayer_FFmpeg, CONSTRUCT_RELOAD_VERSION_INFO(FClassReloadVersionInfo, sizeof(UVideoPlayer_FFmpeg), 2165916193U) },
 	};
-	static FRegisterCompiledInInfo Z_CompiledInDeferFile_FID_PluginTest_Plugins_FFmpegExtension_Source_FFmpegExtension_Public_Video_VideoPlayer_FFmpeg_h_3430203138(TEXT("/Script/FFmpegExtension"),
+	static FRegisterCompiledInInfo Z_CompiledInDeferFile_FID_PluginTest_Plugins_FFmpegExtension_Source_FFmpegExtension_Public_Video_VideoPlayer_FFmpeg_h_3651764648(TEXT("/Script/FFmpegExtension"),
 		Z_CompiledInDeferFile_FID_PluginTest_Plugins_FFmpegExtension_Source_FFmpegExtension_Public_Video_VideoPlayer_FFmpeg_h_Statics::ClassInfo, UE_ARRAY_COUNT(Z_CompiledInDeferFile_FID_PluginTest_Plugins_FFmpegExtension_Source_FFmpegExtension_Public_Video_VideoPlayer_FFmpeg_h_Statics::ClassInfo),
 		Z_CompiledInDeferFile_FID_PluginTest_Plugins_FFmpegExtension_Source_FFmpegExtension_Public_Video_VideoPlayer_FFmpeg_h_Statics::ScriptStructInfo, UE_ARRAY_COUNT(Z_CompiledInDeferFile_FID_PluginTest_Plugins_FFmpegExtension_Source_FFmpegExtension_Public_Video_VideoPlayer_FFmpeg_h_Statics::ScriptStructInfo),
 		Z_CompiledInDeferFile_FID_PluginTest_Plugins_FFmpegExtension_Source_FFmpegExtension_Public_Video_VideoPlayer_FFmpeg_h_Statics::EnumInfo, UE_ARRAY_COUNT(Z_CompiledInDeferFile_FID_PluginTest_Plugins_FFmpegExtension_Source_FFmpegExtension_Public_Video_VideoPlayer_FFmpeg_h_Statics::EnumInfo));

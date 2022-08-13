@@ -25,13 +25,16 @@ void UVideoPlayer_FFmpeg::SynchronizeProperties()
 		UE_LOG(LogTemp, Warning, TEXT("Video Player Object: %s, Is Constructed!"), *this->GetName());
 	}
 }
-
 void UVideoPlayer_FFmpeg::VideoThread()
 {
 	FFmpegParam = new FLocal_FFmpegParam();
 
 	//使用 EUpdateTextureMethod::Memcpy 时 Realloc 的帧数据指针
 	void* TextureData = nullptr;
+
+	AVPacket* Local_AVPacket = av_packet_alloc();
+	AVFrame* Local_AVFrameBeforeScale = av_frame_alloc();
+	AVFrame* Local_AVFrameAfterScale = av_frame_alloc();
 
 	//FFmpeg API 返回错误码
 	int32 ret;
@@ -46,6 +49,10 @@ void UVideoPlayer_FFmpeg::VideoThread()
 	if (ret != 0)
 	{
 		OutLog(FString("Error at avformat_open_input()"));
+		if (IsValid(this))
+		{
+			OnVideoError.Broadcast("媒体流打开失败 / Media Stream Open Failure");
+		}
 		goto _Error;
 	}
 	if (!bRun)
@@ -98,6 +105,12 @@ void UVideoPlayer_FFmpeg::VideoThread()
 		}
 	}
 
+	OnFindVideoSuccessfully.Broadcast(VideoInfo);
+	AsyncTask(ENamedThreads::GameThread, [&]()
+		{
+			SetVideoKeepRatio(VideoInfo.KeepVideoRatio);
+		});
+
 	//初始化一个视音频编解码器的上下文
 	ret = avcodec_open2(FFmpegParam->Local_AVCodecContext, FFmpegParam->Local_AVCodec, NULL);
 	if (ret != 0)
@@ -121,10 +134,6 @@ void UVideoPlayer_FFmpeg::VideoThread()
 		AV_PIX_FMT_BGRA,
 		SWS_BICUBIC, NULL, NULL, NULL);
 
-	AVPacket* Local_AVPacket = av_packet_alloc();
-	AVFrame* Local_AVFrameBeforeScale = av_frame_alloc();
-	AVFrame* Local_AVFrameAfterScale = av_frame_alloc();
-
 	//通过指定像素格式、图像宽、图像高来计算帧缓存所需的内存大小
 	int32 Local_FrameBufferSize = av_image_get_buffer_size(AV_PIX_FMT_BGRA, VideoInfo.FrameWidth, VideoInfo.FrameHeight, 1);
 
@@ -145,7 +154,7 @@ void UVideoPlayer_FFmpeg::VideoThread()
 	//		});
 	//}
 
-	//准备 UTexture2D
+	//初始化 UTexture2D
 	AsyncTask(ENamedThreads::GameThread, [&]()
 		{
 			VideoInfo.VideoTexture = UTexture2D::CreateTransient(VideoInfo.FrameWidth, VideoInfo.FrameHeight, PF_B8G8R8A8);
@@ -153,9 +162,13 @@ void UVideoPlayer_FFmpeg::VideoThread()
 			this->SetBrushFromTexture(VideoInfo.VideoTexture);
 		});
 
+	OnVideoPlayBegin.Broadcast();
+	
 	clock_t begin_time;
 	float milliseconds;
-	while (bRun)
+	int32 SleepTime = 0;
+	int32 Index = 0;
+	while (bRun && this != nullptr)
 	{
 		begin_time = clock();
 		//读取码流中的音频若干帧或者视频一帧
@@ -163,6 +176,7 @@ void UVideoPlayer_FFmpeg::VideoThread()
 		if (ret < 0)
 		{
 			OutLog(FString("Error at av_read_frame()"));
+			OnVideoPlayEnd.Broadcast();
 			goto _Error;
 		}
 		if (Local_AVPacket->stream_index != VideoInfo.ValidFirstVideoStreamIndex)
@@ -172,24 +186,28 @@ void UVideoPlayer_FFmpeg::VideoThread()
 
 		//将数据包发送到解码队列
 		ret = avcodec_send_packet(FFmpegParam->Local_AVCodecContext, Local_AVPacket);
+		if (ret == AVERROR(EAGAIN))
+		{
+			continue;
+		}
 		if (ret != 0)
 		{
 			OutLog(FString("Error at avcodec_send_packet()"));
+			OnVideoPlayEnd.Broadcast();
 			goto _Error;
 		}
 
 		//读取解码后的一帧
 		ret = avcodec_receive_frame(FFmpegParam->Local_AVCodecContext, Local_AVFrameBeforeScale);
-		if (ret == AVERROR_EOF)
+		if (ret == AVERROR(EAGAIN))
 		{
-			OutLog(FString("Media Play End!"));
-			goto _Error;
-		}
-		else if (ret < 0)
-		{
-			OutLog(FString("Error at avcodec_receive_frame"));
-			//goto _Error;
 			continue;
+		}
+		if (ret != 0)
+		{
+			OutLog(FString("Error at avcodec_receive_frame()"));
+			OnVideoPlayEnd.Broadcast();
+			goto _Error;
 		}
 
 		sws_scale(FFmpegParam->Local_SwsContext, Local_AVFrameBeforeScale->data, Local_AVFrameBeforeScale->linesize, 0,
@@ -240,23 +258,36 @@ void UVideoPlayer_FFmpeg::VideoThread()
 				});
 
 			milliseconds = float(clock() - begin_time);
-			//AsyncTask(ENamedThreads::GameThread, [&milliseconds]()
-			//    {
-			//        UE_LOG(LogTemp, Warning, TEXT("RHICommand Exec Time: %f"), milliseconds);
-			//    });
+			/*AsyncTask(ENamedThreads::GameThread, [&milliseconds]()
+			    {
+			        UE_LOG(LogTemp, Warning, TEXT("RHICommand Exec Time: %f"), milliseconds);
+			    });*/
 
 			break;
 		}
 
+		SleepTime = VideoInfo.FrameInterval_ms - milliseconds;
+		if (SleepTime < 0)
+		{
+			SleepTime = 0;
+		}
+		
 		av_packet_unref(Local_AVPacket);
-		std::this_thread::sleep_for(std::chrono::milliseconds(VideoInfo.FrameInterval_ms));
-	}
+		std::this_thread::sleep_for(std::chrono::milliseconds(SleepTime));
+		milliseconds = float(clock() - begin_time);
 
+		UE_LOG(LogTemp, Warning, TEXT("Loop Exec Time: %f"), milliseconds);
+	}
+	
 _Error:
 	AsyncTask(ENamedThreads::GameThread, [&]()
 		{
-			UE_LOG(LogTemp, Warning, TEXT("%s: Clear source"), *this->GetName());
+			if (IsValid(this))
+			{
+				UE_LOG(LogTemp, Warning, TEXT("%s: Clear source"), *this->GetName());
+			}
 		});
+	bRun = false;
 	if (FFmpegParam)
 	{
 		FFmpegParam->ReleaseFFmpegParam();
@@ -270,8 +301,6 @@ _Error:
 		TextureData = nullptr;
 	}
 	av_packet_free(&Local_AVPacket);
-	av_frame_free(&Local_AVFrameAfterScale);
-	av_frame_free(&Local_AVFrameBeforeScale);
 }
 
 void UVideoPlayer_FFmpeg::CloseVideo()
@@ -299,7 +328,7 @@ void UVideoPlayer_FFmpeg::SetVideoKeepRatio(EKeepVideoRatio KeepVideoRatio)
 	FVector2D NewSize;
 	float NewSizeY;
 
-	EKeepVideoRatio NewRatioType;
+	EKeepVideoRatio NewRatioType = KeepVideoRatio;
 	
 	//如果是自动，则需要判断缩放方式
 	if (KeepVideoRatio == EKeepVideoRatio::Auto)
@@ -366,6 +395,24 @@ void UVideoPlayer_FFmpeg::SetVideoKeepRatio(EKeepVideoRatio KeepVideoRatio)
             {
             	VideoCanvasPanelSlot->SetSize(NewSize);
             }
+		}
+		break;
+		//与输入图像保持一致
+		case EKeepVideoRatio::Origin :
+		if (SlotSize != FVector2D(VideoInfo.FrameWidth, VideoInfo.FrameHeight))
+		{
+			NewSize = FVector2D(VideoInfo.FrameWidth, VideoInfo.FrameHeight);
+			if (bIsSlateParent)
+			{
+				FMargin OldMargin = ParentSlateSlot->GetOffset();
+				OldMargin.Right = NewSize.X;
+				OldMargin.Bottom = NewSize.Y;
+				ParentSlateSlot->SetOffset(OldMargin);
+			}
+			else
+			{
+				VideoCanvasPanelSlot->SetSize(NewSize);
+			}
 		}
 		break;
 		//自动判断

@@ -278,10 +278,10 @@ D:\Project_Unreal_5\PluginTest\Plugins\FFmpegExtension\Intermediate\Build\Win64\
 /I "C:\Program Files (x86)\Windows Kits\10\include\10.0.19041.0\shared"
 /I "C:\Program Files (x86)\Windows Kits\10\include\10.0.19041.0\um"
 /I "C:\Program Files (x86)\Windows Kits\10\include\10.0.19041.0\winrt"
-/FI"D:\Project_Unreal_5\PluginTest\Intermediate\Build\Win64\PluginTestEditor\Development\Engine\SharedPCH.Engine.ShadowErrors.h"
+/FI"D:\Project_Unreal_5\PluginTest\Intermediate\Build\Win64\PluginTestEditor\Development\UnrealEd\SharedPCH.UnrealEd.ShadowErrors.h"
 /FI"D:\Project_Unreal_5\PluginTest\Plugins\FFmpegExtension\Intermediate\Build\Win64\UnrealEditor\Development\FFmpegEditor\Definitions.FFmpegEditor.h"
-/Yu"D:\Project_Unreal_5\PluginTest\Intermediate\Build\Win64\PluginTestEditor\Development\Engine\SharedPCH.Engine.ShadowErrors.h"
-/Fp"D:\Project_Unreal_5\PluginTest\Intermediate\Build\Win64\PluginTestEditor\Development\Engine\SharedPCH.Engine.ShadowErrors.h.pch"
+/Yu"D:\Project_Unreal_5\PluginTest\Intermediate\Build\Win64\PluginTestEditor\Development\UnrealEd\SharedPCH.UnrealEd.ShadowErrors.h"
+/Fp"D:\Project_Unreal_5\PluginTest\Intermediate\Build\Win64\PluginTestEditor\Development\UnrealEd\SharedPCH.UnrealEd.ShadowErrors.h.pch"
 /Fo"D:\Project_Unreal_5\PluginTest\Plugins\FFmpegExtension\Intermediate\Build\Win64\UnrealEditor\Development\FFmpegEditor\Module.FFmpegEditor.cpp.obj"
 /sourceDependencies D:\Project_Unreal_5\PluginTest\Plugins\FFmpegExtension\Intermediate\Build\Win64\UnrealEditor\Development\FFmpegEditor\Module.FFmpegEditor.cpp.json
 /Zc:inline
