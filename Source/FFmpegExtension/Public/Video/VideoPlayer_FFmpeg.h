@@ -20,6 +20,7 @@ extern "C"
  * 
  */
 
+//缩放
 UENUM(BlueprintType)
 enum class EKeepVideoRatio : uint8
 {
@@ -30,6 +31,7 @@ enum class EKeepVideoRatio : uint8
 	Auto
 };
 
+//FFmpeg相关
 struct FLocal_FFmpegParam
 {
 	/**
@@ -48,7 +50,7 @@ struct FLocal_FFmpegParam
 	AVCodecParameters* Local_AVCodecParameters = NULL;
 
 	//存储编解码器信息的结构体
-	const AVCodec* Local_AVCodec = NULL;
+	AVCodec* Local_AVCodec = NULL;
 
 	//编解码器上下文，包含了众多编解码器需要的参数信息
 	AVCodecContext* Local_AVCodecContext = NULL;
@@ -90,6 +92,7 @@ struct FLocal_FFmpegParam
 	}
 };
 
+//视频相关
 USTRUCT(BlueprintType)
 struct FVideoInfo
 {
@@ -169,19 +172,6 @@ class FFMPEGEXTENSION_API UVideoPlayer_FFmpeg : public UImage
 {
 	GENERATED_BODY()
 
-private:
-
-	FORCEINLINE void OutLog(const FString OutMessage) const
-	{
-		if (VideoInfo.bOutLog)
-		{
-			AsyncTask(ENamedThreads::GameThread, [=]()
-				{
-					UE_LOG(LogTemp, Warning, TEXT("PlayerObject: %s, %s"), *this->GetName(), *OutMessage);
-				});
-		}
-	}
-
 public:
 
 	FLocal_FFmpegParam* FFmpegParam;
@@ -210,7 +200,23 @@ public:
 	//控制线程退出
 	bool bRun = true;
 
+	//定时器句柄
+	FTimerHandle TimerHandle;
+
+public:
 	virtual void SynchronizeProperties() override;
+	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
+	virtual void BeginDestroy() override;
+	virtual void ReleaseSlateResources(bool bReleaseChildren) override;
+
+	//视频开始播放
+	UFUNCTION()
+	virtual void VideoBeginPlay();
+
+	//显示更新
+	UFUNCTION()
+	void UpdateFrameTexture();
+	
 	void VideoThread();
 
 	UFUNCTION(BlueprintCallable, Category = "FFmpegExtension|Video")
@@ -221,9 +227,23 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "v")
 	void SetVideoKeepRatio(EKeepVideoRatio KeepVideoRatio);
+
+private:
+
+	TQueue<uint8*> FrameBufferQueue;
+	uint8* CurrentBuffer = nullptr;
+
+	//使用 EUpdateTextureMethod::Memcpy 时 Realloc 的帧数据指针
+	void* TextureData = nullptr;
 	
-	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
-	
-	virtual void BeginDestroy() override;
-	virtual void ReleaseSlateResources(bool bReleaseChildren) override;
+	FORCEINLINE void OutLog(const FString OutMessage) const
+	{
+		if (VideoInfo.bOutLog)
+		{
+			AsyncTask(ENamedThreads::GameThread, [=]()
+				{
+					UE_LOG(LogTemp, Warning, TEXT("PlayerObject: %s, %s"), *this->GetName(), *OutMessage);
+				});
+		}
+	}
 };

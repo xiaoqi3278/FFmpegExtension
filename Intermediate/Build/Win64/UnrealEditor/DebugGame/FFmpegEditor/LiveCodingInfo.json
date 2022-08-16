@@ -1,9 +1,0 @@
-{
-	"RemapUnityFiles": 
-	{
-		"Module.FFmpegEditor.cpp.obj": [
-			"FFmpegEditor.cpp.obj",
-			"StreamingServerWidget.cpp.obj"
-		]
-	}
-}

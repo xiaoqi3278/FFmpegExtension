@@ -20,17 +20,12 @@ void UVideoPlayer_FFmpeg::SynchronizeProperties()
 
 	if (!IsDesignTime() && VideoInfo.bAutoPlay && !HasAnyFlags(RF_ClassDefaultObject) && this->GetWorld())
 	{
-		std::thread VideoThread(&UVideoPlayer_FFmpeg::VideoThread, this);
-		VideoThread.detach();
-		UE_LOG(LogTemp, Warning, TEXT("Video Player Object: %s, Is Constructed!"), *this->GetName());
+		OpenVideo();
 	}
 }
 void UVideoPlayer_FFmpeg::VideoThread()
 {
 	FFmpegParam = new FLocal_FFmpegParam();
-
-	//使用 EUpdateTextureMethod::Memcpy 时 Realloc 的帧数据指针
-	void* TextureData = nullptr;
 
 	AVPacket* Local_AVPacket = av_packet_alloc();
 	AVFrame* Local_AVFrameBeforeScale = av_frame_alloc();
@@ -44,8 +39,11 @@ void UVideoPlayer_FFmpeg::VideoThread()
 
 	//视频地址
 	const char* LocalVideoURL = TCHAR_TO_UTF8(*VideoInfo.VideoURL);
+	//参数
+	av_dict_set(&FFmpegParam->Local_AVDictionary, "stimeout", "5000000", 0);   // us
+	av_dict_set(&FFmpegParam->Local_AVDictionary, "buffer_size", "2048000", 0);
 	//打开视频
-	ret = avformat_open_input(&FFmpegParam->Local_AVFormatContext, LocalVideoURL, 0, 0);
+	ret = avformat_open_input(&FFmpegParam->Local_AVFormatContext, LocalVideoURL, 0, &FFmpegParam->Local_AVDictionary);
 	if (ret != 0)
 	{
 		OutLog(FString("Error at avformat_open_input()"));
@@ -69,46 +67,73 @@ void UVideoPlayer_FFmpeg::VideoThread()
 	}
 
 	//找到第一个可用的视频流
-	for (uint32 i = 0; i < FFmpegParam->Local_AVFormatContext->nb_streams; i++)
+	//for (uint32 i = 0; i < FFmpegParam->Local_AVFormatContext->nb_streams; i++)
+	//{
+	//	AVStream* LocalStream = FFmpegParam->Local_AVFormatContext->streams[i];
+	//	if (LocalStream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
+	//	{
+	//		//查找适合的解码器
+	//		FFmpegParam->Local_AVCodec = avcodec_find_decoder(LocalStream->codecpar->codec_id);
+	//		if (FFmpegParam->Local_AVCodec == NULL)
+	//		{
+	//			OutLog(FString("The suitable decoder not found"));
+	//			goto _Error;
+	//		}
+	//		//使用查找到的解码器初始化编解码器上下文
+	//		FFmpegParam->Local_AVCodecContext = avcodec_alloc_context3(FFmpegParam->Local_AVCodec);
+	//		av_opt_set(FFmpegParam->Local_AVCodecContext->priv_data, "tune", "zerolatency", 0);
+	//		if (FFmpegParam->Local_AVCodecContext == NULL)
+	//		{
+	//			OutLog(FString("Error at avcodec_alloc_context3()"));
+	//			goto _Error;
+	//		}
+	//		//为编解码器上下文设置参数
+	//		ret = avcodec_parameters_to_context(FFmpegParam->Local_AVCodecContext, LocalStream->codecpar);
+	//		if (ret < 0)
+	//		{
+	//			OutLog(FString("Error at avcodec_parameters_to_context()"));
+	//			goto _Error;
+	//		}
+	//		VideoInfo.FrameWidth = FFmpegParam->Local_AVCodecContext->width;
+	//		VideoInfo.FrameHeight = FFmpegParam->Local_AVCodecContext->height;
+	//		VideoInfo.FPS = av_q2d(LocalStream->r_frame_rate);
+	//		VideoInfo.FrameInterval_ms = 1 / VideoInfo.FPS * 1000;
+	//		VideoInfo.ValidFirstVideoStreamIndex = i;
+	//		break;
+	//	}
+	//}
+	VideoInfo.ValidFirstVideoStreamIndex = av_find_best_stream(FFmpegParam->Local_AVFormatContext, AVMEDIA_TYPE_VIDEO, -1, -1, &(FFmpegParam->Local_AVCodec), 0);
+	AVStream* LocalStream = FFmpegParam->Local_AVFormatContext->streams[VideoInfo.ValidFirstVideoStreamIndex];
+	//查找适合的解码器
+	FFmpegParam->Local_AVCodec = avcodec_find_decoder(LocalStream->codecpar->codec_id);
+	if (FFmpegParam->Local_AVCodec == NULL)
 	{
-		AVStream* LocalStream = FFmpegParam->Local_AVFormatContext->streams[i];
-		if (LocalStream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
-		{
-			//查找适合的解码器
-			FFmpegParam->Local_AVCodec = avcodec_find_decoder(LocalStream->codecpar->codec_id);
-			if (FFmpegParam->Local_AVCodec == NULL)
-			{
-				OutLog(FString("The suitable decoder not found"));
-				goto _Error;
-			}
-			//使用查找到的解码器初始化编解码器上下文
-			FFmpegParam->Local_AVCodecContext = avcodec_alloc_context3(FFmpegParam->Local_AVCodec);
-			av_opt_set(FFmpegParam->Local_AVCodecContext->priv_data, "tune", "zerolatency", 0);
-			if (FFmpegParam->Local_AVCodecContext == NULL)
-			{
-				OutLog(FString("Error at avcodec_alloc_context3()"));
-				goto _Error;
-			}
-			//为编解码器上下文设置参数
-			ret = avcodec_parameters_to_context(FFmpegParam->Local_AVCodecContext, LocalStream->codecpar);
-			if (ret < 0)
-			{
-				OutLog(FString("Error at avcodec_parameters_to_context()"));
-				goto _Error;
-			}
-			VideoInfo.FrameWidth = FFmpegParam->Local_AVCodecContext->width;
-			VideoInfo.FrameHeight = FFmpegParam->Local_AVCodecContext->height;
-			VideoInfo.FPS = av_q2d(LocalStream->r_frame_rate);
-			VideoInfo.FrameInterval_ms = 1 / VideoInfo.FPS * 1000;
-			VideoInfo.ValidFirstVideoStreamIndex = i;
-			break;
-		}
+		OutLog(FString("The suitable decoder not found"));
+		goto _Error;
 	}
+	//使用查找到的解码器初始化编解码器上下文
+	FFmpegParam->Local_AVCodecContext = avcodec_alloc_context3(FFmpegParam->Local_AVCodec);
+	av_opt_set(FFmpegParam->Local_AVCodecContext->priv_data, "tune", "zerolatency", 0);
+	if (FFmpegParam->Local_AVCodecContext == NULL)
+	{
+		OutLog(FString("Error at avcodec_alloc_context3()"));
+		goto _Error;
+	}
+	//为编解码器上下文设置参数
+	ret = avcodec_parameters_to_context(FFmpegParam->Local_AVCodecContext, LocalStream->codecpar);
+	if (ret < 0)
+	{
+		OutLog(FString("Error at avcodec_parameters_to_context()"));
+		goto _Error;
+	}
+	VideoInfo.FrameWidth = FFmpegParam->Local_AVCodecContext->width;
+	VideoInfo.FrameHeight = FFmpegParam->Local_AVCodecContext->height;
+	VideoInfo.FPS = av_q2d(LocalStream->r_frame_rate);
+	VideoInfo.FrameInterval_ms = 1 / VideoInfo.FPS * 1000;
 
-	OnFindVideoSuccessfully.Broadcast(VideoInfo);
-	AsyncTask(ENamedThreads::GameThread, [&]()
+	AsyncTask(ENamedThreads::GameThread, [&]
 		{
-			SetVideoKeepRatio(VideoInfo.KeepVideoRatio);
+			OnFindVideoSuccessfully.Broadcast(VideoInfo);
 		});
 
 	//初始化一个视音频编解码器的上下文
@@ -120,12 +145,10 @@ void UVideoPlayer_FFmpeg::VideoThread()
 	}
 
 	//初始化 Image 大小
-	AsyncTask(ENamedThreads::GameThread, [&]()
-	{
-		this->Brush.SetImageSize(FVector2D(FFmpegParam->Local_AVCodecContext->width, FFmpegParam->Local_AVCodecContext->height));
-		UE_LOG(LogTemp, Warning, TEXT("%s"), *this->Brush.GetImageSize().ToString());
-		this->SetVideoKeepRatio(VideoInfo.KeepVideoRatio);
-	});
+	//AsyncTask(ENamedThreads::GameThread, [&]()
+	//{
+
+	//});
 	
 	//初始化图像转换上下文
 	FFmpegParam->Local_SwsContext = sws_getContext(FFmpegParam->Local_AVCodecContext->width, FFmpegParam->Local_AVCodecContext->height,
@@ -138,7 +161,7 @@ void UVideoPlayer_FFmpeg::VideoThread()
 	int32 Local_FrameBufferSize = av_image_get_buffer_size(AV_PIX_FMT_BGRA, VideoInfo.FrameWidth, VideoInfo.FrameHeight, 1);
 
 	VideoInfo.FrameBuffer = (uint8*)av_malloc(Local_FrameBufferSize * sizeof(uint8));
-	//格式化已经申请的内存并将 Local_FrameBuffer 绑定到 Local_AVFrameAfterScale
+	//格式化已经申请的内存并将 FrameBuffer 绑定到 Local_AVFrameAfterScale
 	av_image_fill_arrays(Local_AVFrameAfterScale->data, Local_AVFrameAfterScale->linesize, VideoInfo.FrameBuffer, AV_PIX_FMT_BGRA,
 		VideoInfo.FrameWidth, VideoInfo.FrameHeight, 1);
 
@@ -154,33 +177,24 @@ void UVideoPlayer_FFmpeg::VideoThread()
 	//		});
 	//}
 
-	//初始化 UTexture2D
-	AsyncTask(ENamedThreads::GameThread, [&]()
-		{
-			VideoInfo.VideoTexture = UTexture2D::CreateTransient(VideoInfo.FrameWidth, VideoInfo.FrameHeight, PF_B8G8R8A8);
-			VideoInfo.VideoTexture->UpdateResource();
-			this->SetBrushFromTexture(VideoInfo.VideoTexture);
-		});
+	AsyncTask(ENamedThreads::GameThread, [&]
+	{
+		OnVideoPlayBegin.Broadcast();
+	});
 
-	OnVideoPlayBegin.Broadcast();
-	
-	clock_t begin_time;
-	float milliseconds;
-	int32 SleepTime = 0;
-	int32 Index = 0;
 	while (bRun && this != nullptr)
 	{
-		begin_time = clock();
 		//读取码流中的音频若干帧或者视频一帧
 		ret = av_read_frame(FFmpegParam->Local_AVFormatContext, Local_AVPacket);
 		if (ret < 0)
 		{
 			OutLog(FString("Error at av_read_frame()"));
-			OnVideoPlayEnd.Broadcast();
+			//OnVideoPlayEnd.Broadcast();
 			goto _Error;
 		}
 		if (Local_AVPacket->stream_index != VideoInfo.ValidFirstVideoStreamIndex)
 		{
+			av_packet_unref(Local_AVPacket);
 			continue;
 		}
 
@@ -188,12 +202,13 @@ void UVideoPlayer_FFmpeg::VideoThread()
 		ret = avcodec_send_packet(FFmpegParam->Local_AVCodecContext, Local_AVPacket);
 		if (ret == AVERROR(EAGAIN))
 		{
+			av_packet_unref(Local_AVPacket);
 			continue;
 		}
 		if (ret != 0)
 		{
 			OutLog(FString("Error at avcodec_send_packet()"));
-			OnVideoPlayEnd.Broadcast();
+			//OnVideoPlayEnd.Broadcast();
 			goto _Error;
 		}
 
@@ -201,82 +216,27 @@ void UVideoPlayer_FFmpeg::VideoThread()
 		ret = avcodec_receive_frame(FFmpegParam->Local_AVCodecContext, Local_AVFrameBeforeScale);
 		if (ret == AVERROR(EAGAIN))
 		{
+			av_packet_unref(Local_AVPacket);
 			continue;
 		}
 		if (ret != 0)
 		{
 			OutLog(FString("Error at avcodec_receive_frame()"));
-			OnVideoPlayEnd.Broadcast();
+			//OnVideoPlayEnd.Broadcast();
 			goto _Error;
 		}
 
 		sws_scale(FFmpegParam->Local_SwsContext, Local_AVFrameBeforeScale->data, Local_AVFrameBeforeScale->linesize, 0,
 			FFmpegParam->Local_AVCodecContext->height, Local_AVFrameAfterScale->data, Local_AVFrameAfterScale->linesize);
 
-		switch (VideoInfo.UpdateTextureMethod)
-		{
-		case EUpdateTextureMethod::Memcpy:
-
-			AsyncTask(ENamedThreads::GameThread, [&]()
-				{
-					if (bRun)
-					{
-						VideoInfo.VideoTexture->PlatformData->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
-						TextureData = VideoInfo.VideoTexture->PlatformData->Mips[0].BulkData.Realloc(VideoInfo.FrameWidth * VideoInfo.FrameHeight * 4);
-						FMemory::Memcpy(TextureData, Local_AVFrameAfterScale->data[0], sizeof(uint8) * VideoInfo.FrameWidth * VideoInfo.FrameHeight * 4);
-						VideoInfo.VideoTexture->PlatformData->Mips[0].BulkData.Unlock();
-
-						//更新UTexture2D
-						VideoInfo.VideoTexture->UpdateResource();
-
-						milliseconds = float(clock() - begin_time);
-						//UE_LOG(LogTemp, Warning, TEXT("Memcpy Exec Time: %f"), milliseconds);
-					}
-				});
-
-			break;
-
-		case EUpdateTextureMethod::RHICommand:
-
-			VideoInfo.Region.SrcX = 0;
-			VideoInfo.Region.SrcY = 0;
-			VideoInfo.Region.DestX = 0;
-			VideoInfo.Region.DestY = 0;
-			VideoInfo.Region.Width = VideoInfo.FrameWidth;
-			VideoInfo.Region.Height = VideoInfo.FrameHeight;
-			//if (!VideoTexture || Local_FrameBuffer == NULL)
-			//{
-			//	return;
-			//}
-
-			AsyncTask(ENamedThreads::GameThread, [&]()
-				{
-					if (bRun)
-					{
-						VideoInfo.VideoTexture->UpdateTextureRegions(0, 1, &VideoInfo.Region, VideoInfo.Region.Width * 4, 4, VideoInfo.FrameBuffer);
-					}
-				});
-
-			milliseconds = float(clock() - begin_time);
-			/*AsyncTask(ENamedThreads::GameThread, [&milliseconds]()
-			    {
-			        UE_LOG(LogTemp, Warning, TEXT("RHICommand Exec Time: %f"), milliseconds);
-			    });*/
-
-			break;
-		}
-
-		SleepTime = VideoInfo.FrameInterval_ms - milliseconds;
-		if (SleepTime < 0)
-		{
-			SleepTime = 0;
-		}
+		//uint8* FrameMem = (uint8*)av_malloc(Local_FrameBufferSize * sizeof(uint8));
+		uint8* FrameMem = new uint8[Local_FrameBufferSize];
+		FMemory::Memcpy(FrameMem, VideoInfo.FrameBuffer, Local_FrameBufferSize * sizeof(uint8));
+		//memcpy(FrameMem, Local_AVFrameAfterScale->data[0], 10);
+		FrameBufferQueue.Enqueue(FrameMem);
 		
 		av_packet_unref(Local_AVPacket);
-		std::this_thread::sleep_for(std::chrono::milliseconds(SleepTime));
-		milliseconds = float(clock() - begin_time);
-
-		UE_LOG(LogTemp, Warning, TEXT("Loop Exec Time: %f"), milliseconds);
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
 	
 _Error:
@@ -290,6 +250,7 @@ _Error:
 	bRun = false;
 	if (FFmpegParam)
 	{
+		avformat_close_input(&FFmpegParam->Local_AVFormatContext);
 		FFmpegParam->ReleaseFFmpegParam();
 		delete FFmpegParam;
 		FFmpegParam = nullptr;
@@ -306,6 +267,8 @@ _Error:
 void UVideoPlayer_FFmpeg::CloseVideo()
 {
 	bRun = false;
+	GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
+	FrameBufferQueue.Empty();
 }
 
 void UVideoPlayer_FFmpeg::OpenVideo()
@@ -313,6 +276,8 @@ void UVideoPlayer_FFmpeg::OpenVideo()
 	std::thread VideoThread(&UVideoPlayer_FFmpeg::VideoThread, this);
 	VideoThread.detach();
 	UE_LOG(LogTemp, Warning, TEXT("Video Player Object: %s, Is Constructed!"), *this->GetName());
+
+	OnVideoPlayBegin.AddDynamic(this, &UVideoPlayer_FFmpeg::VideoBeginPlay);
 }
 
 void UVideoPlayer_FFmpeg::SetVideoKeepRatio(EKeepVideoRatio KeepVideoRatio)
@@ -450,5 +415,54 @@ void UVideoPlayer_FFmpeg::ReleaseSlateResources(bool bReleaseChildren)
 	if (bRun && !IsDesignTime() && !HasAnyFlags(RF_ClassDefaultObject) && this->GetWorld())
 	{
 		CloseVideo();
+	}
+}
+
+void UVideoPlayer_FFmpeg::VideoBeginPlay()
+{
+	//初始化 UTexture2D
+	VideoInfo.VideoTexture = UTexture2D::CreateTransient(VideoInfo.FrameWidth, VideoInfo.FrameHeight, PF_B8G8R8A8);
+	VideoInfo.VideoTexture->UpdateResource();
+	this->SetBrushFromTexture(VideoInfo.VideoTexture);
+
+	this->Brush.SetImageSize(FVector2D(VideoInfo.FrameWidth, VideoInfo.FrameHeight));
+	this->SetVideoKeepRatio(VideoInfo.KeepVideoRatio);
+
+	const float Rate = VideoInfo.FrameInterval_ms / 1000.0;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UVideoPlayer_FFmpeg::UpdateFrameTexture, Rate, true);
+}
+
+void UVideoPlayer_FFmpeg::UpdateFrameTexture()
+{
+	if (FrameBufferQueue.Dequeue(CurrentBuffer))
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("%d"), FrameBufferQueue.);
+		switch (VideoInfo.UpdateTextureMethod)
+		{
+		case EUpdateTextureMethod::Memcpy:
+
+			VideoInfo.VideoTexture->PlatformData->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
+			TextureData = VideoInfo.VideoTexture->PlatformData->Mips[0].BulkData.Realloc(VideoInfo.FrameWidth * VideoInfo.FrameHeight * 4);
+			FMemory::Memcpy(TextureData, CurrentBuffer, sizeof(uint8) * VideoInfo.FrameWidth * VideoInfo.FrameHeight * 4);
+			VideoInfo.VideoTexture->PlatformData->Mips[0].BulkData.Unlock();
+
+			//更新UTexture2D
+			VideoInfo.VideoTexture->UpdateResource();
+
+			break;
+
+		case EUpdateTextureMethod::RHICommand:
+
+			VideoInfo.Region.SrcX = 0;
+			VideoInfo.Region.SrcY = 0;
+			VideoInfo.Region.DestX = 0;
+			VideoInfo.Region.DestY = 0;
+			VideoInfo.Region.Width = VideoInfo.FrameWidth;
+			VideoInfo.Region.Height = VideoInfo.FrameHeight;
+
+			VideoInfo.VideoTexture->UpdateTextureRegions(0, 1, &VideoInfo.Region, VideoInfo.Region.Width * 4, 4, CurrentBuffer);
+
+			break;
+		}
 	}
 }

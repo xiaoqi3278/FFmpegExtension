@@ -27,7 +27,7 @@ void EmptyLinkFunctionForGeneratedCodeFFmpegExtension_init() {}
 				SingletonFuncArray,
 				UE_ARRAY_COUNT(SingletonFuncArray),
 				PKG_CompiledIn | 0x00000000,
-				0xAA41E453,
+				0xA561EB96,
 				0x5021DD5C,
 				METADATA_PARAMS(nullptr, 0)
 			};
@@ -35,5 +35,5 @@ void EmptyLinkFunctionForGeneratedCodeFFmpegExtension_init() {}
 		}
 		return Z_Registration_Info_UPackage__Script_FFmpegExtension.OuterSingleton;
 	}
-	static FRegisterCompiledInInfo Z_CompiledInDeferPackage_UPackage__Script_FFmpegExtension(Z_Construct_UPackage__Script_FFmpegExtension, TEXT("/Script/FFmpegExtension"), Z_Registration_Info_UPackage__Script_FFmpegExtension, CONSTRUCT_RELOAD_VERSION_INFO(FPackageReloadVersionInfo, 0xAA41E453, 0x5021DD5C));
+	static FRegisterCompiledInInfo Z_CompiledInDeferPackage_UPackage__Script_FFmpegExtension(Z_Construct_UPackage__Script_FFmpegExtension, TEXT("/Script/FFmpegExtension"), Z_Registration_Info_UPackage__Script_FFmpegExtension, CONSTRUCT_RELOAD_VERSION_INFO(FPackageReloadVersionInfo, 0xA561EB96, 0x5021DD5C));
 PRAGMA_ENABLE_DEPRECATION_WARNINGS

@@ -6,7 +6,7 @@
 /NAME:"UnrealEditor-FFmpegEditor.dll"
 /IGNORE:4221
 /NODEFAULTLIB
-"D:\Project_Unreal_5\PluginTest\Intermediate\Build\Win64\PluginTestEditor\Development\UnrealEd\SharedPCH.UnrealEd.ShadowErrors.h.obj"
-"D:\Project_Unreal_5\PluginTest\Plugins\FFmpegExtension\Intermediate\Build\Win64\UnrealEditor\Development\FFmpegEditor\Module.FFmpegEditor.cpp.obj"
-"D:\Project_Unreal_5\PluginTest\Plugins\FFmpegExtension\Intermediate\Build\Win64\UnrealEditor\Development\FFmpegEditor\Default.rc2.res"
-/OUT:"D:\Project_Unreal_5\PluginTest\Plugins\FFmpegExtension\Intermediate\Build\Win64\UnrealEditor\Development\FFmpegEditor\UnrealEditor-FFmpegEditor.lib"
+"C:\Project\PluginTest\Intermediate\Build\Win64\PluginTestEditor\Development\UnrealEd\SharedPCH.UnrealEd.ShadowErrors.h.obj"
+"C:\Project\PluginTest\Plugins\FFmpegExtension\Intermediate\Build\Win64\UnrealEditor\Development\FFmpegEditor\Module.FFmpegEditor.cpp.obj"
+"C:\Project\PluginTest\Plugins\FFmpegExtension\Intermediate\Build\Win64\UnrealEditor\Development\FFmpegEditor\Default.rc2.res"
+/OUT:"C:\Project\PluginTest\Plugins\FFmpegExtension\Intermediate\Build\Win64\UnrealEditor\Development\FFmpegEditor\UnrealEditor-FFmpegEditor.lib"
