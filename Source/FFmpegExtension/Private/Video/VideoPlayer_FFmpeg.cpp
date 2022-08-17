@@ -3,6 +3,7 @@
 
 #include "Video/VideoPlayer_FFmpeg.h"
 #include <thread>
+#include <crtdbg.h>
 
 #include "Components/CanvasPanelSlot.h"
 #include "Widgets/Images/SImage.h"
@@ -40,7 +41,7 @@ void UVideoPlayer_FFmpeg::VideoThread()
 	//视频地址
 	const char* LocalVideoURL = TCHAR_TO_UTF8(*VideoInfo.VideoURL);
 	//参数
-	av_dict_set(&FFmpegParam->Local_AVDictionary, "stimeout", "5000000", 0);   // us
+	av_dict_set(&FFmpegParam->Local_AVDictionary, "stimeout", "10000000", 0);   // us
 	av_dict_set(&FFmpegParam->Local_AVDictionary, "buffer_size", "2048000", 0);
 	//打开视频
 	ret = avformat_open_input(&FFmpegParam->Local_AVFormatContext, LocalVideoURL, 0, &FFmpegParam->Local_AVDictionary);
@@ -160,11 +161,6 @@ void UVideoPlayer_FFmpeg::VideoThread()
 	//通过指定像素格式、图像宽、图像高来计算帧缓存所需的内存大小
 	int32 Local_FrameBufferSize = av_image_get_buffer_size(AV_PIX_FMT_BGRA, VideoInfo.FrameWidth, VideoInfo.FrameHeight, 1);
 
-	VideoInfo.FrameBuffer = (uint8*)av_malloc(Local_FrameBufferSize * sizeof(uint8));
-	//格式化已经申请的内存并将 FrameBuffer 绑定到 Local_AVFrameAfterScale
-	av_image_fill_arrays(Local_AVFrameAfterScale->data, Local_AVFrameAfterScale->linesize, VideoInfo.FrameBuffer, AV_PIX_FMT_BGRA,
-		VideoInfo.FrameWidth, VideoInfo.FrameHeight, 1);
-
 	//输出视频信息
 	//FString UE_VideoURL(std::string(FFmpegParam->Local_AVFormatContext->url).c_str());
 	//VideoInfo.VideoTotalTime = FFmpegParam->Local_AVFormatContext->duration;
@@ -226,16 +222,25 @@ void UVideoPlayer_FFmpeg::VideoThread()
 			goto _Error;
 		}
 
+		//uint8* FrameBuffer = (uint8*)av_malloc(Local_FrameBufferSize * sizeof(uint8));
+		uint8* FrameBuffer = new uint8[Local_FrameBufferSize];
+		//格式化已经申请的内存并将 FrameBuffer 绑定到 Local_AVFrameAfterScale
+		av_image_fill_arrays(Local_AVFrameAfterScale->data, Local_AVFrameAfterScale->linesize, FrameBuffer, AV_PIX_FMT_BGRA,
+			VideoInfo.FrameWidth, VideoInfo.FrameHeight, 1);
+
 		sws_scale(FFmpegParam->Local_SwsContext, Local_AVFrameBeforeScale->data, Local_AVFrameBeforeScale->linesize, 0,
 			FFmpegParam->Local_AVCodecContext->height, Local_AVFrameAfterScale->data, Local_AVFrameAfterScale->linesize);
 
 		//uint8* FrameMem = (uint8*)av_malloc(Local_FrameBufferSize * sizeof(uint8));
-		uint8* FrameMem = new uint8[Local_FrameBufferSize];
-		FMemory::Memcpy(FrameMem, VideoInfo.FrameBuffer, Local_FrameBufferSize * sizeof(uint8));
+		//uint8* FrameMem = new uint8[Local_FrameBufferSize];
+		//uint8* FrameMem = VideoInfo.FrameBuffer;
+		//FMemory::Memcpy(FrameMem, VideoInfo.FrameBuffer, Local_FrameBufferSize * sizeof(uint8));
 		//memcpy(FrameMem, Local_AVFrameAfterScale->data[0], 10);
-		FrameBufferQueue.Enqueue(FrameMem);
+		//FrameBufferQueue.Enqueue(FrameBuffer);
+		FrameBufferQueue_std.push(FrameBuffer);
 		
 		av_packet_unref(Local_AVPacket);
+		//delete FrameMem;
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
 	
@@ -261,14 +266,35 @@ _Error:
 		delete TextureData;
 		TextureData = nullptr;
 	}
+	//_CrtDumpMemoryLeaks();
 	av_packet_free(&Local_AVPacket);
 }
 
 void UVideoPlayer_FFmpeg::CloseVideo()
 {
 	bRun = false;
-	GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
-	FrameBufferQueue.Empty();
+	if (TimerHandle.IsValid() && !IsDesignTime() && !HasAnyFlags(RF_ClassDefaultObject) && this->GetWorld())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("%d"), FrameBufferQueue_std.size());
+
+	//bool IsValid = true;
+	//while(IsValid)
+	//{
+	//	uint8* Buffer;
+	//	IsValid = FrameBufferQueue.Dequeue(Buffer);
+	//	if (IsValid)
+	//	{
+	//		delete Buffer;
+	//		Buffer = nullptr;
+	//	}
+	//	else
+	//	{
+	//		IsValid = false;
+	//	}
+	//}
 }
 
 void UVideoPlayer_FFmpeg::OpenVideo()
@@ -402,10 +428,12 @@ void UVideoPlayer_FFmpeg::BeginDestroy()
 {
 	Super::BeginDestroy();
 
-	if (bRun && !IsDesignTime() && !HasAnyFlags(RF_ClassDefaultObject) && this->GetWorld())
-	{
-		CloseVideo();
-	}
+	CloseVideo();
+
+	//if (!IsDesignTime() && !HasAnyFlags(RF_ClassDefaultObject) && this->GetWorld())
+	//{
+	//	CloseVideo();
+	//}
 }
 
 void UVideoPlayer_FFmpeg::ReleaseSlateResources(bool bReleaseChildren)
@@ -434,8 +462,12 @@ void UVideoPlayer_FFmpeg::VideoBeginPlay()
 
 void UVideoPlayer_FFmpeg::UpdateFrameTexture()
 {
-	if (FrameBufferQueue.Dequeue(CurrentBuffer))
+	uint8* Buffer = nullptr;
+	//if (FrameBufferQueue.Dequeue(Buffer))
+	Buffer = FrameBufferQueue_std.front();
+	if (Buffer)
 	{
+		FrameBufferQueue_std.pop();
 		//UE_LOG(LogTemp, Warning, TEXT("%d"), FrameBufferQueue.);
 		switch (VideoInfo.UpdateTextureMethod)
 		{
@@ -443,11 +475,13 @@ void UVideoPlayer_FFmpeg::UpdateFrameTexture()
 
 			VideoInfo.VideoTexture->PlatformData->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
 			TextureData = VideoInfo.VideoTexture->PlatformData->Mips[0].BulkData.Realloc(VideoInfo.FrameWidth * VideoInfo.FrameHeight * 4);
-			FMemory::Memcpy(TextureData, CurrentBuffer, sizeof(uint8) * VideoInfo.FrameWidth * VideoInfo.FrameHeight * 4);
+			FMemory::Memcpy(TextureData, Buffer, sizeof(uint8) * VideoInfo.FrameWidth * VideoInfo.FrameHeight * 4);
 			VideoInfo.VideoTexture->PlatformData->Mips[0].BulkData.Unlock();
 
 			//更新UTexture2D
 			VideoInfo.VideoTexture->UpdateResource();
+			delete Buffer;
+			Buffer = nullptr;
 
 			break;
 
@@ -460,7 +494,11 @@ void UVideoPlayer_FFmpeg::UpdateFrameTexture()
 			VideoInfo.Region.Width = VideoInfo.FrameWidth;
 			VideoInfo.Region.Height = VideoInfo.FrameHeight;
 
-			VideoInfo.VideoTexture->UpdateTextureRegions(0, 1, &VideoInfo.Region, VideoInfo.Region.Width * 4, 4, CurrentBuffer);
+			VideoInfo.VideoTexture->UpdateTextureRegions(0, 1, &VideoInfo.Region, VideoInfo.Region.Width * 4, 4, Buffer,
+			[Buffer](uint8* SrcData, const FUpdateTextureRegion2D*)
+			{
+				//delete Buffer;
+			});
 
 			break;
 		}

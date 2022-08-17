@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <queue>
+
 #include "CoreMinimal.h"
 #include "Components/Image.h"
 #include "Utilities/CusEnum.h"
@@ -141,7 +143,7 @@ struct FVideoInfo
 	int32 FrameInterval_ms;
 
 	//视频帧缓存
-	uint8* FrameBuffer = nullptr;
+	//uint8* FrameBuffer = nullptr;
 
 	//帧宽
 	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
@@ -231,6 +233,7 @@ public:
 private:
 
 	TQueue<uint8*> FrameBufferQueue;
+	std::queue<uint8*> FrameBufferQueue_std;
 	uint8* CurrentBuffer = nullptr;
 
 	//使用 EUpdateTextureMethod::Memcpy 时 Realloc 的帧数据指针
