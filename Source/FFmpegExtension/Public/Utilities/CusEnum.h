@@ -18,6 +18,17 @@ extern "C"
  * 
  */
 
+//缩放
+UENUM(BlueprintType)
+enum class EVideoRatio : uint8
+{
+	No,
+	Height,
+	Width,
+	Origin,
+	Auto
+};
+
 UENUM(BlueprintType)
 enum class EUpdateTextureMethod : uint8
 {

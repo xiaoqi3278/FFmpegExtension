@@ -7,6 +7,8 @@
 #include "CoreMinimal.h"
 #include "Components/Image.h"
 #include "Utilities/CusEnum.h"
+#include "Utilities/UtilitiesClass.h"
+#include "Utilities/CusStruct.h"
 #include "Widgets/Layout/SConstraintCanvas.h"
 
 extern "C"
@@ -21,146 +23,6 @@ extern "C"
 /**
  * 
  */
-
-//缩放
-UENUM(BlueprintType)
-enum class EKeepVideoRatio : uint8
-{
-	No,
-	Height,
-	Width,
-	Origin,
-	Auto
-};
-
-//FFmpeg相关
-struct FLocal_FFmpegParam
-{
-	/**
-	 * AVFormatContext
-	 * 解封装上下文,描述媒体文件或者媒体流的构成和基本信息
-	 */
-	AVFormatContext* Local_AVFormatContext;
-
-	/**
-	 * AVDictionary
-	 * ͨ健值对存储工具,设置/读取内部参数
-	 */
-	AVDictionary* Local_AVDictionary = NULL;
-
-	//编解码器参数
-	AVCodecParameters* Local_AVCodecParameters = NULL;
-
-	//存储编解码器信息的结构体
-	AVCodec* Local_AVCodec = NULL;
-
-	//编解码器上下文，包含了众多编解码器需要的参数信息
-	AVCodecContext* Local_AVCodecContext = NULL;
-
-	//图像转换上下文,提供图像缩放、图像格式转换等功能
-	SwsContext* Local_SwsContext = NULL;
-
-	FLocal_FFmpegParam()
-	{
-		Local_AVFormatContext = avformat_alloc_context();
-	};
-
-	void ReleaseFFmpegParam()
-	{
-		if (Local_SwsContext)
-		{
-			sws_freeContext(Local_SwsContext);
-		}
-
-		if (Local_AVCodecContext)
-		{
-			avcodec_close(Local_AVCodecContext);
-		}
-
-		if (Local_AVFormatContext)
-		{
-			avformat_close_input(&Local_AVFormatContext);
-		}
-
-		if (Local_AVCodecContext)
-		{
-			avcodec_free_context(&Local_AVCodecContext);
-		}
-
-		if (Local_AVFormatContext)
-		{
-			avformat_free_context(Local_AVFormatContext);
-		}
-	}
-};
-
-//视频相关
-USTRUCT(BlueprintType)
-struct FVideoInfo
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
-	bool bAutoPlay = false;
-
-	//视频地址
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
-	FString VideoURL;
-
-	//是否输出到日志,可能会影响性能
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
-	bool bOutLog = false;
-
-	//视频帧更新方法
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
-	EUpdateTextureMethod UpdateTextureMethod;
-
-	/** 预期大小 */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
-	FVector2D ExpectedSize;
-
-	/** 保持宽高比 */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
-	EKeepVideoRatio KeepVideoRatio;
-	
-	UTexture2D* VideoTexture;
-	FUpdateTextureRegion2D Region;
-
-	//视频帧率
-	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
-	float FPS;
-
-	//首个可用的视频流
-	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
-	int32 ValidFirstVideoStreamIndex = -1;
-
-	//视频总时长
-	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
-	int32 VideoTotalTime;
-
-	//帧间隔时间
-	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
-	int32 FrameInterval_ms;
-
-	//视频帧缓存
-	//uint8* FrameBuffer = nullptr;
-
-	//帧宽
-	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
-	int32 FrameWidth;
-	//帧高
-	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
-	int32 FrameHeight;
-	
-	~FVideoInfo()
-	{
-		//if (FrameBuffer != nullptr)
-		//{
-			//delete FrameBuffer;
-			//FrameBuffer = nullptr;
-		//}
-	}
-};
 
 class SConstraintCanvas;
 
@@ -206,6 +68,11 @@ public:
 	FTimerHandle TimerHandle;
 
 public:
+	UVideoPlayer_FFmpeg()
+	{
+		FrameQueue_std = new FrameQueue();
+	}
+
 	virtual void SynchronizeProperties() override;
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
 	virtual void BeginDestroy() override;
@@ -221,20 +88,40 @@ public:
 	
 	void VideoThread();
 
+	//打开视频
+	UFUNCTION(BlueprintCallable, Category = "FFmpegExtension|Video")
+	void PlayVideo(FString VideoURL);
+
+	//关闭视频
 	UFUNCTION(BlueprintCallable, Category = "FFmpegExtension|Video")
 	void CloseVideo();
 
+	//使用已有配置打开视频
 	UFUNCTION(BlueprintCallable, Category = "FFmpegExtension|Video")
 	void OpenVideo();
 
-	UFUNCTION(BlueprintCallable, Category = "v")
-	void SetVideoKeepRatio(EKeepVideoRatio KeepVideoRatio);
+	//暂停视频播放
+	UFUNCTION(BlueprintCallable, Category = "FFmpegExtension|Video")
+	void PausePlay();
+
+	//恢复视频播放
+	UFUNCTION(BlueprintCallable, Category = "FFmpegExtension|Video")
+	void ResumePlay();
+
+	//设置视频宽高比
+	UFUNCTION(BlueprintCallable, Category = "FFmpegExtension|Video")
+	void SetVideoRatio(EVideoRatio KeepVideoRatio);
+
+	//获取视频单帧所占内存大小(单位: M)
+	UFUNCTION(BlueprintCallable, Category = "FFmpegExtension|Video")
+	float GetFrameBufferSize();
+
+	//设置视频播放速度
+	UFUNCTION(BlueprintCallable, Category = "FFmpegExtension|Video")
+	void SetPlaybackSpeed(float Speed = 1);
 
 private:
-
-	TQueue<uint8*> FrameBufferQueue;
-	std::queue<uint8*> FrameBufferQueue_std;
-	uint8* CurrentBuffer = nullptr;
+	FrameQueue* FrameQueue_std;
 
 	//使用 EUpdateTextureMethod::Memcpy 时 Realloc 的帧数据指针
 	void* TextureData = nullptr;

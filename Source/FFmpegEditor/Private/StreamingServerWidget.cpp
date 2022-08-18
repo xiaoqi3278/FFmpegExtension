@@ -160,7 +160,7 @@ FReply SStreamingServerWidget::ClickBeginStreaming()
 	Player->VideoInfo.bOutLog = false;
 	Player->VideoInfo.UpdateTextureMethod = EUpdateTextureMethod::RHICommand;
 	Player->VideoInfo.ExpectedSize = FVector2D(1200, 400);
-	Player->VideoInfo.KeepVideoRatio = EKeepVideoRatio::Auto;
+	Player->VideoInfo.VideoRatio = EVideoRatio::Auto;
 	Player->OpenVideo();
 
 	TSharedPtr<FJsonObject> JsonObject = GetConfigJsonObject();

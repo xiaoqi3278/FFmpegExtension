@@ -42,7 +42,7 @@ void UVideoPlayer_FFmpeg::VideoThread()
 	const char* LocalVideoURL = TCHAR_TO_UTF8(*VideoInfo.VideoURL);
 	//参数
 	av_dict_set(&FFmpegParam->Local_AVDictionary, "stimeout", "10000000", 0);   // us
-	av_dict_set(&FFmpegParam->Local_AVDictionary, "buffer_size", "2048000", 0);
+	av_dict_set(&FFmpegParam->Local_AVDictionary, "buffer_size", "4096000", 0);
 	//打开视频
 	ret = avformat_open_input(&FFmpegParam->Local_AVFormatContext, LocalVideoURL, 0, &FFmpegParam->Local_AVDictionary);
 	if (ret != 0)
@@ -131,6 +131,7 @@ void UVideoPlayer_FFmpeg::VideoThread()
 	VideoInfo.FrameHeight = FFmpegParam->Local_AVCodecContext->height;
 	VideoInfo.FPS = av_q2d(LocalStream->r_frame_rate);
 	VideoInfo.FrameInterval_ms = 1 / VideoInfo.FPS * 1000;
+	VideoInfo.FrameInterval_s = VideoInfo.FrameInterval_ms / 1000.0;
 
 	AsyncTask(ENamedThreads::GameThread, [&]
 		{
@@ -144,12 +145,6 @@ void UVideoPlayer_FFmpeg::VideoThread()
 		OutLog(FString("Error at avcodec_open2()"));
 		goto _Error;
 	}
-
-	//初始化 Image 大小
-	//AsyncTask(ENamedThreads::GameThread, [&]()
-	//{
-
-	//});
 	
 	//初始化图像转换上下文
 	FFmpegParam->Local_SwsContext = sws_getContext(FFmpegParam->Local_AVCodecContext->width, FFmpegParam->Local_AVCodecContext->height,
@@ -160,6 +155,8 @@ void UVideoPlayer_FFmpeg::VideoThread()
 
 	//通过指定像素格式、图像宽、图像高来计算帧缓存所需的内存大小
 	int32 Local_FrameBufferSize = av_image_get_buffer_size(AV_PIX_FMT_BGRA, VideoInfo.FrameWidth, VideoInfo.FrameHeight, 1);
+	VideoInfo.FrameBufferSize = (float)Local_FrameBufferSize / 1024 / 1024;
+	FrameQueue_std->SetFrameBufferSize(VideoInfo.FrameBufferSize);
 
 	//输出视频信息
 	//FString UE_VideoURL(std::string(FFmpegParam->Local_AVFormatContext->url).c_str());
@@ -173,6 +170,10 @@ void UVideoPlayer_FFmpeg::VideoThread()
 	//		});
 	//}
 
+	//获取视频信息
+	av_dump_format(FFmpegParam->Local_AVFormatContext, 0, LocalVideoURL, 0);
+	VideoInfo.VideoTotalTime = FFmpegParam->Local_AVFormatContext->duration / AV_TIME_BASE;
+
 	AsyncTask(ENamedThreads::GameThread, [&]
 	{
 		OnVideoPlayBegin.Broadcast();
@@ -180,68 +181,62 @@ void UVideoPlayer_FFmpeg::VideoThread()
 
 	while (bRun && this != nullptr)
 	{
-		//读取码流中的音频若干帧或者视频一帧
-		ret = av_read_frame(FFmpegParam->Local_AVFormatContext, Local_AVPacket);
-		if (ret < 0)
+		if (FrameQueue_std->bCanPush && !VideoInfo.bIsPaused)
 		{
-			OutLog(FString("Error at av_read_frame()"));
-			//OnVideoPlayEnd.Broadcast();
-			goto _Error;
-		}
-		if (Local_AVPacket->stream_index != VideoInfo.ValidFirstVideoStreamIndex)
-		{
+			//读取码流中的音频若干帧或者视频一帧
+			ret = av_read_frame(FFmpegParam->Local_AVFormatContext, Local_AVPacket);
+			if (ret < 0)
+			{
+				OutLog(FString("Error at av_read_frame()"));
+				//OnVideoPlayEnd.Broadcast();
+				goto _Error;
+			}
+			if (Local_AVPacket->stream_index != VideoInfo.ValidFirstVideoStreamIndex)
+			{
+				av_packet_unref(Local_AVPacket);
+				continue;
+			}
+
+			//将数据包发送到解码队列
+			ret = avcodec_send_packet(FFmpegParam->Local_AVCodecContext, Local_AVPacket);
+			if (ret == AVERROR(EAGAIN))
+			{
+				av_packet_unref(Local_AVPacket);
+				continue;
+			}
+			if (ret != 0)
+			{
+				OutLog(FString("Error at avcodec_send_packet()"));
+				//OnVideoPlayEnd.Broadcast();
+				goto _Error;
+			}
+
+			//读取解码后的一帧
+			ret = avcodec_receive_frame(FFmpegParam->Local_AVCodecContext, Local_AVFrameBeforeScale);
+			if (ret == AVERROR(EAGAIN))
+			{
+				av_packet_unref(Local_AVPacket);
+				continue;
+			}
+			if (ret != 0)
+			{
+				OutLog(FString("Error at avcodec_receive_frame()"));
+				//OnVideoPlayEnd.Broadcast();
+				goto _Error;
+			}
+
+			uint8* FrameBuffer = (uint8*)av_malloc(Local_FrameBufferSize * sizeof(uint8));
+			//格式化已经申请的内存并将 FrameBuffer 绑定到 Local_AVFrameAfterScale
+			av_image_fill_arrays(Local_AVFrameAfterScale->data, Local_AVFrameAfterScale->linesize, FrameBuffer, AV_PIX_FMT_BGRA,
+				VideoInfo.FrameWidth, VideoInfo.FrameHeight, 1);
+
+			sws_scale(FFmpegParam->Local_SwsContext, Local_AVFrameBeforeScale->data, Local_AVFrameBeforeScale->linesize, 0,
+				FFmpegParam->Local_AVCodecContext->height, Local_AVFrameAfterScale->data, Local_AVFrameAfterScale->linesize);
+
+			FrameQueue_std->EnqueueFrame(FrameBuffer);
+
 			av_packet_unref(Local_AVPacket);
-			continue;
 		}
-
-		//将数据包发送到解码队列
-		ret = avcodec_send_packet(FFmpegParam->Local_AVCodecContext, Local_AVPacket);
-		if (ret == AVERROR(EAGAIN))
-		{
-			av_packet_unref(Local_AVPacket);
-			continue;
-		}
-		if (ret != 0)
-		{
-			OutLog(FString("Error at avcodec_send_packet()"));
-			//OnVideoPlayEnd.Broadcast();
-			goto _Error;
-		}
-
-		//读取解码后的一帧
-		ret = avcodec_receive_frame(FFmpegParam->Local_AVCodecContext, Local_AVFrameBeforeScale);
-		if (ret == AVERROR(EAGAIN))
-		{
-			av_packet_unref(Local_AVPacket);
-			continue;
-		}
-		if (ret != 0)
-		{
-			OutLog(FString("Error at avcodec_receive_frame()"));
-			//OnVideoPlayEnd.Broadcast();
-			goto _Error;
-		}
-
-		//uint8* FrameBuffer = (uint8*)av_malloc(Local_FrameBufferSize * sizeof(uint8));
-		uint8* FrameBuffer = new uint8[Local_FrameBufferSize];
-		//格式化已经申请的内存并将 FrameBuffer 绑定到 Local_AVFrameAfterScale
-		av_image_fill_arrays(Local_AVFrameAfterScale->data, Local_AVFrameAfterScale->linesize, FrameBuffer, AV_PIX_FMT_BGRA,
-			VideoInfo.FrameWidth, VideoInfo.FrameHeight, 1);
-
-		sws_scale(FFmpegParam->Local_SwsContext, Local_AVFrameBeforeScale->data, Local_AVFrameBeforeScale->linesize, 0,
-			FFmpegParam->Local_AVCodecContext->height, Local_AVFrameAfterScale->data, Local_AVFrameAfterScale->linesize);
-
-		//uint8* FrameMem = (uint8*)av_malloc(Local_FrameBufferSize * sizeof(uint8));
-		//uint8* FrameMem = new uint8[Local_FrameBufferSize];
-		//uint8* FrameMem = VideoInfo.FrameBuffer;
-		//FMemory::Memcpy(FrameMem, VideoInfo.FrameBuffer, Local_FrameBufferSize * sizeof(uint8));
-		//memcpy(FrameMem, Local_AVFrameAfterScale->data[0], 10);
-		//FrameBufferQueue.Enqueue(FrameBuffer);
-		FrameBufferQueue_std.push(FrameBuffer);
-		
-		av_packet_unref(Local_AVPacket);
-		//delete FrameMem;
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
 	
 _Error:
@@ -270,6 +265,12 @@ _Error:
 	av_packet_free(&Local_AVPacket);
 }
 
+void UVideoPlayer_FFmpeg::PlayVideo(FString VideoURL)
+{
+	this->VideoInfo.VideoURL = VideoURL;
+	OpenVideo();
+}
+
 void UVideoPlayer_FFmpeg::CloseVideo()
 {
 	bRun = false;
@@ -277,28 +278,25 @@ void UVideoPlayer_FFmpeg::CloseVideo()
 	{
 		GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
 	}
+	else if (GWorld != nullptr)
+	{
+		GWorld->GetTimerManager().ClearTimer(TimerHandle);
+	}
 
-	UE_LOG(LogTemp, Warning, TEXT("%d"), FrameBufferQueue_std.size());
+	UE_LOG(LogTemp, Warning, TEXT("%d"), FrameQueue_std->GetFrameNum());
 
-	//bool IsValid = true;
-	//while(IsValid)
-	//{
-	//	uint8* Buffer;
-	//	IsValid = FrameBufferQueue.Dequeue(Buffer);
-	//	if (IsValid)
-	//	{
-	//		delete Buffer;
-	//		Buffer = nullptr;
-	//	}
-	//	else
-	//	{
-	//		IsValid = false;
-	//	}
-	//}
+	while(FrameQueue_std->GetFrameNum() > 0)
+	{
+		uint8* Buffer;
+		Buffer = FrameQueue_std->DequeueFrame();
+		av_free(Buffer);
+	}
 }
 
 void UVideoPlayer_FFmpeg::OpenVideo()
 {
+	FrameQueue_std->SetBufferSize(VideoInfo.BufferSize);
+
 	std::thread VideoThread(&UVideoPlayer_FFmpeg::VideoThread, this);
 	VideoThread.detach();
 	UE_LOG(LogTemp, Warning, TEXT("Video Player Object: %s, Is Constructed!"), *this->GetName());
@@ -306,7 +304,17 @@ void UVideoPlayer_FFmpeg::OpenVideo()
 	OnVideoPlayBegin.AddDynamic(this, &UVideoPlayer_FFmpeg::VideoBeginPlay);
 }
 
-void UVideoPlayer_FFmpeg::SetVideoKeepRatio(EKeepVideoRatio KeepVideoRatio)
+void UVideoPlayer_FFmpeg::PausePlay()
+{
+	VideoInfo.bIsPaused = true;
+}
+
+void UVideoPlayer_FFmpeg::ResumePlay()
+{
+	VideoInfo.bIsPaused = false;
+}
+
+void UVideoPlayer_FFmpeg::SetVideoRatio(EVideoRatio KeepVideoRatio)
 {
 	bool bIsSlateParent = false;
 	UCanvasPanelSlot* VideoCanvasPanelSlot = Cast<UCanvasPanelSlot>(this->Slot);
@@ -319,19 +327,19 @@ void UVideoPlayer_FFmpeg::SetVideoKeepRatio(EKeepVideoRatio KeepVideoRatio)
 	FVector2D NewSize;
 	float NewSizeY;
 
-	EKeepVideoRatio NewRatioType = KeepVideoRatio;
+	EVideoRatio NewRatioType = KeepVideoRatio;
 	
 	//如果是自动，则需要判断缩放方式
-	if (KeepVideoRatio == EKeepVideoRatio::Auto)
+	if (KeepVideoRatio == EVideoRatio::Auto)
 	{
 		NewSizeY = (VideoInfo.ExpectedSize.X / BrushSize.X) * BrushSize.Y;
 		if (NewSizeY > VideoInfo.ExpectedSize.Y)
 		{
-			NewRatioType = EKeepVideoRatio::Height;
+			NewRatioType = EVideoRatio::Height;
 		}
 		else
 		{
-			NewRatioType = EKeepVideoRatio::Width;
+			NewRatioType = EVideoRatio::Width;
 		}
 	}
 	
@@ -347,11 +355,11 @@ void UVideoPlayer_FFmpeg::SetVideoKeepRatio(EKeepVideoRatio KeepVideoRatio)
 	}
 	switch (NewRatioType)
 	{
-	case EKeepVideoRatio::No :
+	case EVideoRatio::No :
 		//ImageSlot->SetSize(ExpectedSize);
 		break;
 		//保持高度不变
-		case EKeepVideoRatio::Height :
+		case EVideoRatio::Height :
 		NewSize.Y = VideoInfo.ExpectedSize.Y;
 		NewSize.X = (NewSize.Y / BrushSize.Y) * BrushSize.X;
 		if (VideoInfo.ExpectedSize.X != NewSize.X || NewSize != SlotSize)
@@ -370,7 +378,7 @@ void UVideoPlayer_FFmpeg::SetVideoKeepRatio(EKeepVideoRatio KeepVideoRatio)
 		}
 		break;
 		//保持宽度不变
-		case EKeepVideoRatio::Width :
+		case EVideoRatio::Width :
 		NewSize.X = VideoInfo.ExpectedSize.X;
 		NewSize.Y = (NewSize.X / BrushSize.X) * BrushSize.Y;
 		if (VideoInfo.ExpectedSize.Y != NewSize.Y || NewSize != SlotSize)
@@ -389,7 +397,7 @@ void UVideoPlayer_FFmpeg::SetVideoKeepRatio(EKeepVideoRatio KeepVideoRatio)
 		}
 		break;
 		//与输入图像保持一致
-		case EKeepVideoRatio::Origin :
+		case EVideoRatio::Origin :
 		if (SlotSize != FVector2D(VideoInfo.FrameWidth, VideoInfo.FrameHeight))
 		{
 			NewSize = FVector2D(VideoInfo.FrameWidth, VideoInfo.FrameHeight);
@@ -407,7 +415,7 @@ void UVideoPlayer_FFmpeg::SetVideoKeepRatio(EKeepVideoRatio KeepVideoRatio)
 		}
 		break;
 		//自动判断
-		case EKeepVideoRatio::Auto :
+		case EVideoRatio::Auto :
 
 		break;
 	default:
@@ -415,12 +423,23 @@ void UVideoPlayer_FFmpeg::SetVideoKeepRatio(EKeepVideoRatio KeepVideoRatio)
 	}
 }
 
+float UVideoPlayer_FFmpeg::GetFrameBufferSize()
+{
+	return VideoInfo.FrameBufferSize;
+}
+
+void UVideoPlayer_FFmpeg::SetPlaybackSpeed(float Speed)
+{
+	float Rate = VideoInfo.FrameInterval_s / Speed;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UVideoPlayer_FFmpeg::UpdateFrameTexture, Rate, true);
+}
+
 void UVideoPlayer_FFmpeg::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 
 #if WITH_EDITOR
-	SetVideoKeepRatio(VideoInfo.KeepVideoRatio);
+	SetVideoRatio(VideoInfo.VideoRatio);
 #endif
 }
 
@@ -454,53 +473,57 @@ void UVideoPlayer_FFmpeg::VideoBeginPlay()
 	this->SetBrushFromTexture(VideoInfo.VideoTexture);
 
 	this->Brush.SetImageSize(FVector2D(VideoInfo.FrameWidth, VideoInfo.FrameHeight));
-	this->SetVideoKeepRatio(VideoInfo.KeepVideoRatio);
+	this->SetVideoRatio(VideoInfo.VideoRatio);
 
-	const float Rate = VideoInfo.FrameInterval_ms / 1000.0;
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UVideoPlayer_FFmpeg::UpdateFrameTexture, Rate, true);
+	if (TimerHandle.IsValid() && !IsDesignTime() && !HasAnyFlags(RF_ClassDefaultObject) && this->GetWorld())
+	{
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UVideoPlayer_FFmpeg::UpdateFrameTexture, VideoInfo.FrameInterval_s, true);
+	}
+	else if(GWorld != nullptr)
+	{
+		GWorld->GetTimerManager().SetTimer(TimerHandle, this, &UVideoPlayer_FFmpeg::UpdateFrameTexture, VideoInfo.FrameInterval_s, true);
+	}
 }
 
 void UVideoPlayer_FFmpeg::UpdateFrameTexture()
 {
-	uint8* Buffer = nullptr;
-	//if (FrameBufferQueue.Dequeue(Buffer))
-	Buffer = FrameBufferQueue_std.front();
-	if (Buffer)
+	if (!VideoInfo.bIsPaused)
 	{
-		FrameBufferQueue_std.pop();
-		//UE_LOG(LogTemp, Warning, TEXT("%d"), FrameBufferQueue.);
-		switch (VideoInfo.UpdateTextureMethod)
+		uint8* Buffer = FrameQueue_std->DequeueFrame();
+		if (Buffer)
 		{
-		case EUpdateTextureMethod::Memcpy:
-
-			VideoInfo.VideoTexture->PlatformData->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
-			TextureData = VideoInfo.VideoTexture->PlatformData->Mips[0].BulkData.Realloc(VideoInfo.FrameWidth * VideoInfo.FrameHeight * 4);
-			FMemory::Memcpy(TextureData, Buffer, sizeof(uint8) * VideoInfo.FrameWidth * VideoInfo.FrameHeight * 4);
-			VideoInfo.VideoTexture->PlatformData->Mips[0].BulkData.Unlock();
-
-			//更新UTexture2D
-			VideoInfo.VideoTexture->UpdateResource();
-			delete Buffer;
-			Buffer = nullptr;
-
-			break;
-
-		case EUpdateTextureMethod::RHICommand:
-
-			VideoInfo.Region.SrcX = 0;
-			VideoInfo.Region.SrcY = 0;
-			VideoInfo.Region.DestX = 0;
-			VideoInfo.Region.DestY = 0;
-			VideoInfo.Region.Width = VideoInfo.FrameWidth;
-			VideoInfo.Region.Height = VideoInfo.FrameHeight;
-
-			VideoInfo.VideoTexture->UpdateTextureRegions(0, 1, &VideoInfo.Region, VideoInfo.Region.Width * 4, 4, Buffer,
-			[Buffer](uint8* SrcData, const FUpdateTextureRegion2D*)
+			switch (VideoInfo.UpdateTextureMethod)
 			{
-				//delete Buffer;
-			});
+			case EUpdateTextureMethod::Memcpy:
 
-			break;
+				VideoInfo.VideoTexture->PlatformData->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
+				TextureData = VideoInfo.VideoTexture->PlatformData->Mips[0].BulkData.Realloc(VideoInfo.FrameWidth * VideoInfo.FrameHeight * 4);
+				FMemory::Memcpy(TextureData, Buffer, sizeof(uint8) * VideoInfo.FrameWidth * VideoInfo.FrameHeight * 4);
+				VideoInfo.VideoTexture->PlatformData->Mips[0].BulkData.Unlock();
+
+				//更新UTexture2D
+				VideoInfo.VideoTexture->UpdateResource();
+				av_free(Buffer);
+
+				break;
+
+			case EUpdateTextureMethod::RHICommand:
+
+				VideoInfo.Region.SrcX = 0;
+				VideoInfo.Region.SrcY = 0;
+				VideoInfo.Region.DestX = 0;
+				VideoInfo.Region.DestY = 0;
+				VideoInfo.Region.Width = VideoInfo.FrameWidth;
+				VideoInfo.Region.Height = VideoInfo.FrameHeight;
+
+				VideoInfo.VideoTexture->UpdateTextureRegions(0, 1, &VideoInfo.Region, VideoInfo.Region.Width * 4, 4, Buffer,
+					[Buffer](uint8* SrcData, const FUpdateTextureRegion2D*)
+					{
+						av_free(Buffer);
+					});
+
+				break;
+			}
 		}
 	}
 }
