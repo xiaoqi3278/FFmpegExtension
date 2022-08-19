@@ -44,6 +44,11 @@ public:
 
 	uint8* DequeueFrame()
 	{
+		if (FrameBufferQueue_std.size() == 0)
+		{
+			return nullptr;
+		}
+
 		CurrentBufferSize -= FrameBufferSize;
 		bCanPush = CurrentBufferSize < BufferSize;
 

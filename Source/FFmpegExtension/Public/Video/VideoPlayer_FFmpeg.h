@@ -57,7 +57,7 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "FFmpegExtension|Video|VideoPlayer")
 	FOnVideoPlayEnd OnVideoPlayEnd;
 
-	//视频播放完成
+	//视频播放失败
 	UPROPERTY(BlueprintAssignable, Category = "FFmpegExtension|Video|VideoPlayer")
 	FOnVideoError OnVideoError;
 
@@ -66,6 +66,9 @@ public:
 
 	//定时器句柄
 	FTimerHandle TimerHandle;
+
+	//解码状态
+	EDecodeState DecodeState;
 
 public:
 	UVideoPlayer_FFmpeg()
@@ -113,12 +116,20 @@ public:
 	void SetVideoRatio(EVideoRatio KeepVideoRatio);
 
 	//获取视频单帧所占内存大小(单位: M)
-	UFUNCTION(BlueprintCallable, Category = "FFmpegExtension|Video")
+	UFUNCTION(BlueprintPure, Category = "FFmpegExtension|Video")
 	float GetFrameBufferSize();
 
 	//设置视频播放速度
 	UFUNCTION(BlueprintCallable, Category = "FFmpegExtension|Video")
 	void SetPlaybackSpeed(float Speed = 1);
+
+	//获取视频总时长
+	UFUNCTION(BlueprintCallable, Category = "FFmpegExtension|Video")
+	FTime GetVideoTime();
+
+	//获取视频信息
+	UFUNCTION(BlueprintPure, Category = "FFmpegExtension|Video")
+	FString GetVideoInfo();
 
 private:
 	FrameQueue* FrameQueue_std;

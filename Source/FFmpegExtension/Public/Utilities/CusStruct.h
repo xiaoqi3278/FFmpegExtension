@@ -80,6 +80,44 @@ struct FLocal_FFmpegParam
 	}
 };
 
+//时长
+USTRUCT(BlueprintType)
+struct FTime
+{
+	GENERATED_BODY()
+
+		//小时
+		UPROPERTY(BlueprintReadWrite)
+		int32 Hours;
+
+	//分钟
+	UPROPERTY(BlueprintReadWrite)
+		int32 Minutes;
+
+	//秒
+	UPROPERTY(BlueprintReadWrite)
+		int32 Seconds;
+
+	//帧
+	UPROPERTY(BlueprintReadWrite)
+		int32 Frames;
+
+	FTime()
+	{
+
+	}
+
+	FTime(int64 Duration)
+	{
+		const double FrameIntervalTime = 1.00 / 30.00;
+		Frames = Duration <= 0 ? 0 : (Duration % AV_TIME_BASE) / 1000 / (FrameIntervalTime * 1000);
+		int32 TotalSeconds = Duration / AV_TIME_BASE;
+		Hours = TotalSeconds / 3600;
+		Minutes = TotalSeconds / 60;
+		Seconds = TotalSeconds % 60;
+	}
+};
+
 //视频相关
 USTRUCT(BlueprintType)
 struct FVideoInfo
@@ -88,6 +126,9 @@ struct FVideoInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
 	bool bAutoPlay = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
+	bool bLoop = false;
 
 	bool bIsPaused = false;
 
@@ -128,7 +169,18 @@ struct FVideoInfo
 
 	//视频总时长(秒)
 	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
-	int32 VideoTotalTime;
+	int32 VideoTime_s;
+
+	//视频总时长(毫秒)
+	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
+	int64 VideoTime_ms;
+
+	//视频总时长(微秒)
+	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
+	int64 VideoTime_us;
+
+	//视频总时长(FTime)
+	FTime VideoTime;
 
 	//帧间隔时间(毫秒)
 	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
@@ -158,14 +210,23 @@ struct FVideoInfo
 	}
 };
 
-struct FVideoTime
-{
-	
-};
-
 UCLASS()
 class FFMPEGEXTENSION_API UCusStruct : public UObject
 {
 	GENERATED_BODY()
-	
+
+public:
+	//格式转换(X -> 0X)
+	UFUNCTION(BlueprintPure, Category = "FFmpegExtension|Utilities")
+	static FString TimeFormat(int32 Num);
+
+	//视频时长(us)转为 FTime 格式
+	UFUNCTION(BlueprintPure, Category = "FFmpegExtension|Utilities")
+	static FTime VideoDurationToTime(int64 Duration);
+
+	UFUNCTION(BlueprintPure, Category = "FFmpegExtension|Utilities", DisplayName = "ToString")
+	static FString VideoTimeToString(FTime Time);
+
+	UFUNCTION(BlueprintPure, Category = "FFmpegExtension|Utilities", DisplayName = "ToString")
+	static FString VideoInfoToString(FVideoInfo VideoInfo);
 };

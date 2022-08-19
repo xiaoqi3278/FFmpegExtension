@@ -36,7 +36,7 @@ public:
 		return "VideoURL:" + VideoInfo.VideoURL +
 			"\n" + "VideoFPS:" + FString::FromInt(VideoInfo.FPS) +
 			"\n" + "ValidFirstVideoStreamIndex" + FString::FromInt(VideoInfo.ValidFirstVideoStreamIndex) +
-			"\n" + "VideoTotalTime:" + FString::FromInt(VideoInfo.VideoTotalTime) +
+			"\n" + "VideoTotalTime:" + FString::FromInt(VideoInfo.VideoTime_s) +
 			"\n" + "VideoWidth:" + FString::FromInt(VideoInfo.FrameWidth) + "     " + "VideoHeight:" + FString::FromInt(VideoInfo.FrameHeight);
 	};
 };

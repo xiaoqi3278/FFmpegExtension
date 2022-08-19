@@ -29,6 +29,15 @@ enum class EVideoRatio : uint8
 	Auto
 };
 
+//解码状态
+UENUM(BlueprintType)
+enum class EDecodeState : uint8
+{
+	Idle,
+	Decoding,
+	Completed
+};
+
 UENUM(BlueprintType)
 enum class EUpdateTextureMethod : uint8
 {

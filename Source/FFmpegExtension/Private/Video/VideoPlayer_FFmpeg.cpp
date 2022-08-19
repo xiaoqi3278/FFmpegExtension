@@ -172,12 +172,16 @@ void UVideoPlayer_FFmpeg::VideoThread()
 
 	//获取视频信息
 	av_dump_format(FFmpegParam->Local_AVFormatContext, 0, LocalVideoURL, 0);
-	VideoInfo.VideoTotalTime = FFmpegParam->Local_AVFormatContext->duration / AV_TIME_BASE;
+	VideoInfo.VideoTime_us = FFmpegParam->Local_AVFormatContext->duration;
+	VideoInfo.VideoTime_s = FFmpegParam->Local_AVFormatContext->duration / AV_TIME_BASE;
+	VideoInfo.VideoTime = FTime(VideoInfo.VideoTime_us);
 
 	AsyncTask(ENamedThreads::GameThread, [&]
 	{
 		OnVideoPlayBegin.Broadcast();
 	});
+
+	DecodeState = EDecodeState::Decoding;
 
 	while (bRun && this != nullptr)
 	{
@@ -185,6 +189,11 @@ void UVideoPlayer_FFmpeg::VideoThread()
 		{
 			//读取码流中的音频若干帧或者视频一帧
 			ret = av_read_frame(FFmpegParam->Local_AVFormatContext, Local_AVPacket);
+			if (ret == AVERROR_EOF)
+			{
+				DecodeState = EDecodeState::Completed;
+				goto _Error;
+			}
 			if (ret < 0)
 			{
 				OutLog(FString("Error at av_read_frame()"));
@@ -268,6 +277,10 @@ _Error:
 void UVideoPlayer_FFmpeg::PlayVideo(FString VideoURL)
 {
 	this->VideoInfo.VideoURL = VideoURL;
+	if (bRun)
+	{
+		CloseVideo();
+	}
 	OpenVideo();
 }
 
@@ -283,8 +296,18 @@ void UVideoPlayer_FFmpeg::CloseVideo()
 		GWorld->GetTimerManager().ClearTimer(TimerHandle);
 	}
 
+	//解码完成
+	DecodeState = EDecodeState::Completed;
+
+	//清空回调
+	OnVideoPlayBegin.Clear();
+	OnFindVideoSuccessfully.Clear();
+	OnVideoError.Clear();
+	OnVideoPlayEnd.Clear();
+
 	UE_LOG(LogTemp, Warning, TEXT("%d"), FrameQueue_std->GetFrameNum());
 
+	//清空缓冲区
 	while(FrameQueue_std->GetFrameNum() > 0)
 	{
 		uint8* Buffer;
@@ -295,6 +318,12 @@ void UVideoPlayer_FFmpeg::CloseVideo()
 
 void UVideoPlayer_FFmpeg::OpenVideo()
 {
+	if (bRun)
+	{
+		CloseVideo();
+	}
+	bRun = true;
+
 	FrameQueue_std->SetBufferSize(VideoInfo.BufferSize);
 
 	std::thread VideoThread(&UVideoPlayer_FFmpeg::VideoThread, this);
@@ -307,11 +336,35 @@ void UVideoPlayer_FFmpeg::OpenVideo()
 void UVideoPlayer_FFmpeg::PausePlay()
 {
 	VideoInfo.bIsPaused = true;
+
+	//暂停图片更新
+	if (TimerHandle.IsValid() && !IsDesignTime() && !HasAnyFlags(RF_ClassDefaultObject) && this->GetWorld())
+	{
+		GetWorld()->GetTimerManager().PauseTimer(TimerHandle);
+	}
+	else if (GWorld != nullptr)
+	{
+		GWorld->GetTimerManager().PauseTimer(TimerHandle);
+	}
+
+	DecodeState = EDecodeState::Idle;
 }
 
 void UVideoPlayer_FFmpeg::ResumePlay()
 {
 	VideoInfo.bIsPaused = false;
+
+	//
+	if (TimerHandle.IsValid() && !IsDesignTime() && !HasAnyFlags(RF_ClassDefaultObject) && this->GetWorld())
+	{
+		GetWorld()->GetTimerManager().UnPauseTimer(TimerHandle);
+	}
+	else if (GWorld != nullptr)
+	{
+		GWorld->GetTimerManager().UnPauseTimer(TimerHandle);
+	}
+
+	DecodeState = EDecodeState::Decoding;
 }
 
 void UVideoPlayer_FFmpeg::SetVideoRatio(EVideoRatio KeepVideoRatio)
@@ -434,6 +487,16 @@ void UVideoPlayer_FFmpeg::SetPlaybackSpeed(float Speed)
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UVideoPlayer_FFmpeg::UpdateFrameTexture, Rate, true);
 }
 
+FTime UVideoPlayer_FFmpeg::GetVideoTime()
+{
+	return VideoInfo.VideoTime;
+}
+
+FString UVideoPlayer_FFmpeg::GetVideoInfo()
+{
+	return UCusStruct::VideoInfoToString(VideoInfo);
+}
+
 void UVideoPlayer_FFmpeg::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -523,6 +586,15 @@ void UVideoPlayer_FFmpeg::UpdateFrameTexture()
 					});
 
 				break;
+			}
+		}
+		else if (DecodeState == EDecodeState::Completed)
+		{
+			OnVideoPlayEnd.Broadcast();
+			CloseVideo();
+			if (VideoInfo.bLoop)
+			{
+				OpenVideo();
 			}
 		}
 	}
