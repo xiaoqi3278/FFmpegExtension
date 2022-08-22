@@ -30,6 +30,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFindVideoSuccessfully, FVideoInfo
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnVideoPlayBegin);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnVideoPlayEnd);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnVideoError, FString, ErrorMessage);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnVideoLoop, int32, LoopIndex);
 
 UCLASS()
 class FFMPEGEXTENSION_API UVideoPlayer_FFmpeg : public UImage
@@ -61,7 +62,11 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "FFmpegExtension|Video|VideoPlayer")
 	FOnVideoError OnVideoError;
 
-	//控制线程退出
+	//视频每次循环时调用, 返回循环次数
+	UPROPERTY(BlueprintAssignable, Category = "FFmpegExtension|Video|VideoPlayer")
+	FOnVideoLoop OnVideoLoop;
+
+	//控制解码线程退出
 	bool bRun = true;
 
 	//定时器句柄
@@ -125,11 +130,15 @@ public:
 
 	//获取视频总时长
 	UFUNCTION(BlueprintCallable, Category = "FFmpegExtension|Video")
-	FTime GetVideoTime();
+	FMediaTime GetVideoTime();
 
 	//获取视频信息
 	UFUNCTION(BlueprintPure, Category = "FFmpegExtension|Video")
 	FString GetVideoInfo();
+
+	//跳转到某个时间点
+	UFUNCTION(BlueprintCallable, Category = "FFmpegExtension|Video")
+	void SeekTo(FMediaTime Time);
 
 private:
 	FrameQueue* FrameQueue_std;

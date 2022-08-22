@@ -42,7 +42,7 @@ void UVideoPlayer_FFmpeg::VideoThread()
 	const char* LocalVideoURL = TCHAR_TO_UTF8(*VideoInfo.VideoURL);
 	//参数
 	av_dict_set(&FFmpegParam->Local_AVDictionary, "stimeout", "10000000", 0);   // us
-	av_dict_set(&FFmpegParam->Local_AVDictionary, "buffer_size", "4096000", 0);
+	//av_dict_set(&FFmpegParam->Local_AVDictionary, "buffer_size", "4096000", 0);
 	//打开视频
 	ret = avformat_open_input(&FFmpegParam->Local_AVFormatContext, LocalVideoURL, 0, &FFmpegParam->Local_AVDictionary);
 	if (ret != 0)
@@ -104,9 +104,9 @@ void UVideoPlayer_FFmpeg::VideoThread()
 	//	}
 	//}
 	VideoInfo.ValidFirstVideoStreamIndex = av_find_best_stream(FFmpegParam->Local_AVFormatContext, AVMEDIA_TYPE_VIDEO, -1, -1, &(FFmpegParam->Local_AVCodec), 0);
-	AVStream* LocalStream = FFmpegParam->Local_AVFormatContext->streams[VideoInfo.ValidFirstVideoStreamIndex];
+	FFmpegParam->Local_AVStream = FFmpegParam->Local_AVFormatContext->streams[VideoInfo.ValidFirstVideoStreamIndex];
 	//查找适合的解码器
-	FFmpegParam->Local_AVCodec = avcodec_find_decoder(LocalStream->codecpar->codec_id);
+	FFmpegParam->Local_AVCodec = avcodec_find_decoder(FFmpegParam->Local_AVStream->codecpar->codec_id);
 	if (FFmpegParam->Local_AVCodec == NULL)
 	{
 		OutLog(FString("The suitable decoder not found"));
@@ -121,7 +121,7 @@ void UVideoPlayer_FFmpeg::VideoThread()
 		goto _Error;
 	}
 	//为编解码器上下文设置参数
-	ret = avcodec_parameters_to_context(FFmpegParam->Local_AVCodecContext, LocalStream->codecpar);
+	ret = avcodec_parameters_to_context(FFmpegParam->Local_AVCodecContext, FFmpegParam->Local_AVStream->codecpar);
 	if (ret < 0)
 	{
 		OutLog(FString("Error at avcodec_parameters_to_context()"));
@@ -129,7 +129,7 @@ void UVideoPlayer_FFmpeg::VideoThread()
 	}
 	VideoInfo.FrameWidth = FFmpegParam->Local_AVCodecContext->width;
 	VideoInfo.FrameHeight = FFmpegParam->Local_AVCodecContext->height;
-	VideoInfo.FPS = av_q2d(LocalStream->r_frame_rate);
+	VideoInfo.FPS = av_q2d(FFmpegParam->Local_AVStream->r_frame_rate);
 	VideoInfo.FrameInterval_ms = 1 / VideoInfo.FPS * 1000;
 	VideoInfo.FrameInterval_s = VideoInfo.FrameInterval_ms / 1000.0;
 
@@ -174,7 +174,7 @@ void UVideoPlayer_FFmpeg::VideoThread()
 	av_dump_format(FFmpegParam->Local_AVFormatContext, 0, LocalVideoURL, 0);
 	VideoInfo.VideoTime_us = FFmpegParam->Local_AVFormatContext->duration;
 	VideoInfo.VideoTime_s = FFmpegParam->Local_AVFormatContext->duration / AV_TIME_BASE;
-	VideoInfo.VideoTime = FTime(VideoInfo.VideoTime_us);
+	VideoInfo.VideoTime = FMediaTime(VideoInfo.VideoTime_us);
 
 	AsyncTask(ENamedThreads::GameThread, [&]
 	{
@@ -185,6 +185,10 @@ void UVideoPlayer_FFmpeg::VideoThread()
 
 	while (bRun && this != nullptr)
 	{
+		if (DecodeState == EDecodeState::Stopped)
+		{
+			continue;
+		}
 		if (FrameQueue_std->bCanPush && !VideoInfo.bIsPaused)
 		{
 			//读取码流中的音频若干帧或者视频一帧
@@ -192,6 +196,16 @@ void UVideoPlayer_FFmpeg::VideoThread()
 			if (ret == AVERROR_EOF)
 			{
 				DecodeState = EDecodeState::Completed;
+				int32 TempRet = av_seek_frame(FFmpegParam->Local_AVFormatContext, VideoInfo.ValidFirstVideoStreamIndex, 0, AVSEEK_FLAG_BACKWARD);
+				if (TempRet >= 0 && VideoInfo.bLoop)
+				{
+					VideoInfo.LoopIndex++;
+					AsyncTask(ENamedThreads::GameThread, [this]()
+						{
+							OnVideoLoop.Broadcast(VideoInfo.LoopIndex);
+						});
+					continue;
+				}
 				goto _Error;
 			}
 			if (ret < 0)
@@ -347,7 +361,7 @@ void UVideoPlayer_FFmpeg::PausePlay()
 		GWorld->GetTimerManager().PauseTimer(TimerHandle);
 	}
 
-	DecodeState = EDecodeState::Idle;
+	DecodeState = EDecodeState::Stopped;
 }
 
 void UVideoPlayer_FFmpeg::ResumePlay()
@@ -487,7 +501,7 @@ void UVideoPlayer_FFmpeg::SetPlaybackSpeed(float Speed)
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UVideoPlayer_FFmpeg::UpdateFrameTexture, Rate, true);
 }
 
-FTime UVideoPlayer_FFmpeg::GetVideoTime()
+FMediaTime UVideoPlayer_FFmpeg::GetVideoTime()
 {
 	return VideoInfo.VideoTime;
 }
@@ -495,6 +509,32 @@ FTime UVideoPlayer_FFmpeg::GetVideoTime()
 FString UVideoPlayer_FFmpeg::GetVideoInfo()
 {
 	return UCusStruct::VideoInfoToString(VideoInfo);
+}
+
+void UVideoPlayer_FFmpeg::SeekTo(FMediaTime Time)
+{
+	int64_t TimeStamp = UCusStruct::TimeToSeconds(Time, VideoInfo.FPS) * AV_TIME_BASE;
+	//int64_t TargetTimeStamp = av_rescale_q(TimeStamp, AV_TIME_BASE_Q, FFmpegParam->Local_AVStream->time_base);
+	//FrameQueue_std->ClearQueue();
+
+	//挂起解码线程
+	DecodeState = EDecodeState::Stopped;
+	//跳转到指定位置
+	av_seek_frame(FFmpegParam->Local_AVFormatContext, VideoInfo.ValidFirstVideoStreamIndex, TimeStamp, AVSEEK_FLAG_BACKWARD);
+
+	FrameQueue_std->bCanPush = false;
+	//清空缓冲区
+	while (FrameQueue_std->GetFrameNum() > 0)
+	{
+		uint8* Buffer;
+		Buffer = FrameQueue_std->DequeueFrame();
+		av_free(Buffer);
+	}
+	FrameQueue_std->SetCurrentBufferSize(0);
+	FrameQueue_std->bCanPush = true;
+
+	//恢复解码线程
+	DecodeState = EDecodeState::Decoding;
 }
 
 void UVideoPlayer_FFmpeg::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
@@ -590,12 +630,12 @@ void UVideoPlayer_FFmpeg::UpdateFrameTexture()
 		}
 		else if (DecodeState == EDecodeState::Completed)
 		{
-			OnVideoPlayEnd.Broadcast();
-			CloseVideo();
-			if (VideoInfo.bLoop)
-			{
-				OpenVideo();
-			}
+			//OnVideoPlayEnd.Broadcast();
+			//CloseVideo();
+			//if (VideoInfo.bLoop)
+			//{
+			//	OpenVideo();
+			//}
 		}
 	}
 }

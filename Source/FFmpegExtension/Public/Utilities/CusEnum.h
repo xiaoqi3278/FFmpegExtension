@@ -33,7 +33,8 @@ enum class EVideoRatio : uint8
 UENUM(BlueprintType)
 enum class EDecodeState : uint8
 {
-	Idle,
+	NotStarted,
+	Stopped,
 	Decoding,
 	Completed
 };

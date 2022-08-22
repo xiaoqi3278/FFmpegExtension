@@ -67,10 +67,28 @@ public:
 		BufferSize = InBufferSize;
 	}
 
+	void SetCurrentBufferSize(float InCurrentBufferSize)
+	{
+		CurrentBufferSize = InCurrentBufferSize;
+	}
+
 	int32 GetFrameNum()
 	{
 		return FrameBufferQueue_std.size();
 	}
+
+	void ClearQueue()
+	{
+		CurrentBufferSize = 0;
+		bCanPush = true;
+		//清空缓冲区
+		while (FrameBufferQueue_std.size() > 0)
+		{
+			uint8* Buffer;
+			Buffer = this->DequeueFrame();
+			delete Buffer;
+		}
+	};
 };
 
 UCLASS()

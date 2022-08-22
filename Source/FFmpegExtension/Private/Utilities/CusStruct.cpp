@@ -8,12 +8,12 @@ FString UCusStruct::TimeFormat(int32 Num)
 	return Num < 10 ? "0" + FString::FromInt(Num) : FString::FromInt(Num);
 }
 
-FTime UCusStruct::VideoDurationToTime(int64 Duration)
+FMediaTime UCusStruct::VideoDurationToTime(int64 Duration)
 {
-	return FTime(Duration);
+	return FMediaTime(Duration);
 }
 
-FString UCusStruct::VideoTimeToString(FTime Time)
+FString UCusStruct::VideoTimeToString(FMediaTime Time)
 {
 	return TimeFormat(Time.Hours) + ":"
 		+ TimeFormat(Time.Minutes) + ":"
@@ -40,4 +40,9 @@ FString UCusStruct::VideoInfoToString(FVideoInfo VideoInfo)
 	Info.Append("FrameBufferSize: "					+ FString::SanitizeFloat(VideoInfo.FrameBufferSize) + "\r\n");
 
 	return Info;
+}
+
+float UCusStruct::TimeToSeconds(FMediaTime Time, int32 FPS)
+{
+	return float(Time.Hours * 3600 + Time.Minutes * 60 + Time.Seconds) + Time.Frames / FPS;
 }

@@ -22,6 +22,7 @@ extern "C"
 //FFmpeg相关
 struct FLocal_FFmpegParam
 {
+public:
 	/**
 	 * AVFormatContext
 	 * 解封装上下文,描述媒体文件或者媒体流的构成和基本信息
@@ -45,6 +46,8 @@ struct FLocal_FFmpegParam
 
 	//图像转换上下文,提供图像缩放、图像格式转换等功能
 	SwsContext* Local_SwsContext = NULL;
+
+	AVStream* Local_AVStream = NULL;
 
 	FLocal_FFmpegParam()
 	{
@@ -82,7 +85,7 @@ struct FLocal_FFmpegParam
 
 //时长
 USTRUCT(BlueprintType)
-struct FTime
+struct FMediaTime
 {
 	GENERATED_BODY()
 
@@ -102,12 +105,12 @@ struct FTime
 	UPROPERTY(BlueprintReadWrite)
 		int32 Frames;
 
-	FTime()
+	FMediaTime()
 	{
 
 	}
 
-	FTime(int64 Duration)
+	FMediaTime(int64 Duration)
 	{
 		const double FrameIntervalTime = 1.00 / 30.00;
 		Frames = Duration <= 0 ? 0 : (Duration % AV_TIME_BASE) / 1000 / (FrameIntervalTime * 1000);
@@ -180,7 +183,7 @@ struct FVideoInfo
 	int64 VideoTime_us;
 
 	//视频总时长(FTime)
-	FTime VideoTime;
+	FMediaTime VideoTime;
 
 	//帧间隔时间(毫秒)
 	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
@@ -199,6 +202,10 @@ struct FVideoInfo
 	//帧高
 	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
 	int32 FrameHeight;
+
+	//循环次数
+	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
+	int32 LoopIndex = 0;
 
 	~FVideoInfo()
 	{
@@ -222,11 +229,13 @@ public:
 
 	//视频时长(us)转为 FTime 格式
 	UFUNCTION(BlueprintPure, Category = "FFmpegExtension|Utilities")
-	static FTime VideoDurationToTime(int64 Duration);
+	static FMediaTime VideoDurationToTime(int64 Duration);
 
 	UFUNCTION(BlueprintPure, Category = "FFmpegExtension|Utilities", DisplayName = "ToString")
-	static FString VideoTimeToString(FTime Time);
+	static FString VideoTimeToString(FMediaTime Time);
 
 	UFUNCTION(BlueprintPure, Category = "FFmpegExtension|Utilities", DisplayName = "ToString")
 	static FString VideoInfoToString(FVideoInfo VideoInfo);
+
+	static float TimeToSeconds(FMediaTime Time, int32 FPS);
 };
