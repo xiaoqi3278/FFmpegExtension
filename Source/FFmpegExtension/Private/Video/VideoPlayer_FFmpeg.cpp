@@ -514,13 +514,13 @@ FString UVideoPlayer_FFmpeg::GetVideoInfo()
 void UVideoPlayer_FFmpeg::SeekTo(FMediaTime Time)
 {
 	int64_t TimeStamp = UCusStruct::TimeToSeconds(Time, VideoInfo.FPS) * AV_TIME_BASE;
-	//int64_t TargetTimeStamp = av_rescale_q(TimeStamp, AV_TIME_BASE_Q, FFmpegParam->Local_AVStream->time_base);
+	int64_t TargetTimeStamp = av_rescale_q(TimeStamp, AV_TIME_BASE_Q, FFmpegParam->Local_AVStream->time_base);
 	//FrameQueue_std->ClearQueue();
 
 	//挂起解码线程
 	DecodeState = EDecodeState::Stopped;
 	//跳转到指定位置
-	av_seek_frame(FFmpegParam->Local_AVFormatContext, VideoInfo.ValidFirstVideoStreamIndex, TimeStamp, AVSEEK_FLAG_BACKWARD);
+	av_seek_frame(FFmpegParam->Local_AVFormatContext, VideoInfo.ValidFirstVideoStreamIndex, TargetTimeStamp, AVSEEK_FLAG_BACKWARD);
 
 	FrameQueue_std->bCanPush = false;
 	//清空缓冲区
