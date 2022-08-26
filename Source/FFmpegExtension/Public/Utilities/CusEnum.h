@@ -36,7 +36,8 @@ enum class EDecodeState : uint8
 	NotStarted,
 	Stopped,
 	Decoding,
-	Completed
+	Completed,
+	Seeking
 };
 
 UENUM(BlueprintType)

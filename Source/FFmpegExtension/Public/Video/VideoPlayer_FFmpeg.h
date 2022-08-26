@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <mutex>
 #include <queue>
 
 #include "CoreMinimal.h"
@@ -75,6 +76,8 @@ public:
 	//解码状态
 	EDecodeState DecodeState;
 
+	bool bIsSending = false;
+
 public:
 	UVideoPlayer_FFmpeg()
 	{
@@ -138,7 +141,7 @@ public:
 
 	//跳转到某个时间点
 	UFUNCTION(BlueprintCallable, Category = "FFmpegExtension|Video")
-	void SeekTo(FMediaTime Time);
+	bool Seek(FMediaTime Time);
 
 private:
 	FrameQueue* FrameQueue_std;

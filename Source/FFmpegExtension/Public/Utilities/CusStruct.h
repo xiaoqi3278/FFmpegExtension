@@ -49,9 +49,12 @@ public:
 
 	AVStream* Local_AVStream = NULL;
 
+	AVPacket* Local_AVPacket = NULL;
+
 	FLocal_FFmpegParam()
 	{
 		Local_AVFormatContext = avformat_alloc_context();
+		Local_AVPacket = av_packet_alloc();
 	};
 
 	void ReleaseFFmpegParam()
@@ -80,6 +83,11 @@ public:
 		{
 			avformat_free_context(Local_AVFormatContext);
 		}
+
+		if (Local_AVPacket)
+		{
+			av_packet_free(&Local_AVPacket);
+		}
 	}
 };
 
@@ -89,32 +97,49 @@ struct FMediaTime
 {
 	GENERATED_BODY()
 
-		//小时
-		UPROPERTY(BlueprintReadWrite)
-		int32 Hours;
+	//小时
+	UPROPERTY(BlueprintReadWrite)
+	int32 Hours;
 
 	//分钟
 	UPROPERTY(BlueprintReadWrite)
-		int32 Minutes;
+	int32 Minutes;
 
 	//秒
 	UPROPERTY(BlueprintReadWrite)
-		int32 Seconds;
+	int32 Seconds;
 
 	//帧
 	UPROPERTY(BlueprintReadWrite)
-		int32 Frames;
+	int32 Frames;
 
 	FMediaTime()
 	{
 
 	}
 
-	FMediaTime(int64 Duration)
+	/**
+	 * @param Duration us
+	 */
+	FMediaTime(int64 Duration, float FPS)
 	{
-		const double FrameIntervalTime = 1.00 / 30.00;
-		Frames = Duration <= 0 ? 0 : (Duration % AV_TIME_BASE) / 1000 / (FrameIntervalTime * 1000);
+		const double FrameIntervalTime = 1.00 / FPS * AV_TIME_BASE;
+		Frames = Duration <= 0 ? 0 : (Duration % AV_TIME_BASE) / FrameIntervalTime;
 		int32 TotalSeconds = Duration / AV_TIME_BASE;
+		Hours = TotalSeconds / 3600;
+		Minutes = TotalSeconds / 60;
+		Seconds = TotalSeconds % 60;
+	}
+
+	/**
+	 * @param Duration seconds
+	 */
+	FMediaTime(float Duration, float FPS)
+	{
+		int64 Duration_s = Duration * 1000000;
+		const double FrameIntervalTime = 1.00 / FPS * AV_TIME_BASE;
+		Frames = Duration_s <= 0 ? 0 : (Duration_s % AV_TIME_BASE) / FrameIntervalTime;
+		int32 TotalSeconds = Duration_s / AV_TIME_BASE;
 		Hours = TotalSeconds / 3600;
 		Minutes = TotalSeconds / 60;
 		Seconds = TotalSeconds % 60;
@@ -228,8 +253,12 @@ public:
 	static FString TimeFormat(int32 Num);
 
 	//视频时长(us)转为 FTime 格式
-	UFUNCTION(BlueprintPure, Category = "FFmpegExtension|Utilities")
-	static FMediaTime VideoDurationToTime(int64 Duration);
+	UFUNCTION(BlueprintPure, Category = "FFmpegExtension|Utilities", DisplayName = "VideoDuration(us)ToTime")
+	static FMediaTime VideoDurationToTime_us(int64 Duration, float FPS);
+
+	//视频时长(s)转为 FTime 格式
+	UFUNCTION(BlueprintPure, Category = "FFmpegExtension|Utilities", DisplayName = "VideoDuration(s)ToTime")
+	static FMediaTime VideoDurationToTime_s(float Duration, float FPS);
 
 	UFUNCTION(BlueprintPure, Category = "FFmpegExtension|Utilities", DisplayName = "ToString")
 	static FString VideoTimeToString(FMediaTime Time);

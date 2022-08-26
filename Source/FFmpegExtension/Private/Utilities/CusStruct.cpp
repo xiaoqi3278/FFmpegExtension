@@ -8,9 +8,14 @@ FString UCusStruct::TimeFormat(int32 Num)
 	return Num < 10 ? "0" + FString::FromInt(Num) : FString::FromInt(Num);
 }
 
-FMediaTime UCusStruct::VideoDurationToTime(int64 Duration)
+FMediaTime UCusStruct::VideoDurationToTime_us(int64 Duration, float FPS)
 {
-	return FMediaTime(Duration);
+	return FMediaTime(Duration, FPS);
+}
+
+FMediaTime UCusStruct::VideoDurationToTime_s(float Duration, float FPS)
+{
+	return FMediaTime(Duration, FPS);
 }
 
 FString UCusStruct::VideoTimeToString(FMediaTime Time)
