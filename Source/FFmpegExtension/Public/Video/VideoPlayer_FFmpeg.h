@@ -97,7 +97,7 @@ public:
 	UFUNCTION()
 	void UpdateFrameTexture();
 	
-	void VideoThread();
+	void DecodeThread();
 
 	//打开视频
 	UFUNCTION(BlueprintCallable, Category = "FFmpegExtension|Video")

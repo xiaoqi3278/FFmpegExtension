@@ -24,7 +24,7 @@ void UVideoPlayer_FFmpeg::SynchronizeProperties()
 		OpenVideo();
 	}
 }
-void UVideoPlayer_FFmpeg::VideoThread()
+void UVideoPlayer_FFmpeg::DecodeThread()
 {
 	FFmpegParam = new FLocal_FFmpegParam();
 
@@ -226,7 +226,7 @@ void UVideoPlayer_FFmpeg::VideoThread()
 
 			//将数据包发送到解码队列
 			bIsSending = true;
-			UE_LOG(LogTemp, Warning, TEXT("Sending， %d"), FFmpegParam->Local_AVPacket->pts);
+			//UE_LOG(LogTemp, Warning, TEXT("Sending， %d"), FFmpegParam->Local_AVPacket->pts);
 			ret = avcodec_send_packet(FFmpegParam->Local_AVCodecContext, FFmpegParam->Local_AVPacket);
 			bIsSending = false;
 			if (ret == AVERROR(EAGAIN))
@@ -346,7 +346,7 @@ void UVideoPlayer_FFmpeg::OpenVideo()
 
 	FrameQueue_std->SetBufferSize(VideoInfo.BufferSize);
 
-	std::thread VideoThread(&UVideoPlayer_FFmpeg::VideoThread, this);
+	std::thread VideoThread(&UVideoPlayer_FFmpeg::DecodeThread, this);
 	VideoThread.detach();
 	UE_LOG(LogTemp, Warning, TEXT("Video Player Object: %s, Is Constructed!"), *this->GetName());
 
@@ -538,6 +538,7 @@ bool UVideoPlayer_FFmpeg::Seek(FMediaTime Time)
 	DecodeState = EDecodeState::Seeking;
 	//跳转到指定位置
 	int32 ret = av_seek_frame(FFmpegParam->Local_AVFormatContext, VideoInfo.ValidFirstVideoStreamIndex, pts, AVSEEK_FLAG_BACKWARD);
+	//ret = avformat_seek_file(FFmpegParam->Local_AVFormatContext, )
 	if (ret < 0)
 	{
 		DecodeState = OldDecodeState;
@@ -547,6 +548,18 @@ bool UVideoPlayer_FFmpeg::Seek(FMediaTime Time)
 	FrameQueue_std->bCanPush = false;
 
 	avcodec_flush_buffers(FFmpegParam->Local_AVCodecContext);
+
+#if 1	//重置解码器上下文
+	avcodec_close(FFmpegParam->Local_AVCodecContext);
+	avcodec_free_context(&FFmpegParam->Local_AVCodecContext);
+	FFmpegParam->Local_AVCodecContext = NULL;
+	FFmpegParam->Local_AVCodecContext = avcodec_alloc_context3(FFmpegParam->Local_AVCodec);
+	av_opt_set(FFmpegParam->Local_AVCodecContext->priv_data, "tune", "zerolatency", 0);
+	//为编解码器上下文设置参数
+	avcodec_parameters_to_context(FFmpegParam->Local_AVCodecContext, FFmpegParam->Local_AVStream->codecpar);
+	//初始化一个视音频编解码器的上下文
+	avcodec_open2(FFmpegParam->Local_AVCodecContext, FFmpegParam->Local_AVCodec, NULL);
+#endif
 
 	while (FrameQueue_std->GetFrameNum() > 0)
 	{
