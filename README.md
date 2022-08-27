@@ -28,7 +28,7 @@
 
 1. <details>
    <summary>视频播放-----VideoPlayer_FFmpeg</summary>
-   视频播放对象以控件方式存在，继承自 UImage ，
+   * 视频播放对象以控件方式存在，继承自 UImage
    </details>
 
 2. 
