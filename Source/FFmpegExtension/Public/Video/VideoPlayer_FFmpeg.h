@@ -123,7 +123,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "FFmpegExtension|Video")
 	void SetVideoRatio(EVideoRatio KeepVideoRatio);
 
-	//获取视频单帧所占内存大小(单位: M)
+	//获取视频单帧所占缓存大小(单位: MB)
 	UFUNCTION(BlueprintPure, Category = "FFmpegExtension|Video")
 	float GetFrameBufferSize();
 
@@ -137,7 +137,9 @@ public:
 
 	//获取视频信息
 	UFUNCTION(BlueprintPure, Category = "FFmpegExtension|Video")
-	FString GetVideoInfo();
+	FString GetVideoInfoAsString();
+	UFUNCTION(BlueprintPure, Category = "FFmpegExtension|Video")
+	FVideoInfo GetVideoInfo();
 
 	//跳转到某个时间点
 	UFUNCTION(BlueprintCallable, Category = "FFmpegExtension|Video")

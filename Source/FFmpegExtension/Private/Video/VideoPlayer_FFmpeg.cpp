@@ -14,6 +14,7 @@ extern "C"
 #include "libavutil/imgutils.h"
 }
 
+std::mutex some_mutex;
 
 void UVideoPlayer_FFmpeg::SynchronizeProperties()
 {
@@ -226,8 +227,10 @@ void UVideoPlayer_FFmpeg::DecodeThread()
 
 			//将数据包发送到解码队列
 			bIsSending = true;
+			//some_mutex.lock();
 			//UE_LOG(LogTemp, Warning, TEXT("Sending， %d"), FFmpegParam->Local_AVPacket->pts);
 			ret = avcodec_send_packet(FFmpegParam->Local_AVCodecContext, FFmpegParam->Local_AVPacket);
+			//some_mutex.unlock();
 			bIsSending = false;
 			if (ret == AVERROR(EAGAIN))
 			{
@@ -267,6 +270,7 @@ void UVideoPlayer_FFmpeg::DecodeThread()
 
 			av_packet_unref(FFmpegParam->Local_AVPacket);
 		}
+		std::this_thread::sleep_for(std::chrono::milliseconds(VideoInfo.FrameDecodeInterval_ms));
 	}
 	
 _Error:
@@ -325,7 +329,7 @@ void UVideoPlayer_FFmpeg::CloseVideo()
 	OnVideoError.Clear();
 	OnVideoPlayEnd.Clear();
 
-	UE_LOG(LogTemp, Warning, TEXT("%d"), FrameQueue_std->GetFrameNum());
+	//UE_LOG(LogTemp, Warning, TEXT("%d"), FrameQueue_std->GetFrameNum());
 
 	//清空缓冲区
 	while(FrameQueue_std->GetFrameNum() > 0)
@@ -512,12 +516,15 @@ FMediaTime UVideoPlayer_FFmpeg::GetVideoTime()
 	return VideoInfo.VideoTime;
 }
 
-FString UVideoPlayer_FFmpeg::GetVideoInfo()
+FString UVideoPlayer_FFmpeg::GetVideoInfoAsString()
 {
 	return UCusStruct::VideoInfoToString(VideoInfo);
 }
 
-std::mutex some_mutex;
+FVideoInfo UVideoPlayer_FFmpeg::GetVideoInfo()
+{
+	return VideoInfo;
+}
 
 bool UVideoPlayer_FFmpeg::Seek(FMediaTime Time)
 {
@@ -534,6 +541,7 @@ bool UVideoPlayer_FFmpeg::Seek(FMediaTime Time)
 
 	//挂起解码线程
 	std::lock_guard<std::mutex> guard(some_mutex);
+	//some_mutex.lock();
 	EDecodeState OldDecodeState = DecodeState;
 	DecodeState = EDecodeState::Seeking;
 	//跳转到指定位置

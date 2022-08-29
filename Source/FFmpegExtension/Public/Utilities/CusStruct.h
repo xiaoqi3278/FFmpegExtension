@@ -210,11 +210,15 @@ struct FVideoInfo
 	//视频总时长(FTime)
 	FMediaTime VideoTime;
 
-	//帧间隔时间(毫秒)
+	//解码线程每帧解码后等待的时间
+	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
+	int64 FrameDecodeInterval_ms = 10;
+
+	//帧渲染间隔时间(毫秒)
 	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
 	int32 FrameInterval_ms;
 
-	//帧间隔时间(秒)
+	//帧渲染间隔时间(秒)
 	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
 	float FrameInterval_s;
 
