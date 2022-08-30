@@ -131,3 +131,25 @@ int32 UCusEnum::GetScaleFlagFFmpegIndex(EScaleFlag ScaleFlag)
 
 	return 1;
 }
+
+int32 UCusEnum::ESampleRateToInt(ESampleRate SampleRate)
+{
+	switch (SampleRate)
+	{
+	case ESampleRate::E_44100 :
+		return 44100;
+	case ESampleRate::E_48000 :
+		return 48000;
+	case ESampleRate::E_96000 :
+		return 96000;
+	case ESampleRate::E_192000 :
+		return 192000;
+	default:
+		return 44100;
+	}
+}
+
+AVSampleFormat UCusEnum::ESampleFormatToAVSampleFormat(ESampleFormat SampleFormat)
+{
+	return AVSampleFormat{static_cast<AVSampleFormat>(SampleFormat)};
+}

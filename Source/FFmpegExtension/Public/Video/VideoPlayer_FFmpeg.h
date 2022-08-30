@@ -44,27 +44,27 @@ public:
 	SConstraintCanvas::FSlot* ParentSlateSlot;
 
 	//视频相关参数
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Video|VideoPlayer", meta = (ExposeOnSpawn = true))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension", meta = (ExposeOnSpawn = true))
 	FVideoInfo VideoInfo;
 
 	//获取视频流成功
-	UPROPERTY(BlueprintAssignable, Category = "FFmpegExtension|Video|VideoPlayer")
+	UPROPERTY(BlueprintAssignable, Category = "FFmpegExtension")
 	FOnFindVideoSuccessfully OnFindVideoSuccessfully;
 
 	//视频开始播放
-	UPROPERTY(BlueprintAssignable, Category = "FFmpegExtension|Video|VideoPlayer")
+	UPROPERTY(BlueprintAssignable, Category = "FFmpegExtension")
 	FOnVideoPlayBegin OnVideoPlayBegin;
 
 	//视频播放完成
-	UPROPERTY(BlueprintAssignable, Category = "FFmpegExtension|Video|VideoPlayer")
+	UPROPERTY(BlueprintAssignable, Category = "FFmpegExtension")
 	FOnVideoPlayEnd OnVideoPlayEnd;
 
 	//视频播放失败
-	UPROPERTY(BlueprintAssignable, Category = "FFmpegExtension|Video|VideoPlayer")
+	UPROPERTY(BlueprintAssignable, Category = "FFmpegExtension")
 	FOnVideoError OnVideoError;
 
 	//视频每次循环时调用, 返回循环次数
-	UPROPERTY(BlueprintAssignable, Category = "FFmpegExtension|Video|VideoPlayer")
+	UPROPERTY(BlueprintAssignable, Category = "FFmpegExtension")
 	FOnVideoLoop OnVideoLoop;
 
 	//控制解码线程退出

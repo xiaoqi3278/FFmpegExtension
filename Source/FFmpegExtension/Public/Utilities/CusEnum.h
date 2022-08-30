@@ -5,6 +5,7 @@
 #include <string>
 
 #include "CoreMinimal.h"
+#include "libavutil/samplefmt.h"
 
 extern "C"
 {
@@ -40,6 +41,7 @@ enum class EDecodeState : uint8
 	Seeking
 };
 
+//引擎图像更新方式
 UENUM(BlueprintType)
 enum class EUpdateTextureMethod : uint8
 {
@@ -49,6 +51,7 @@ enum class EUpdateTextureMethod : uint8
 	RHICommand UMETA(DisplayName = "RHICommand")
 };
 
+//像素格式
 UENUM(BlueprintType)
 enum class EPixFormat : uint8
 {
@@ -83,6 +86,7 @@ enum class EPixFormat : uint8
 	BGRA
 };
 
+//编解码器
 UENUM(BlueprintType)
 enum class ECoder : uint8
 {
@@ -151,6 +155,73 @@ enum class EScaleFlag : uint8
 	E_SWS_SPLINE
 };
 
+//采样率
+UENUM(BlueprintType)
+enum class ESampleRate : uint8
+{
+	E_44100 UMETA(DisplayName = "44100 HZ"),
+	E_48000 UMETA(DisplayName = "48000 HZ"),
+	E_96000 UMETA(DisplayName = "96000 HZ"),
+	E_192000 UMETA(DisplayName = "192000 HZ")
+
+};
+
+//采样格式
+UENUM(BlueprintType)
+enum class ESampleFormat : uint8
+{
+	E_SAMPLE_FMT_U8,          ///< unsigned 8 bits
+	E_SAMPLE_FMT_S16,         ///< signed 16 bits
+	E_SAMPLE_FMT_S32,         ///< signed 32 bits
+	E_SAMPLE_FMT_FLT,         ///< float
+	E_SAMPLE_FMT_DBL,         ///< double
+
+	E_SAMPLE_FMT_U8P,         ///< unsigned 8 bits, planar
+	E_SAMPLE_FMT_S16P,        ///< signed 16 bits, planar
+	E_SAMPLE_FMT_S32P,        ///< signed 32 bits, planar
+	E_SAMPLE_FMT_FLTP,        ///< float, planar
+	E_SAMPLE_FMT_DBLP,        ///< double, planar
+	E_SAMPLE_FMT_S64,         ///< signed 64 bits
+	E_SAMPLE_FMT_S64P,        ///< signed 64 bits, planar
+
+	E_SAMPLE_FMT_NB           ///< Number of sample formats. DO NOT USE if linking dynamically
+};
+
+//声道布局
+UENUM(BlueprintType)
+enum class EChannelLayout : uint8
+{
+	E_CH_LAYOUT_MONO,
+	E_CH_LAYOUT_STEREO,
+	E_CH_LAYOUT_2POINT1,
+	E_CH_LAYOUT_2_1,
+	E_CH_LAYOUT_SURROUND,
+	E_CH_LAYOUT_3POINT1,
+	E_CH_LAYOUT_4POINT0,
+	E_CH_LAYOUT_4POINT1,
+	E_CH_LAYOUT_2_2,
+	E_CH_LAYOUT_QUAD,
+	E_CH_LAYOUT_5POINT0,
+	E_CH_LAYOUT_5POINT1,
+	E_CH_LAYOUT_5POINT0_BACK,
+	E_CH_LAYOUT_5POINT1_BACK,
+	E_CH_LAYOUT_6POINT0,
+	E_CH_LAYOUT_6POINT0_FRONT,
+	E_CH_LAYOUT_HEXAGONAL,
+	E_CH_LAYOUT_6POINT1,
+	E_CH_LAYOUT_6POINT1_BACK,
+	E_CH_LAYOUT_6POINT1_FRONT,
+	E_CH_LAYOUT_7POINT0,
+	E_CH_LAYOUT_7POINT0_FRONT,
+	E_CH_LAYOUT_7POINT1,
+	E_CH_LAYOUT_7POINT1_WIDE,
+	E_CH_LAYOUT_7POINT1_WIDE_BACK,
+	E_CH_LAYOUT_OCTAGONAL,
+	E_CH_LAYOUT_HEXADECAGONAL,
+	E_CH_LAYOUT_STEREO_DOWNMIX,
+	E_CH_LAYOUT_22POINT2          
+};
+
 UCLASS()
 class FFMPEGEXTENSION_API UCusEnum : public UObject
 {
@@ -168,4 +239,8 @@ public:
 	static std::string TuneParamToStandardString(ETuneParam TuneParam);
 
 	static int32 GetScaleFlagFFmpegIndex(EScaleFlag ScaleFlag);
+
+	static int32 ESampleRateToInt(ESampleRate SampleRate);
+
+	static AVSampleFormat ESampleFormatToAVSampleFormat(ESampleFormat SampleFormat);
 };

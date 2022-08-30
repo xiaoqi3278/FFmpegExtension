@@ -50,8 +50,26 @@ public class FFmpegExtension : ModuleRules
 		return true;
 	}
 
+	public bool LoadSDL(ReadOnlyTargetRules Target)
+    {
+		string SDLPath = Path.Combine(ThirdParty, "SDL");
+		string LibPath = Path.Combine(SDLPath, "lib/x64");
+		string DLLPath = Path.Combine(SDLPath, "lib/x64");
+
+		PublicIncludePaths.AddRange(new string[] { Path.Combine(SDLPath, "include") });
+
+		PublicAdditionalLibraries.Add(Path.Combine(LibPath, "SDL2.lib"));
+		PublicAdditionalLibraries.Add(Path.Combine(LibPath, "SDL2main.lib"));
+		PublicAdditionalLibraries.Add(Path.Combine(LibPath, "SDL2test.lib"));
+
+		PublicDelayLoadDLLs.Add(Path.Combine(DLLPath + "SDL2.dll"));
+
+
+		return true;
+	}
+
 	public FFmpegExtension(ReadOnlyTargetRules Target) : base(Target)
-	{
+	{ 
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		
 		PublicIncludePaths.AddRange(
@@ -98,5 +116,6 @@ public class FFmpegExtension : ModuleRules
 			);
 
 		LoadFFmpeg(Target);
+		LoadSDL(Target);
 	}
 }

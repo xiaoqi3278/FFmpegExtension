@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "CusEnum.h"
+#include "libswresample/swresample.h"
 #include "UObject/NoExportTypes.h"
 
 extern "C"
@@ -46,6 +47,8 @@ public:
 
 	//图像转换上下文,提供图像缩放、图像格式转换等功能
 	SwsContext* Local_SwsContext = NULL;
+	//音频重采样上下文
+	SwrContext* Local_SwrContext = NULL;
 
 	AVStream* Local_AVStream = NULL;
 
@@ -62,6 +65,10 @@ public:
 		if (Local_SwsContext)
 		{
 			sws_freeContext(Local_SwsContext);
+		}
+		if (Local_SwrContext)
+		{
+			swr_free(&Local_SwrContext);
 		}
 
 		if (Local_AVCodecContext)
@@ -152,88 +159,88 @@ struct FVideoInfo
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video")
 	bool bAutoPlay = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video")
 	bool bLoop = false;
 
 	bool bIsPaused = false;
 
 	//视频地址
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video")
 	FString VideoURL;
 
 	//帧缓冲区大小(计算方式: 一帧所需缓冲区大小(MB) = (分辨率X * 分辨率Y * 4) / 1024 / 1024)
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer", meta = (DisplayName = "BufferSize(MB)"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video", meta = (DisplayName = "BufferSize(MB)"))
 	float BufferSize = 100;
 
 	//是否输出到日志,可能会影响性能
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video")
 	bool bOutLog = false;
 
 	//视频帧更新方法
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video")
 	EUpdateTextureMethod UpdateTextureMethod;
 
 	/** 预期大小 */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video")
 	FVector2D ExpectedSize;
 
 	/** 保持宽高比 */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video")
 	EVideoRatio VideoRatio;
 
 	UTexture2D* VideoTexture;
 	FUpdateTextureRegion2D Region;
 
 	//视频帧率
-	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
+	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video")
 	float FPS;
 
 	//首个可用的视频流
-	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
+	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video")
 	int32 ValidFirstVideoStreamIndex = -1;
 
 	//视频总时长(秒)
-	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
+	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video")
 	int32 VideoTime_s;
 
 	//视频总时长(毫秒)
-	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
+	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video")
 	int64 VideoTime_ms;
 
 	//视频总时长(微秒)
-	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
+	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video")
 	int64 VideoTime_us;
 
 	//视频总时长(FTime)
 	FMediaTime VideoTime;
 
 	//解码线程每帧解码后等待的时间
-	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
+	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video")
 	int64 FrameDecodeInterval_ms = 10;
 
 	//帧渲染间隔时间(毫秒)
-	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
+	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video")
 	int32 FrameInterval_ms;
 
 	//帧渲染间隔时间(秒)
-	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
+	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video")
 	float FrameInterval_s;
 
 	//单帧缓冲大小
 	float FrameBufferSize = 0;
 
 	//帧宽
-	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
+	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video")
 	int32 FrameWidth;
 	//帧高
-	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
+	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video")
 	int32 FrameHeight;
 
 	//循环次数
-	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video|VideoPlayer")
+	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video")
 	int32 LoopIndex = 0;
 
 	~FVideoInfo()
@@ -244,6 +251,37 @@ struct FVideoInfo
 			//FrameBuffer = nullptr;
 		//}
 	}
+};
+
+//音频相关
+USTRUCT(BlueprintType)
+struct FAudioInfo
+{
+	GENERATED_BODY()
+
+	//是否自动播放
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Audio")
+	bool bAutoPlay = false;
+
+	//是否自动循环
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Audio")
+	bool bLoop = false;
+
+	//视频地址
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Audio")
+	FString AudioURL;
+
+	//首个可用的音频流
+	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Audio")
+	int32 ValidFirstAudioStreamIndex = -1;
+
+	//输出音频采样率
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Audio")
+	ESampleRate OutSampleRate = ESampleRate::E_44100;
+
+	//输出音频采样格式
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Audio")
+	ESampleFormat OutSampleFormat = ESampleFormat::E_SAMPLE_FMT_S16;
 };
 
 UCLASS()
