@@ -19,13 +19,21 @@ class FFMPEGEXTENSION_API UFFmpegFunctionLib : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 	
 public:
-	static FORCEINLINE void OutLog(UObject* CallObject, bool bOutLog, const FString OutMessage)
+	static FORCEINLINE void OutLog(UObject* CallObject, bool bOutLog, FString OutMessage)
 	{
 		if (bOutLog)
 		{
-			AsyncTask(ENamedThreads::GameThread, [&]()
+			//UE_LOG(LogTemp, Warning, TEXT("%s"), *OutMessage);
+			AsyncTask(ENamedThreads::GameThread, [=]()
 				{
-					UE_LOG(FFmpegExtensionLog, Warning, TEXT("PlayerObject: %s, %s"), *CallObject->GetName(), *OutMessage);
+					if (CallObject)
+					{
+						UE_LOG(FFmpegExtensionLog, Warning, TEXT("PlayerObject: %s, %s"), *CallObject->GetName(), *OutMessage);
+					}
+					else
+					{
+						UE_LOG(FFmpegExtensionLog, Warning, TEXT("PlayerObject: None, %s"), *OutMessage);
+					}
 				});
 		}
 	}

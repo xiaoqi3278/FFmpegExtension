@@ -5,11 +5,12 @@
 #include <string>
 
 #include "CoreMinimal.h"
-#include "libavutil/samplefmt.h"
 
 extern "C"
 {
 #include "libavcodec/codec_id.h"
+#include "libavutil/channel_layout.h"
+#include "libavutil/samplefmt.h"
 }
 
 #include "UObject/NoExportTypes.h"
@@ -46,9 +47,9 @@ UENUM(BlueprintType)
 enum class EUpdateTextureMethod : uint8
 {
 	//使用内存复制的方式更新视频帧
-	Memcpy UMETA(DisplayName = "Memcpy"),
+	Memcpy		UMETA(DisplayName = "Memcpy"),
 	//将视频帧数据发送到渲染线程更新
-	RHICommand UMETA(DisplayName = "RHICommand")
+	RHICommand	UMETA(DisplayName = "RHICommand")
 };
 
 //像素格式
@@ -159,10 +160,10 @@ enum class EScaleFlag : uint8
 UENUM(BlueprintType)
 enum class ESampleRate : uint8
 {
-	E_44100 UMETA(DisplayName = "44100 HZ"),
-	E_48000 UMETA(DisplayName = "48000 HZ"),
-	E_96000 UMETA(DisplayName = "96000 HZ"),
-	E_192000 UMETA(DisplayName = "192000 HZ")
+	E_44100		UMETA(DisplayName = "44100 HZ"),
+	E_48000		UMETA(DisplayName = "48000 HZ"),
+	E_96000		UMETA(DisplayName = "96000 HZ"),
+	E_192000	UMETA(DisplayName = "192000 HZ")
 
 };
 
@@ -191,35 +192,35 @@ enum class ESampleFormat : uint8
 UENUM(BlueprintType)
 enum class EChannelLayout : uint8
 {
-	E_CH_LAYOUT_MONO,
-	E_CH_LAYOUT_STEREO,
-	E_CH_LAYOUT_2POINT1,
-	E_CH_LAYOUT_2_1,
-	E_CH_LAYOUT_SURROUND,
-	E_CH_LAYOUT_3POINT1,
-	E_CH_LAYOUT_4POINT0,
-	E_CH_LAYOUT_4POINT1,
-	E_CH_LAYOUT_2_2,
-	E_CH_LAYOUT_QUAD,
-	E_CH_LAYOUT_5POINT0,
-	E_CH_LAYOUT_5POINT1,
-	E_CH_LAYOUT_5POINT0_BACK,
-	E_CH_LAYOUT_5POINT1_BACK,
-	E_CH_LAYOUT_6POINT0,
-	E_CH_LAYOUT_6POINT0_FRONT,
-	E_CH_LAYOUT_HEXAGONAL,
-	E_CH_LAYOUT_6POINT1,
-	E_CH_LAYOUT_6POINT1_BACK,
-	E_CH_LAYOUT_6POINT1_FRONT,
-	E_CH_LAYOUT_7POINT0,
-	E_CH_LAYOUT_7POINT0_FRONT,
-	E_CH_LAYOUT_7POINT1,
-	E_CH_LAYOUT_7POINT1_WIDE,
-	E_CH_LAYOUT_7POINT1_WIDE_BACK,
-	E_CH_LAYOUT_OCTAGONAL,
-	E_CH_LAYOUT_HEXADECAGONAL,
-	E_CH_LAYOUT_STEREO_DOWNMIX,
-	E_CH_LAYOUT_22POINT2          
+	E_CH_LAYOUT_MONO					UMETA(DisplayName = "mono")				,
+	E_CH_LAYOUT_STEREO					UMETA(DisplayName = "stereo")			,
+	E_CH_LAYOUT_2POINT1					UMETA(DisplayName = "2.1")				,
+	E_CH_LAYOUT_2_1						UMETA(DisplayName = "3.0")				,
+	E_CH_LAYOUT_SURROUND				UMETA(DisplayName = "3.0(back)")		,
+	E_CH_LAYOUT_3POINT1					UMETA(DisplayName = "4.0")				,
+	E_CH_LAYOUT_4POINT0					UMETA(DisplayName = "quad")				,
+	E_CH_LAYOUT_4POINT1					UMETA(DisplayName = "quad(side)")		,
+	E_CH_LAYOUT_2_2						UMETA(DisplayName = "3.1")				,
+	E_CH_LAYOUT_QUAD					UMETA(DisplayName = "5.0")				,
+	E_CH_LAYOUT_5POINT0					UMETA(DisplayName = "5.0(side)")		,
+	E_CH_LAYOUT_5POINT1					UMETA(DisplayName = "4.1")				,
+	E_CH_LAYOUT_5POINT0_BACK			UMETA(DisplayName = "5.1")				,
+	E_CH_LAYOUT_5POINT1_BACK			UMETA(DisplayName = "5.1(side)")		,
+	E_CH_LAYOUT_6POINT0					UMETA(DisplayName = "6.0")				,
+	E_CH_LAYOUT_6POINT0_FRONT			UMETA(DisplayName = "6.0(front)")		,
+	E_CH_LAYOUT_HEXAGONAL				UMETA(DisplayName = "hexagonal")		,
+	E_CH_LAYOUT_6POINT1					UMETA(DisplayName = "6.1")				,
+	E_CH_LAYOUT_6POINT1_BACK			UMETA(DisplayName = "6.1(back)")		,
+	E_CH_LAYOUT_6POINT1_FRONT			UMETA(DisplayName = "6.1(front)")		,
+	E_CH_LAYOUT_7POINT0					UMETA(DisplayName = "7.0")				,
+	E_CH_LAYOUT_7POINT0_FRONT			UMETA(DisplayName = "7.0(front)")		,
+	E_CH_LAYOUT_7POINT1					UMETA(DisplayName = "7.1")				,
+	E_CH_LAYOUT_7POINT1_WIDE			UMETA(DisplayName = "7.1(wide)")		,
+	E_CH_LAYOUT_7POINT1_WIDE_BACK		UMETA(DisplayName = "7.1(wide-side)")	,
+	E_CH_LAYOUT_OCTAGONAL				UMETA(DisplayName = "octagonal")		,
+	E_CH_LAYOUT_HEXADECAGONAL			UMETA(DisplayName = "hexadecagonal")	,
+	E_CH_LAYOUT_STEREO_DOWNMIX			UMETA(DisplayName = "downmix")			,
+	E_CH_LAYOUT_22POINT2          		UMETA(DisplayName = "22.2")				
 };
 
 UCLASS()
@@ -243,4 +244,6 @@ public:
 	static int32 ESampleRateToInt(ESampleRate SampleRate);
 
 	static AVSampleFormat ESampleFormatToAVSampleFormat(ESampleFormat SampleFormat);
+
+	static uint64_t EChannelLayoutToint64(EChannelLayout ChannelLayout);
 };

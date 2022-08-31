@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "CusEnum.h"
-#include "libswresample/swresample.h"
 #include "UObject/NoExportTypes.h"
 
 extern "C"
@@ -12,6 +11,7 @@ extern "C"
 #include "libavcodec/avcodec.h"
 #include "libavformat/avformat.h"
 #include "libswscale/swscale.h"
+#include "libswresample/swresample.h"
 }
 
 #include "CusStruct.generated.h"
@@ -60,8 +60,9 @@ public:
 		Local_AVPacket = av_packet_alloc();
 	};
 
-	void ReleaseFFmpegParam()
+	~FLocal_FFmpegParam()
 	{
+		avformat_close_input(&Local_AVFormatContext);
 		if (Local_SwsContext)
 		{
 			sws_freeContext(Local_SwsContext);
@@ -159,36 +160,36 @@ struct FVideoInfo
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Video")
 	bool bAutoPlay = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Video")
 	bool bLoop = false;
 
 	bool bIsPaused = false;
 
 	//视频地址
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Video")
 	FString VideoURL;
 
 	//帧缓冲区大小(计算方式: 一帧所需缓冲区大小(MB) = (分辨率X * 分辨率Y * 4) / 1024 / 1024)
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video", meta = (DisplayName = "BufferSize(MB)"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Video", meta = (DisplayName = "BufferSize(MB)"))
 	float BufferSize = 100;
 
 	//是否输出到日志,可能会影响性能
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Video")
 	bool bOutLog = false;
 
 	//视频帧更新方法
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Video")
 	EUpdateTextureMethod UpdateTextureMethod;
 
 	/** 预期大小 */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Video")
 	FVector2D ExpectedSize;
 
 	/** 保持宽高比 */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Video")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Video")
 	EVideoRatio VideoRatio;
 
 	UTexture2D* VideoTexture;
@@ -260,15 +261,20 @@ struct FAudioInfo
 	GENERATED_BODY()
 
 	//是否自动播放
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Audio")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Audio")
 	bool bAutoPlay = false;
 
 	//是否自动循环
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Audio")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Audio")
 	bool bLoop = false;
 
-	//视频地址
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Audio")
+	bool bIsPaused = false;
+
+	uint8_t* Buffer = nullptr;
+	int32 BufferLen = 0;
+
+	//音频地址
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Audio")
 	FString AudioURL;
 
 	//首个可用的音频流
@@ -276,12 +282,24 @@ struct FAudioInfo
 	int32 ValidFirstAudioStreamIndex = -1;
 
 	//输出音频采样率
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Audio")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Audio")
 	ESampleRate OutSampleRate = ESampleRate::E_44100;
 
 	//输出音频采样格式
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FFmpegExtension|Audio")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Audio")
 	ESampleFormat OutSampleFormat = ESampleFormat::E_SAMPLE_FMT_S16;
+
+	//输出声道布局
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Audio")
+	EChannelLayout OutChannelLayout = EChannelLayout::E_CH_LAYOUT_STEREO;
+
+	//输出声道数量
+	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Audio")
+	int32 OutChannelCount;
+
+	//帧缓冲区大小
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Audio", meta = (DisplayName = "BufferSize(MB)"))
+	float BufferSize = 10;
 };
 
 UCLASS()

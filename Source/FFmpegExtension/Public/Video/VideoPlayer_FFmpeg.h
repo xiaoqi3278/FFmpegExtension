@@ -81,7 +81,15 @@ public:
 public:
 	UVideoPlayer_FFmpeg()
 	{
-		FrameQueue_std = new FrameQueue();
+		VideoQueue = new FrameQueue();
+	}
+	~UVideoPlayer_FFmpeg()
+	{
+		if (VideoQueue != nullptr)
+		{
+			delete VideoQueue;
+			VideoQueue = nullptr;
+		}
 	}
 
 	virtual void SynchronizeProperties() override;
@@ -146,7 +154,8 @@ public:
 	bool Seek(FMediaTime Time);
 
 private:
-	FrameQueue* FrameQueue_std;
+	//视频帧缓冲队列
+	FrameQueue* VideoQueue;
 
 	//使用 EUpdateTextureMethod::Memcpy 时 Realloc 的帧数据指针
 	void* TextureData = nullptr;

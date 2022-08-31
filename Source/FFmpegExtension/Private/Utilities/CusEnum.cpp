@@ -153,3 +153,18 @@ AVSampleFormat UCusEnum::ESampleFormatToAVSampleFormat(ESampleFormat SampleForma
 {
 	return AVSampleFormat{static_cast<AVSampleFormat>(SampleFormat)};
 }
+
+uint64_t UCusEnum::EChannelLayoutToint64(EChannelLayout ChannelLayout)
+{
+	switch(ChannelLayout)
+	{
+	case EChannelLayout::E_CH_LAYOUT_MONO :
+		return AV_CH_LAYOUT_MONO;
+		break;
+	case EChannelLayout::E_CH_LAYOUT_STEREO :
+		return AV_CH_LAYOUT_STEREO;
+		break;
+	default:
+		return AV_CH_LAYOUT_STEREO;
+	}
+}

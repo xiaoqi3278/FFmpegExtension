@@ -62,6 +62,11 @@ public:
 		FrameBufferSize = InFrameBufferSize;
 	}
 
+	float GetFrameBufferSize()
+	{
+		return FrameBufferSize;
+	}
+
 	void SetBufferSize(float InBufferSize)
 	{
 		BufferSize = InBufferSize;
