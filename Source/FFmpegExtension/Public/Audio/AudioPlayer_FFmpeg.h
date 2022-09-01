@@ -68,6 +68,7 @@ public:
 
 	virtual void PostInitProperties() override;
 	virtual UWorld* GetWorld() const override;
+	virtual void BeginDestroy() override;
 
 	void ErrorLog(FString ErrorMessage);
 

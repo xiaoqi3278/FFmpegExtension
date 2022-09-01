@@ -99,6 +99,31 @@ public:
 	}
 };
 
+//音频重采样时一帧音频信息
+struct FAudioFrameData
+{
+	//指向缓冲区的指针
+	uint8_t** AudioData = nullptr;
+
+	//缓冲区大小
+	int32 LineSize = 0;
+
+	//声道数
+	int32 Channels = 0;
+
+	//每个采样样本的大小
+	int32 PerSampleInByte = 0;
+
+	//缓冲区样本数量
+	int32 Samples = 0;
+
+	//采样率
+	int32 SampleRate = 0;
+
+	//采样格式
+	AVSampleFormat Format;
+};
+
 //时长
 USTRUCT(BlueprintType)
 struct FMediaTime
