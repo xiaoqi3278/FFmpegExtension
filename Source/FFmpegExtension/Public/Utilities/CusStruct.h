@@ -109,7 +109,7 @@ struct FAudioFrameData
 	int32 LineSize = 0;
 
 	//声道数
-	int32 Channels = 0;
+	uint64_t Channels = 0;
 
 	//每个采样样本的大小
 	int32 PerSampleInByte = 0;

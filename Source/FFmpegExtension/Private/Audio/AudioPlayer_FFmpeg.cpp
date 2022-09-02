@@ -205,7 +205,7 @@ void UAudioPlayer_FFmpeg::DecodeThread()
 	//输出缓冲区
 	FAudioFrameData* OutData = new FAudioFrameData();
 	OutData->Channels = UCusEnum::EChannelLayoutToint64(AudioInfo.OutChannelLayout);
-	InData->Format = AV_SAMPLE_FMT_S16;
+	OutData->Format = AV_SAMPLE_FMT_S16;
 	OutData->PerSampleInByte = InData->Channels * av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
 	//OutData->Samples = 1024;
 	OutData->SampleRate = UCusEnum::ESampleRateToInt(AudioInfo.OutSampleRate);
@@ -219,8 +219,8 @@ void UAudioPlayer_FFmpeg::DecodeThread()
 	swr_init(FFmpegParam->Local_SwrContext);
 
 	//获取声道数量
-	AudioInfo.OutChannelCount = av_get_channel_layout_nb_channels(OutChannelLayout);
-	int32 TempBufferSize = av_samples_get_buffer_size(NULL, AudioInfo.OutChannelCount, OutRate, OutFormat, 0);
+	AudioInfo.OutChannelCount = av_get_channel_layout_nb_channels(OutData->Channels);
+	int32 TempBufferSize = av_samples_get_buffer_size(NULL, AudioInfo.OutChannelCount, OutData->SampleRate, OutData->Format, 0);
 	AudioInfo.BufferLen = TempBufferSize;
 
 	//计算一个音频Buffer所需内存大小
@@ -323,12 +323,10 @@ void UAudioPlayer_FFmpeg::DecodeThread()
 				goto _Clear;
 			}
 
-			//音频数据重采样
-			swr_convert(FFmpegParam->Local_SwrContext, &Buffer, Frame->nb_samples, (const uint8_t**)Frame->data, Frame->nb_samples);
-			fwrite(Buffer, AudioInfo.BufferLen, 1, File);
+			//fwrite(Frame->data[1], Frame->linesize[0], 1, File);
 			//将音频数据添加到缓冲区
-			AudioQueue->EnqueueFrame(Buffer);
-			SDL_QueueAudio(audioId, Buffer, AudioInfo.BufferLen);
+			//AudioQueue->EnqueueFrame(OutData->AudioData[0]);
+			//SDL_QueueAudio(audioId, OutData->AudioData, AudioInfo.BufferLen);
 
 			av_packet_unref(FFmpegParam->Local_AVPacket);
 		}
