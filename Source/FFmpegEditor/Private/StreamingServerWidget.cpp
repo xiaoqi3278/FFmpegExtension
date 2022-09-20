@@ -7,7 +7,7 @@
 #include "Widgets/Input/SButton.h"
 #include "SlateCore/Public/Types/SlateStructs.h"
 #include "Video/VideoPlayer_FFmpeg.h"
-#include "Video/StreamingServer.h"
+#include "Video/StreamingServer_FFmpeg.h"
 #include "Dom/JsonObject.h"
 #include "Misc/FileHelper.h"
 #include "Serialization/JsonReader.h"
@@ -147,7 +147,7 @@ void SStreamingServerWidget::Construct(const FArguments& InArgs)
 FReply SStreamingServerWidget::ClickBeginStreaming()
 {
 	//创建推流服务
-	Server = NewObject<UStreamingServer>();
+	Server = NewObject<UStreamingServer_FFmpeg>();
 	FString InputURL = InputURLText.Get()->GetText().ToString();
 	FString OutputURL = OutputURLText.Get()->GetText().ToString();
 	Server->StreamingInfo.InURL = InputURL;

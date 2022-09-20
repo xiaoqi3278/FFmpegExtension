@@ -160,9 +160,18 @@ enum class EScaleFlag : uint8
 UENUM(BlueprintType)
 enum class ESampleRate : uint8
 {
+	E_6000		UMETA(DisplayName = "6000 HZ"),
+	E_8000		UMETA(DisplayName = "8000 HZ"),
+	E_11025		UMETA(DisplayName = "11025 HZ"),
+	E_16000		UMETA(DisplayName = "16000 HZ"),
+	E_22050		UMETA(DisplayName = "22050 HZ"),
+	E_32000		UMETA(DisplayName = "32000 HZ"),
 	E_44100		UMETA(DisplayName = "44100 HZ"),
 	E_48000		UMETA(DisplayName = "48000 HZ"),
+	E_64000		UMETA(DisplayName = "64000 HZ"),
+	E_88200		UMETA(DisplayName = "88200 HZ"),
 	E_96000		UMETA(DisplayName = "96000 HZ"),
+	E_176400	UMETA(DisplayName = "176400 HZ"),
 	E_192000	UMETA(DisplayName = "192000 HZ")
 
 };
@@ -241,9 +250,12 @@ public:
 
 	static int32 GetScaleFlagFFmpegIndex(EScaleFlag ScaleFlag);
 
-	static int32 ESampleRateToInt(ESampleRate SampleRate);
+	static int32 ESampleRate2Int(ESampleRate SampleRate);
+	static ESampleRate Int2ESampleRate(int32 SampleRate);
 
-	static AVSampleFormat ESampleFormatToAVSampleFormat(ESampleFormat SampleFormat);
+	static AVSampleFormat ESampleFormat2AVSampleFormat(ESampleFormat SampleFormat);
+	static ESampleFormat AVSampleFormat2ESampleFormat(AVSampleFormat SampleFormat);
 
-	static uint64_t EChannelLayoutToint64(EChannelLayout ChannelLayout);
+	static uint64_t EChannelLayout2int64(EChannelLayout ChannelLayout);
+	static EChannelLayout AV_CHANNEL_LAYOUT2EChannel(uint64_t Layout);
 };

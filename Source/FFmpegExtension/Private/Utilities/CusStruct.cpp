@@ -3,6 +3,12 @@
 
 #include "Utilities/CusStruct.h"
 
+void FAudioInfo::SetVolume(int32 NewVolume)
+{
+	Volume = NewVolume;
+	this->SDLVolume = NewVolume * 128 / 100;
+}
+
 FString UCusStruct::TimeFormat(int32 Num)
 {
 	return Num < 10 ? "0" + FString::FromInt(Num) : FString::FromInt(Num);
@@ -50,4 +56,29 @@ FString UCusStruct::VideoInfoToString(FVideoInfo VideoInfo)
 float UCusStruct::TimeToSeconds(FMediaTime Time, int32 FPS)
 {
 	return float(Time.Hours * 3600 + Time.Minutes * 60 + Time.Seconds) + Time.Frames / FPS;
+}
+
+void UCusStruct::InitAudioFormat(FAudioFormat* AudioFormat, int32 InSampleRate, AVSampleFormat InSampleFormat, uint64_t InChannelLayout)
+{
+	AudioFormat->ChannelLayout = InChannelLayout;
+	AudioFormat->ChannelLayout_E = UCusEnum::AV_CHANNEL_LAYOUT2EChannel(InChannelLayout);
+	AudioFormat->SampleFormat = InSampleFormat;
+	AudioFormat->SampleFormat_E = UCusEnum::AVSampleFormat2ESampleFormat(InSampleFormat);
+	AudioFormat->SampleRate = InSampleRate;
+	AudioFormat->SampleRate_E = UCusEnum::Int2ESampleRate(InSampleRate);
+
+	AudioFormat->Channels = av_get_channel_layout_nb_channels(InChannelLayout);
+}
+
+void UCusStruct::InitAudioFormat(FAudioFormat* AudioFormat)
+{
+	AudioFormat->ChannelLayout = UCusEnum::EChannelLayout2int64(AudioFormat->ChannelLayout_E);
+	AudioFormat->SampleFormat = UCusEnum::ESampleFormat2AVSampleFormat(AudioFormat->SampleFormat_E);
+	AudioFormat->SampleRate = UCusEnum::ESampleRate2Int(AudioFormat->SampleRate_E);
+	AudioFormat->Channels = av_get_channel_layout_nb_channels(AudioFormat->ChannelLayout);
+}
+
+void UCusStruct::InitAudioInfo(FAudioInfo* AudioInfo)
+{
+
 }

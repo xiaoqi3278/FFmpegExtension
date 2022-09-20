@@ -6,26 +6,25 @@
 
 #include <thread>
 
+#include "FFmpegExtension/Thirdparty/SDL/include/SDL.h"
 #include "FFmpegExtension/Thirdparty/SDL/include/SDL_error.h"
 
 extern "C"
 {
-#include "FFmpegExtension/Thirdparty/SDL/include/SDL.h"
-#include "FFmpegExtension/Thirdparty/SDL/include/SDL_error.h"
 #include "libswresample/swresample.h"
 }
 
-
-
+//
+UAudioPlayer_FFmpeg* GlobalAudioPlayer = nullptr;
 
 void UAudioPlayer_FFmpeg::PostInitProperties()
 {
 	UObject::PostInitProperties();
 
-	if (GetWorld() && AudioInfo.bAutoPlay)
-	{
-		OpenAudio();
-	}
+	//if (GetWorld() && AudioInfo.bAutoPlay)
+	//{
+	//	OpenAudio();
+	//}
 }
 
 UWorld* UAudioPlayer_FFmpeg::GetWorld() const
@@ -63,56 +62,71 @@ void UAudioPlayer_FFmpeg::ErrorLog(FString ErrorMessage)
 	}
 }
 
-int32 BufferLen = 0;
-uint8_t* GlobalBuffer = nullptr;
-bool bPlay = true;
+void UAudioPlayer_FFmpeg::SetAudioInfo(FAudioInfo NewAudioInfo)
+{
+	this->AudioInfo = NewAudioInfo;
+}
+
+void UAudioPlayer_FFmpeg::SetAudioOutputFormat(FAudioFormat NewOutputFormat)
+{
+	this->PlayFormat = NewOutputFormat;
+}
 
 //当音频设备需要更多数据时会调用该函数
-void (Call_Back_SDL) (void* userdata, Uint8* stream, int len)
+void Call_Back_SDL(void* userdata, Uint8* stream, int len)
 {
-	if (!bPlay)
+	FAudioQueue* AudioQueue = static_cast<FAudioQueue*>(userdata);
+	if (AudioQueue == nullptr || (AudioQueue->GetFrameNum() == 0 && GlobalAudioPlayer->GetIsDecodeing() == false))
 	{
+		GlobalAudioPlayer->CloseAudio();
 		return;
 	}
 
+#if 0
+	SDL_memset(stream, 0, len);
+
+	int ReadLen = 0;
+	int BufferLen = 0;
+	int NeedLen = len;
+	while(NeedLen > 0)
+	{
+		SDL_memset(stream, 0, BufferLen);
+
+		//判断缓冲区是否为空
+		if (AudioQueue->GetFrameNum() == 0)
+		{
+			return;
+		}
+
+		BufferLen = NeedLen;
+		uint8* Data = AudioQueue->DequeueFrame(BufferLen);
+		NeedLen -= BufferLen;
+		SDL_MixAudio(stream, (Uint8*)Data + ReadLen, BufferLen, SDL_MIX_MAXVOLUME);
+		ReadLen += BufferLen;
+	}
+#endif
+
+#if 1
 	//清空 stream
 	SDL_memset(stream, 0, len);
 
-	if (BufferLen <= 0)
+	//判断缓冲区是否为空
+	if (AudioQueue->GetFrameNum() == 0)
 	{
 		return;
 	}
+	//len = 1000;
+	int32 BufferLen = len;
+	uint8* Data = AudioQueue->DequeueFrame(BufferLen);
 
 	len = (len > BufferLen) ? BufferLen : len;
 	//UE_LOG(LogTemp, Warning, TEXT("Call Back!"));
 	//填充数据
-	SDL_MixAudio(stream, (Uint8*)GlobalBuffer, len, SDL_MIX_MAXVOLUME);
-	BufferLen -= len;
-	GlobalBuffer += len;
+	SDL_MixAudio(stream, (Uint8*)Data, len, GlobalAudioPlayer->AudioInfo.SDLVolume);
+	//SDL_MixAudioFormat(stream, (Uint8*)Data, wanted_spec.format, len, SDL_MIX_MAXVOLUME);
+	//memcpy(stream, Data, len);
+#endif
 }
-
-//void UAudioPlayer_FFmpeg::Call_Back_SDL(void* userdata, Uint8* stream, int len)
-//{
-//	if (!bPlay)
-//	{
-//		return;
-//	}
-//
-//	//清空 stream
-//	SDL_memset(stream, 0, len);
-//
-//	if (BufferLen <= 0)
-//	{
-//		return;
-//	}
-//
-//	len = (len > BufferLen) ? BufferLen : len;
-//	UE_LOG(LogTemp, Warning, TEXT("Call Back!"));
-//	//填充数据
-//	SDL_MixAudio(stream, (Uint8*)GlobalBuffer, len, SDL_MIX_MAXVOLUME);
-//	BufferLen -= len;
-//	GlobalBuffer += len;
-//}
 
 void UAudioPlayer_FFmpeg::DecodeThread()
 {
@@ -122,8 +136,21 @@ void UAudioPlayer_FFmpeg::DecodeThread()
 	//初始化音频重采样上下文
 	FFmpegParam->Local_SwrContext = swr_alloc();
 
+	uint8* OutData = nullptr;
+
 	//FFmpeg API 返回错误码
 	int32 Ret = 0;
+
+	//输入音频格式
+	FAudioFormat InputFormat;
+
+#if 0
+	FILE* File = fopen("C:\\Users\\23907\\Desktop\\Test\\Audio.pcm", "wb+");
+	if (File == NULL)
+	{
+		goto _Clear;
+	}
+#endif
 
 	//初始化网络库
 	avformat_network_init();
@@ -194,94 +221,72 @@ void UAudioPlayer_FFmpeg::DecodeThread()
 		goto _Clear;
 	}
 
-	//输入缓冲区
-	FAudioFrameData* InData = new FAudioFrameData();
-	InData->Channels = FFmpegParam->Local_AVCodecContext->channel_layout;
-	InData->Format = FFmpegParam->Local_AVCodecContext->sample_fmt;
-	InData->PerSampleInByte = InData->Channels * av_get_bytes_per_sample(FFmpegParam->Local_AVCodecContext->sample_fmt);
-	//InData->Samples = 1024;
-	InData->SampleRate = FFmpegParam->Local_AVCodecContext->sample_rate;
+	//初始化输入音频格式结构体
+	UCusStruct::InitAudioFormat(&InputFormat,
+		FFmpegParam->Local_AVCodecContext->sample_rate,
+		FFmpegParam->Local_AVCodecContext->sample_fmt,
+		FFmpegParam->Local_AVCodecContext->channel_layout);
 
-	//输出缓冲区
-	FAudioFrameData* OutData = new FAudioFrameData();
-	OutData->Channels = UCusEnum::EChannelLayoutToint64(AudioInfo.OutChannelLayout);
-	OutData->Format = AV_SAMPLE_FMT_S16;
-	OutData->PerSampleInByte = InData->Channels * av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
-	//OutData->Samples = 1024;
-	OutData->SampleRate = UCusEnum::ESampleRateToInt(AudioInfo.OutSampleRate);
+	//初始化输出音频格式结构体
+	//是否匹配源
+	if (PlayFormat.bSameAsSrc)
+	{
+		PlayFormat = InputFormat;
+		PlayFormat.SampleFormat_E = ESampleFormat::E_SAMPLE_FMT_S16;
+		UCusStruct::InitAudioFormat(&PlayFormat);
+	}
+	else
+	{
+		UCusStruct::InitAudioFormat(&PlayFormat);
+	}
 
-	//设置 Swrcontext 参数
+	int BytesPerSample = av_get_bytes_per_sample(PlayFormat.SampleFormat);
+	int OutDataSize = PlayFormat.SampleRate * BytesPerSample * PlayFormat.Channels;
+
+	//分配重采样参数
 	swr_alloc_set_opts(FFmpegParam->Local_SwrContext,
-		OutData->Channels, OutData->Format, OutData->SampleRate,
-		InData->Channels, InData->Format, InData->SampleRate,
+		PlayFormat.ChannelLayout,
+		PlayFormat.SampleFormat,
+		PlayFormat.SampleRate,
+		InputFormat.ChannelLayout,
+		InputFormat.SampleFormat,
+		InputFormat.SampleRate,
 		0, NULL);
-	//初始化
+	//初始化重采样上下文
 	swr_init(FFmpegParam->Local_SwrContext);
 
-	//获取声道数量
-	AudioInfo.OutChannelCount = av_get_channel_layout_nb_channels(OutData->Channels);
-	int32 TempBufferSize = av_samples_get_buffer_size(NULL, AudioInfo.OutChannelCount, OutData->SampleRate, OutData->Format, 0);
-	AudioInfo.BufferLen = TempBufferSize;
-
-	//计算一个音频Buffer所需内存大小
-	AudioQueue->SetFrameBufferSize((float)TempBufferSize / 1024 / 1024);
-	//设置音频缓冲区的大小
-	AudioQueue->SetBufferSize(AudioInfo.BufferSize);
+	//设置音频缓冲区大小
+	AudioQueue->SetMaxBufferSize(AudioInfo.BufferSize * 1024 * 1024);
 
 	//初始化SDL子系统
-	if (SDL_Init(SDL_INIT_AUDIO))
+	if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_TIMER))
 	{
 		ErrorLog(FString("初始化SDL子系统失败 / Failed to Init SDL SubSystem | Error at SDL_Init(SDL_INIT_AUDIO) | " + FString(ANSI_TO_TCHAR(SDL_GetError()))));
 		goto _Clear;
 	}
 
-	//音频设备参数
-	//SDL_AudioSpec Spec;
-	//Spec.freq = OutRate;
-	//Spec.format = AUDIO_S16;
-	//Spec.channels = AudioInfo.OutChannelCount;
-	//Spec.samples = 1024;
-	//Spec.callback = Call_Back_SDL;
-
-	//打开音频设备
-	//if (SDL_OpenAudio(&Spec, nullptr))
-	//{
-	//	ErrorLog(FString("打开音频设备失败 / Failed to Open Audio Device | Error at SDL_OpenAudio() | " + FString(ANSI_TO_TCHAR(SDL_GetError()))));
-	//	goto _Clear;
-	//}
-
 	//启动播放线程
 	//bRunPlay = true;
 	//StartPlayThread();
 
-	SDL_AudioSpec wanted_spec, spec;
-	int audioId = 0;
-	//打开设备
-	wanted_spec.channels = av_get_channel_layout_nb_channels(FFmpegParam->Local_AVCodecContext->channel_layout);
-	wanted_spec.freq = 44100;
-	wanted_spec.format = AUDIO_S16LSB;
-	wanted_spec.silence = 0;
-	wanted_spec.samples = 1024;
-	wanted_spec.callback = NULL;
-	wanted_spec.userdata = NULL;
-	audioId = SDL_OpenAudioDevice(NULL, 0, &wanted_spec, &spec, 1);
-	if (audioId <= 0)
-	{
-		printf("Open audio device error!\n");
-		goto _Clear;
-	}
+	//int num = SDL_GetNumAudioDevices(0);
+	//const char* DeveiceName = SDL_GetAudioDeviceName(num, 0);
+	//audioId = SDL_OpenAudioDevice(NULL, 0, &wanted_spec, &spec, SDL_AUDIO_ALLOW_ANY_CHANGE);
+	//if (audioId <= 0)
+	//{
+	//	printf("Open audio device error!\n");
+	//	goto _Clear;
+	//}
 	//开启播放
-	SDL_PauseAudioDevice(audioId, 0);
+	//SDL_PauseAudioDevice(audioId, 0);
 
-#if 1
-	FILE* File = fopen("C:\\Users\\4B-012\\Desktop\\New\\Audio.pcm", "w");
-	if (File == NULL)
-	{
-		goto _Clear;
-	}
-#endif
 	while(bRunDecode)
 	{
+		if (FFmpegParam->Local_AVPacket->stream_index != AudioInfo.ValidFirstAudioStreamIndex
+			|| !AudioQueue->bCanPush)
+		{
+			continue;
+		}
 		if (!AudioInfo.bIsPaused)
 		{
 			//读取码流中的音频若干帧或者视频一帧
@@ -323,14 +328,36 @@ void UAudioPlayer_FFmpeg::DecodeThread()
 				goto _Clear;
 			}
 
-			//fwrite(Frame->data[1], Frame->linesize[0], 1, File);
-			//将音频数据添加到缓冲区
-			//AudioQueue->EnqueueFrame(OutData->AudioData[0]);
-			//SDL_QueueAudio(audioId, OutData->AudioData, AudioInfo.BufferLen);
+			//初始化音频设备
+			if (!AudioInfo.bDeviceIsInited)
+			{
+				InitAudioDevice(Frame);
+			}
 
+			/**
+			 * 如何用获取到的 ConvertLen 去初始化播放器
+			 */
+			OutData = (uint8*)av_malloc(Frame->nb_samples* BytesPerSample * PlayFormat.Channels);
+			int32 ConverLen = swr_convert(FFmpegParam->Local_SwrContext, &OutData, Frame->nb_samples, (const uint8_t**)Frame->data, Frame->nb_samples);
+
+			//写PCM文件
+			//fwrite(OutData, len * BytesPerSample * PlayFormat.Channels, 1, File);
+
+			//写PCM文件
+			//int data_size = av_get_bytes_per_sample(FFmpegParam->Local_AVCodecContext->sample_fmt);
+			//for (int i = 0; i < Frame->nb_samples; i++) {
+			//	//遍历声道
+			//	for (int ch = 0; ch < FFmpegParam->Local_AVCodecContext->channels; ch++) {
+			//		fwrite(Frame->data[ch] + data_size * i, 1, data_size, File);
+			//	}
+			//}
+
+			//将音频数据添加到缓冲区
+			AudioQueue->EnqueueFrame(OutData, ConverLen * BytesPerSample * PlayFormat.Channels);
+			OutData = nullptr;
 			av_packet_unref(FFmpegParam->Local_AVPacket);
 		}
-		SDL_Delay(100);
+		//SDL_Delay(5);
 	}
 
 _Clear:
@@ -343,54 +370,42 @@ _Clear:
 		delete FFmpegParam;
 		FFmpegParam = nullptr;
 	}
-
-	SDL_CloseAudio();
-	SDL_Quit();
 }
 
-void UAudioPlayer_FFmpeg::PlayThread()
+void UAudioPlayer_FFmpeg::InitAudioDevice(AVFrame* Frame)
 {
-	SDL_PauseAudio(0);
-	while(bRunPlay)
+	int audioId = 0;
+	//打开设备
+	wanted_spec.channels = PlayFormat.Channels;
+	wanted_spec.freq = PlayFormat.SampleRate;
+	wanted_spec.format = AUDIO_S16SYS;
+	//wanted_spec.silence = 0;
+	//wanted_spec.samples = 1152;
+	if (FFmpegParam->Local_AVCodecContext->frame_size != 0)
 	{
-		if (!AudioInfo.bIsPaused)
-		{
-			if (BufferLen > 0)
-			{
-				continue;
-			}
-
-			if (AudioInfo.Buffer)
-			{
-				//delete AudioInfo.Buffer;
-				av_free(AudioInfo.Buffer);
-				AudioInfo.Buffer = nullptr;
-			}
-
-			BufferLen = AudioInfo.BufferLen;
-			GlobalBuffer = AudioQueue->DequeueFrame();
-			AudioInfo.Buffer = GlobalBuffer;
-		}
+		wanted_spec.samples = FFmpegParam->Local_AVCodecContext->frame_size;
 	}
-	
-	SDL_CloseAudio();
-	SDL_Quit();
-}
+	else
+	{
+		wanted_spec.samples = Frame->nb_samples;
+	}
+	wanted_spec.callback = Call_Back_SDL;
+	wanted_spec.userdata = AudioQueue;
 
-void UAudioPlayer_FFmpeg::StartPlayThread()
-{
-	std::thread PlayThread(&UAudioPlayer_FFmpeg::PlayThread, this);
-	PlayThread.detach();
+	SDL_OpenAudio(&wanted_spec, NULL);
+	SDL_PauseAudio(0);
+	AudioInfo.bDeviceIsInited = true;
 }
 
 void UAudioPlayer_FFmpeg::OpenAudio()
 {
+	GlobalAudioPlayer = this;
+
 	if (bRunDecode)
 	{
 		CloseAudio();
 	}
 	bRunDecode = true;
-	bPlay = true;
 
 	std::thread AudioThread(&UAudioPlayer_FFmpeg::DecodeThread, this);
 	AudioThread.detach();
@@ -405,19 +420,46 @@ void UAudioPlayer_FFmpeg::PlayAudio(FString AudioURL)
 void UAudioPlayer_FFmpeg::CloseAudio()
 {
 	bRunDecode = false;
-	bRunPlay = false;
-	bPlay = false;
 
 	//清空缓冲区
-	while (AudioQueue->GetFrameNum() > 0)
-	{
-		uint8* Buffer;
-		Buffer = AudioQueue->DequeueFrame();
-		av_free(Buffer);
-	}
+	//AudioQueue->ClearQueue(true);
+	//while (AudioQueue->GetFrameNum() > 0)
+	//{
+	//	uint8* Buffer;
+	//	Buffer = AudioQueue->DequeueFrame();
+	//	av_free(Buffer);
+	//}
+
+	SDL_CloseAudio();
+	SDL_Quit();
 }
 
-void UAudioPlayer_FFmpeg::TestFunction()
+void UAudioPlayer_FFmpeg::PauseAudio()
 {
-	//(*Call_Back_SDL)(nullptr, nullptr, 1);
+}
+
+void UAudioPlayer_FFmpeg::ResumeAudio()
+{
+}
+
+void UAudioPlayer_FFmpeg::SetVolume(int32 NewVolume)
+{
+	this->AudioInfo.SetVolume(NewVolume);
+}
+
+bool UAudioPlayer_FFmpeg::GetIsDecodeing()
+{
+	return bRunDecode;
+}
+
+UAudioPlayer_FFmpeg* UAudioPlayer_FFmpeg::FFmpegPlayAudio(FString Key, FAudioInfo InAudioInfo, FAudioFormat InPlaytFormat)
+{
+	UAudioPlayer_FFmpeg* Player = NewObject<UAudioPlayer_FFmpeg>();
+	Player->SetAudioInfo(InAudioInfo);
+	Player->SetAudioOutputFormat(InPlaytFormat);
+	if (InAudioInfo.bAutoPlay)
+	{
+		Player->OpenAudio();
+	}
+	return Player;
 }

@@ -28,7 +28,7 @@ public:
 				{
 					if (CallObject)
 					{
-						UE_LOG(FFmpegExtensionLog, Warning, TEXT("PlayerObject: %s, %s"), *CallObject->GetName(), *OutMessage);
+						UE_LOG(FFmpegExtensionLog, Warning, TEXT("PlayerObject: None, %s"), *OutMessage);
 					}
 					else
 					{

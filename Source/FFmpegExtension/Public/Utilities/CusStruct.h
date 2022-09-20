@@ -124,6 +124,34 @@ struct FAudioFrameData
 	AVSampleFormat Format;
 };
 
+USTRUCT(BlueprintType)
+struct FAudioFormat
+{
+	GENERATED_BODY()
+
+	//是否匹配源
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio|OutputFormat")
+	bool bSameAsSrc = false;
+
+	//音频采样率
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio|OutputFormat")
+	ESampleRate SampleRate_E = ESampleRate::E_44100;
+	int32 SampleRate = 44100;
+
+	//音频采样格式
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio|OutputFormat")
+	ESampleFormat SampleFormat_E = ESampleFormat::E_SAMPLE_FMT_S16;
+	AVSampleFormat SampleFormat;
+
+	//声道布局
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio|OutputFormat")
+	EChannelLayout ChannelLayout_E = EChannelLayout::E_CH_LAYOUT_STEREO;
+	uint64_t ChannelLayout = AV_CH_LAYOUT_STEREO;
+
+	//声道数
+	int32 Channels = 0;
+};
+
 //时长
 USTRUCT(BlueprintType)
 struct FMediaTime
@@ -198,7 +226,7 @@ struct FVideoInfo
 	FString VideoURL;
 
 	//帧缓冲区大小(计算方式: 一帧所需缓冲区大小(MB) = (分辨率X * 分辨率Y * 4) / 1024 / 1024)
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Video", meta = (DisplayName = "BufferSize(MB)"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Video", meta = (DisplayName = "MaxBufferSize(MB)"))
 	float BufferSize = 100;
 
 	//是否输出到日志,可能会影响性能
@@ -256,7 +284,7 @@ struct FVideoInfo
 	float FrameInterval_s;
 
 	//单帧缓冲大小
-	float FrameBufferSize = 0;
+	int32 FrameBufferSize = 0;
 
 	//帧宽
 	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Video")
@@ -285,6 +313,10 @@ struct FAudioInfo
 {
 	GENERATED_BODY()
 
+	bool bIsPaused = false;
+	bool bDeviceIsInited = false;
+	int SDLVolume = 128;
+
 	//是否自动播放
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Audio")
 	bool bAutoPlay = false;
@@ -292,11 +324,6 @@ struct FAudioInfo
 	//是否自动循环
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Audio")
 	bool bLoop = false;
-
-	bool bIsPaused = false;
-
-	uint8_t* Buffer = nullptr;
-	int32 BufferLen = 0;
 
 	//音频地址
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Audio")
@@ -306,25 +333,19 @@ struct FAudioInfo
 	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Audio")
 	int32 ValidFirstAudioStreamIndex = -1;
 
-	//输出音频采样率
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Audio")
-	ESampleRate OutSampleRate = ESampleRate::E_44100;
-
-	//输出音频采样格式
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Audio")
-	ESampleFormat OutSampleFormat = ESampleFormat::E_SAMPLE_FMT_S16;
-
-	//输出声道布局
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Audio")
-	EChannelLayout OutChannelLayout = EChannelLayout::E_CH_LAYOUT_STEREO;
-
 	//输出声道数量
 	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Audio")
 	int32 OutChannelCount;
 
+	//声量
+	UPROPERTY(BlueprintReadOnly, Category = "FFmpegExtension|Audio")
+	int32 Volume = 100;
+
 	//帧缓冲区大小
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Audio", meta = (DisplayName = "BufferSize(MB)"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FFmpegExtension|Audio", meta = (DisplayName = "MaxBufferSize(MB)"))
 	float BufferSize = 10;
+
+	void SetVolume(int32 NewVolume);
 };
 
 UCLASS()
@@ -352,4 +373,9 @@ public:
 	static FString VideoInfoToString(FVideoInfo VideoInfo);
 
 	static float TimeToSeconds(FMediaTime Time, int32 FPS);
+
+	static void InitAudioFormat(FAudioFormat* AudioFormat,int32 InSampleRate, AVSampleFormat InSampleFormat, uint64_t InChannelLayout);
+	static void InitAudioFormat(FAudioFormat* AudioFormat);
+
+	static void InitAudioInfo(FAudioInfo* AudioInfo);
 };

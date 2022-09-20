@@ -1,0 +1,13 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/DEF
+/NAME:"UnrealEditor-FFmpegExtension-Win64-DebugGame.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"E:\Project_Unreal_5\PluginTest\Intermediate\Build\Win64\PluginTestEditor\DebugGame\Engine\SharedPCH.Engine.NonOptimized.ShadowErrors.h.obj"
+"E:\Project_Unreal_5\PluginTest\Plugins\FFmpegExtension\Intermediate\Build\Win64\UnrealEditor\DebugGame\FFmpegExtension\Module.FFmpegExtension.cpp.obj"
+"E:\Project_Unreal_5\PluginTest\Plugins\FFmpegExtension\Intermediate\Build\Win64\UnrealEditor\DebugGame\FFmpegExtension\Module.FFmpegExtension.gen.cpp.obj"
+"E:\Project_Unreal_5\PluginTest\Plugins\FFmpegExtension\Intermediate\Build\Win64\UnrealEditor\DebugGame\FFmpegExtension\Default.rc2.res"
+/OUT:"E:\Project_Unreal_5\PluginTest\Plugins\FFmpegExtension\Intermediate\Build\Win64\UnrealEditor\DebugGame\FFmpegExtension\UnrealEditor-FFmpegExtension-Win64-DebugGame.lib"

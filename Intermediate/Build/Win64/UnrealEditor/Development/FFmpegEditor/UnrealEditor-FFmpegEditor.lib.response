@@ -1,0 +1,12 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/DEF
+/NAME:"UnrealEditor-FFmpegEditor.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"E:\Project_Unreal_5\PluginTest\Intermediate\Build\Win64\PluginTestEditor\Development\UnrealEd\SharedPCH.UnrealEd.ShadowErrors.h.obj"
+"E:\Project_Unreal_5\PluginTest\Plugins\FFmpegExtension\Intermediate\Build\Win64\UnrealEditor\Development\FFmpegEditor\Module.FFmpegEditor.cpp.obj"
+"E:\Project_Unreal_5\PluginTest\Plugins\FFmpegExtension\Intermediate\Build\Win64\UnrealEditor\Development\FFmpegEditor\Default.rc2.res"
+/OUT:"E:\Project_Unreal_5\PluginTest\Plugins\FFmpegExtension\Intermediate\Build\Win64\UnrealEditor\Development\FFmpegEditor\UnrealEditor-FFmpegEditor.lib"

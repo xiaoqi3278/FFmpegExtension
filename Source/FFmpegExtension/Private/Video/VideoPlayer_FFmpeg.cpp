@@ -156,8 +156,8 @@ void UVideoPlayer_FFmpeg::DecodeThread()
 
 	//通过指定像素格式、图像宽、图像高来计算帧缓存所需的内存大小
 	int32 Local_FrameBufferSize = av_image_get_buffer_size(AV_PIX_FMT_BGRA, VideoInfo.FrameWidth, VideoInfo.FrameHeight, 1);
-	VideoInfo.FrameBufferSize = (float)Local_FrameBufferSize / 1024 / 1024;
-	VideoQueue->SetFrameBufferSize(VideoInfo.FrameBufferSize);
+	VideoInfo.FrameBufferSize = Local_FrameBufferSize;
+	VideoQueue->SetVideoFrameBufferSize(VideoInfo.FrameBufferSize);
 
 	//输出视频信息
 	//FString UE_VideoURL(std::string(FFmpegParam->Local_AVFormatContext->url).c_str());
@@ -349,7 +349,7 @@ void UVideoPlayer_FFmpeg::OpenVideo()
 	}
 	bRun = true;
 
-	VideoQueue->SetBufferSize(VideoInfo.BufferSize);
+	VideoQueue->SetVideoBufferSize(VideoInfo.BufferSize * 1024 * 1024);
 
 	std::thread VideoThread(&UVideoPlayer_FFmpeg::DecodeThread, this);
 	VideoThread.detach();
@@ -570,14 +570,15 @@ bool UVideoPlayer_FFmpeg::Seek(FMediaTime Time)
 	avcodec_open2(FFmpegParam->Local_AVCodecContext, FFmpegParam->Local_AVCodec, NULL);
 #endif
 
-	while (VideoQueue->GetFrameNum() > 0)
-	{
-		uint8* Buffer;
-		Buffer = VideoQueue->DequeueFrame();
-		av_free(Buffer);
-	}
-	VideoQueue->SetCurrentBufferSize(0);
-	VideoQueue->bCanPush = true;
+	VideoQueue->ClearQueue(true);
+	//while (FVideoQueue->GetFrameNum() > 0)
+	//{
+	//	uint8* Buffer;
+	//	Buffer = FVideoQueue->DequeueFrame();
+	//	av_free(Buffer);
+	//}
+	//FVideoQueue->SetCurrentBufferSize(0);
+	//FVideoQueue->bCanPush = true;
 
 	//恢复解码线程
 	DecodeState = EDecodeState::Decoding;

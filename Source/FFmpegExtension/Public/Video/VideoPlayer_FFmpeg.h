@@ -81,7 +81,7 @@ public:
 public:
 	UVideoPlayer_FFmpeg()
 	{
-		VideoQueue = new FrameQueue();
+		VideoQueue = new FVideoQueue();
 	}
 	~UVideoPlayer_FFmpeg()
 	{
@@ -155,7 +155,7 @@ public:
 
 private:
 	//视频帧缓冲队列
-	FrameQueue* VideoQueue;
+	FVideoQueue* VideoQueue;
 
 	//使用 EUpdateTextureMethod::Memcpy 时 Realloc 的帧数据指针
 	void* TextureData = nullptr;

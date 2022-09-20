@@ -132,39 +132,93 @@ int32 UCusEnum::GetScaleFlagFFmpegIndex(EScaleFlag ScaleFlag)
 	return 1;
 }
 
-int32 UCusEnum::ESampleRateToInt(ESampleRate SampleRate)
+int32 UCusEnum::ESampleRate2Int(ESampleRate SampleRate)
 {
 	switch (SampleRate)
 	{
-	case ESampleRate::E_44100 :
-		return 44100;
-	case ESampleRate::E_48000 :
-		return 48000;
-	case ESampleRate::E_96000 :
-		return 96000;
-	case ESampleRate::E_192000 :
-		return 192000;
-	default:
-		return 44100;
+	case ESampleRate::E_6000:	return 6000;
+	case ESampleRate::E_8000:	return 8000;
+	case ESampleRate::E_11025:	return 11025;
+	case ESampleRate::E_16000:	return 16000;
+	case ESampleRate::E_22050:	return 22050;
+	case ESampleRate::E_32000:	return 32000;
+	case ESampleRate::E_44100:	return 44100;
+	case ESampleRate::E_48000:	return 48000;
+	case ESampleRate::E_64000:	return 64000;
+	case ESampleRate::E_88200:	return 88200;
+	case ESampleRate::E_96000:	return 96000;
+	case ESampleRate::E_176400: return 176400;
+	case ESampleRate::E_192000: return 192000;
+	default: return 44100;
 	}
 }
 
-AVSampleFormat UCusEnum::ESampleFormatToAVSampleFormat(ESampleFormat SampleFormat)
+ESampleRate UCusEnum::Int2ESampleRate(int32 SampleRate)
+{
+	switch (SampleRate)
+	{
+	case 6000 :
+		return ESampleRate::E_6000;
+	case 8000 :
+		return ESampleRate::E_8000;
+	case 11025 :
+		return ESampleRate::E_11025;
+	case 16000 :
+		return ESampleRate::E_16000;
+	case 22050 :
+		return ESampleRate::E_22050;
+	case 32000 :
+		return ESampleRate::E_32000;
+	case 44100 :
+		return ESampleRate::E_44100;
+	case 48000 :
+		return ESampleRate::E_48000;
+	case 64000 :
+		return ESampleRate::E_64000;
+	case 88200 :
+		return ESampleRate::E_88200;
+	case 96000 :
+		return ESampleRate::E_96000;
+	case 192000 :
+		return ESampleRate::E_192000;
+	case 176400 :
+		return ESampleRate::E_176400;
+	default:
+		return ESampleRate::E_44100;
+	}
+}
+
+AVSampleFormat UCusEnum::ESampleFormat2AVSampleFormat(ESampleFormat SampleFormat)
 {
 	return AVSampleFormat{static_cast<AVSampleFormat>(SampleFormat)};
 }
 
-uint64_t UCusEnum::EChannelLayoutToint64(EChannelLayout ChannelLayout)
+ESampleFormat UCusEnum::AVSampleFormat2ESampleFormat(AVSampleFormat SampleFormat)
+{
+	return static_cast<ESampleFormat>(SampleFormat);
+}
+
+uint64_t UCusEnum::EChannelLayout2int64(EChannelLayout ChannelLayout)
 {
 	switch(ChannelLayout)
 	{
 	case EChannelLayout::E_CH_LAYOUT_MONO :
 		return AV_CH_LAYOUT_MONO;
-		break;
 	case EChannelLayout::E_CH_LAYOUT_STEREO :
 		return AV_CH_LAYOUT_STEREO;
-		break;
 	default:
 		return AV_CH_LAYOUT_STEREO;
 	}
+}
+
+EChannelLayout UCusEnum::AV_CHANNEL_LAYOUT2EChannel(uint64_t Layout)
+{
+	switch(Layout)
+	{
+	case AV_CH_LAYOUT_MONO :
+		return EChannelLayout::E_CH_LAYOUT_MONO;
+	case AV_CH_LAYOUT_STEREO :
+		return EChannelLayout::E_CH_LAYOUT_STEREO;
+	}
+	return EChannelLayout::E_CH_LAYOUT_STEREO;
 }

@@ -1,0 +1,8 @@
+{
+	"BuildId": "19505902",
+	"Modules": 
+	{
+		"FFmpegEditor": "UnrealEditor-FFmpegEditor-Win64-DebugGame.dll",
+		"FFmpegExtension": "UnrealEditor-FFmpegExtension-Win64-DebugGame.dll"
+	}
+}
