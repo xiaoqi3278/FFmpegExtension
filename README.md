@@ -1,3 +1,5 @@
+# 这个项目正在重构中，请等待更新
+
 # FFmpegExtension
 
 [English](README.md) | [简体中文](README.zh*Hans.md)
