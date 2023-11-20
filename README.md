@@ -1,4 +1,5 @@
 # 这个项目正在重构中，请等待更新
+# This project is currently undergoing refactoring, please wait for updates
 
 # FFmpegExtension
 
